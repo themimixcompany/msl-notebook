@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <head>
-  <script type="module" src="/ts/simple-greeting.ts"></script>
+
+  <!-- MSL Notebook Startup Script. Do Not use type='module'; makes everything global. -->
+  <script src="/ts/startup.ts"></script>
+
+  <!-- MSL Notebook Components. Use type='module'; isolates scope to import/export. -->
+  <script type="module" src="/ts/component-loader.ts"></script>
+
 </head>
+
 <body>
   <img src="/svg/MSL Notebook.svg" style="width:500px;margin-bottom:20px;">
   <br>
   <hello-mimix></hello-mimix>
+  <mx-communicator></mx-communicator>
 </body>
