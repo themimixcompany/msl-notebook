@@ -5,8 +5,21 @@ import {customElement, property} from 'lit/decorators.js';
 //MSL.js Services
 import {machine} from '/ts/services/machine.ts'
 
-let myMachineList = machine.list("msl");
-console.log(myMachineList);
+console.log("find msl");
+console.log(machine.find("msl"));
+
+console.log("all machines");
+console.log(machine.all());
+let myMachineCopy = machine.all();
+
+console.log("copy to local and change");
+myMachineCopy.test1 = ["hey"];
+console.log(myMachineCopy);
+
+let mySecondCopy = machine.all();
+console.log("change remote and refetch");
+machine.set("test1","name","Howdy!")
+console.log(mySecondCopy);
 
 
 @customElement('communicator-view')
