@@ -3,7 +3,7 @@ import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
 @customElement('mx-communicator')
-export class mxComponent extends LitElement {
+export class mxCommunicator extends LitElement {
   static styles = css`
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
     input { font-family: Inter; font-size: 24pt }
@@ -12,7 +12,6 @@ export class mxComponent extends LitElement {
   //Define public properties (databinding)
 
   @property() mslResults = '';
-
 
 
   //Something changed in the MSL input box
@@ -26,7 +25,7 @@ export class mxComponent extends LitElement {
   //Show this component on screen
   render() {
     return html`
-    ver ${mslNotebook.version}<br>
+    communicator ver ${mslNotebook.version}<br>
     <input @change=${this.mslBoxChanged} placeholder="(msl)"></input>
     <textarea id="mslResultsBox" rows="20" cols="100">${this.mslResults}</textarea>
     `;

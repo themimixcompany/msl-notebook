@@ -6,3 +6,4 @@
 //Export Individual Components
 export * from "/ts/components/mx-greeting.ts";
 export * from "/ts/components/mx-communicator.ts";
+export * from "/ts/views/communicator-view.ts";
