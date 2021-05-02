@@ -2,23 +2,22 @@
 <head>
 
   <!-- MSL Notebook Startup Script. Do Not use type='module'; makes everything global. -->
-  <script src="/ts/startup.ts"></script>
+  <script src="/mx/global/startup.ts"></script>
 
   <!-- MSL Notebook Components. Use type='module'; isolates scope to import/export. -->
-  <script type="module" src="/ts/component-loader.ts"></script>
+  <script type="module" src="/mx/global/component-loader.ts"></script>
 
   <!-- MSL Notebook Services. Use type='module'; isolates scope to import/export. -->
-  <script type="module" src="/ts/service-loader.ts"></script>
+  <script type="module" src="/mx/global/service-loader.ts"></script>
 
 </head>
 
 <body>
 
   <!-- Logo -->
-  <img src="/svg/MSL Notebook.svg" style="width:500px;margin-bottom:20px;">
-  <br>
+  <mx-logo></mx-logo>
 
   <!-- Outer View -->
-  <communicator-view></communicator-view>
+  <communicator-view id="communicatorView"></communicator-view>
 
 </body>
