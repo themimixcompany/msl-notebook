@@ -5,12 +5,13 @@
 
 //SERVICE CONSTANTS
 
+//machines
 //Available Machines
 const machines = {
   "test1": {
       "name": "WSS Echo",
       "ip": "echo.websocket.org",
-      "ports" : ["ws-text"]
+      "ports" : ["wss-text"]
     },
   "test2": {
       "name": "WS Kaazing",
@@ -25,6 +26,7 @@ const machines = {
 
 }
 
+//ports
 //Port Defintions
 const ports = {
   "mx-world": {
@@ -53,6 +55,7 @@ const ports = {
 
 //PRIVATE FUNCTIONS
 
+//isPortType
 //Test if a port is of a matching type
 const isPortType = function(portKey,portType) {
 
@@ -67,7 +70,7 @@ const isPortType = function(portKey,portType) {
     return true
 }
 
-
+//isMachineType
 //Test if machine has a port of matching type
 const isMachineType = function(machineKey,portType) {
 
@@ -113,18 +116,25 @@ const allMachines = function():Object {
   return copy;
 }
 
+//allPorts
+//Return a copy of all ports
+const allPorts = function():Object {
+  let {...copy} = ports; //copy by destructuring
+  return copy;
+}
+
 //setValue
 //Set a single value on a machine
 const setValue = function(machineKey,key,value):boolean {
 
   //Quit if no matching key
   if (!machines[machineKey] || !machines[machineKey][key]) {
-
     return false;
   }
 
   //Set new value
   machines[machineKey][key] = value;
+
   //Return success
   return true;
 
@@ -133,7 +143,9 @@ const setValue = function(machineKey,key,value):boolean {
 
 //Service Definition
 export const machine = {
+  list: allMachines(),
+  ports: allPorts(),
+  keys: Object.keys(machines),
   find: findByType,
-  all: allMachines,
   set: setValue
 };

@@ -3,23 +3,24 @@ import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
 //MSL.js Services
-import {machine} from '/ts/services/machine.ts'
+import * as mx from '/ts/service-loader.ts'
 
-console.log("find msl");
-console.log(machine.find("msl"));
+// console.log("find msl");
+// console.log(mx.machine.find("msl"));
+//
 
 console.log("all machines");
-console.log(machine.all());
-let myMachineCopy = machine.all();
+console.log(mx.machine.list);
 
-console.log("copy to local and change");
-myMachineCopy.test1 = ["hey"];
-console.log(myMachineCopy);
-
-let mySecondCopy = machine.all();
-console.log("change remote and refetch");
-machine.set("test1","name","Howdy!")
-console.log(mySecondCopy);
+// console.log("copy to local and change");
+// let myMachineCopy = mx.machine.list();
+// myMachineCopy.test1 = ["hey"];
+// console.log(myMachineCopy);
+//
+// let mySecondCopy = mx.machine.list();
+// console.log("change remote and refetch");
+// mx.machine.set("test1","name","Howdy!")
+// console.log(mySecondCopy);
 
 
 @customElement('communicator-view')
@@ -44,6 +45,7 @@ export class communicatorView extends LitElement {
     view ver ${mslNotebook.version}<br>
     user ${this.userName}<br>
     <mx-greeting @my-event=${this.handleEvent} id="mxGreeting"></mx-greeting>
+    <mx-connect></mx-connect>
     <mx-communicator id="mxCommunicator"></mx-communicator>
     `
   }

@@ -3,82 +3,87 @@
 
 // Provides access to a websocket for sending and receiving harnessed messages.
 
+//MSL.js Services
+import * as mx from '/ts/services/machine.ts'
+
 //SERVICE CONSTANTS
 
-//All Available Machines
-const machines = {
-  "test1": {
-      "name": "WSS Echo",
-      "ip": "echo.websocket.org",
-      "type": {
-        "text": {
-          "name": "wss-echo",
-          "protocol": "wss"
-        }
+//WebSocket States
+const status = {
+  "connecting": 0,
+  "open": 1,
+  "closing": 2,
+  "closed": 3
+};
+
+//Active Sockets
+let activeSockets = {};
+
+//PUBLIC FUNCTIONS
+
+//connect
+//Connect to a WebSocket on a machine.
+const connect = function(machineKey, portKey) {
+
+  console.log("connecting", machineKey, portKey);
+
+      // //Quit if user is already connected to this machine and type
+      // if (USER.sockets[type]) {
+      //   if (USER.sockets[type][machineKey]) {
+      //     mxDebug("mslWebSocket user already connected to", machineKey, type);
+      //     return;
+      //   }
+      // }
+
+      //Get machine & port
+      let thisMachine = mx.machine.list[machineKey];
+      let thisPort = mx.machine.ports[portKey];
+
+      //Quit if no matching machine
+      if (!thisMachine) {
+        console.log("quit, no machine");
+        return false;
       }
-    },
-    "test2": {
-      "name": "WS Kaazing",
-      "ip": "demos.kaazing.com/echo",
-      "type": {
-        "text": {
-          "name": "kaazing-demo",
-          "protocol": "ws"
-        }
+
+      //Quit if the port isn't listed for this machine
+      if (thisMachine.ports.indexOf(portKey) == -1) {
+        console.log("quit, no port");
+        return false;
       }
-    },
-    "local": {
-      "name": "Local Mimix",
-      "ip": "localhost",
-      "type": {
-        "world": {
-          "name": "mx-world",
-          "protocol": "http"
-        },
-        "msl": {
-          "name": "mx-msl",
-          "protocol": "ws",
-          "port": "60000"
-        },
-        "admin": {
-          "name": "mx-admin",
-          "protocol": "ws",
-          "port": "60500"
-        }
+
+      //Handle ports
+      let portString = ""; //assume no portString
+      if (thisPort.port) {
+        portString = ":" + thisPort.port;
       }
+
+      //Finalize URL
+      var socketURL = thisPort.protocol + "://" + thisMachine.ip + portString;
+      console.log(socketURL);
+
+      //Create a key to track in activeSockets
+      let socketKey = `${machineKey}-${portKey}`;
+
+      //Never connected? Create new WebSocket and store in activeSockets.
+        if (!activeSockets[socketKey]) {
+          console.log("connected",socketKey);
+          activeSockets[socketKey] = new WebSocket(socketURL);
     }
 
-}
+      //Previously closed? Reconnect.
+      if (activeSockets[socketKey].readyState == status.closed) {
+        console.log("reconnect",socketKey);
+        activeSockets[socketKey] = new WebSocket(socketURL); //previously closed; reopen
+      };
 
-//SERVICE FUNCTIONS
-
-//List Machines of Type
-const listMachines = function(requestedType) {
-
-  //Setup Outgoing List
-  let matchingMachines = {};
-
-  //Iterate through Machines
-  for (let machineKey in machines) {
-
-    //Test for Requested Type
-    if (machines[machineKey].type[requestedType]) {
-
-      //Before Destructing Method
-      //matchingMachines[machineKey] = Object.assign({}, machines[machineKey]); //Copy by Value
-      //matchingMachines[machineKey].type = machines[machineKey].type[type]; //Obliterate other types
-
-      let { type: machineType, ...oneMatch } = machines[machineKey]; //Copy by Destructuring, Remove type.
-      oneMatch.type = machineType[requestedType]; //Put only the requestedType on this machine entry.
-      matchingMachines[machineKey] = oneMatch; //Add this machine to outgoing list under its key.
+      //Return live socket.
+      return activeSockets[socketKey];
     }
-  }
 
-  //Return Matching List
-  return matchingMachines;
-}
 
 //Service Definition
-export const machine = {
-  list: listMachines
+
+export const socket = {
+ connect: connect,
+ list: activeSockets
 };

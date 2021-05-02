@@ -5,3 +5,4 @@
 
 //Export Individual Services
 export * from "/ts/services/machine.ts";
+export * from "/ts/services/socket.ts";
