@@ -11,8 +11,8 @@ import * as mx from 'msl-js/service-loader'
 @customElement('mx-connect')
 export class mxConnect extends LitElement {
   static styles = css`
-    p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
-    ol, input, h2 { font-family: Inter; font-size: 24pt }
+    p, textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
+    ol,ul, input, h2 { font-family: Inter; font-size: 18pt }
     a { text-decoration: underline;}
     `;
 
@@ -75,8 +75,8 @@ export class mxConnect extends LitElement {
     return html`
     connect ver ${mslNotebook.version}<br>
 
-    <p>Click mx-msl to connect. Then send an MSL message.</p>
-    
+    <p>Click a server to connect. Then send a message.</p>
+
     ${this.machineList()}
     ${this.connectionList()}
     <br>
