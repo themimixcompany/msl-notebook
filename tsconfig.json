@@ -5,6 +5,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "baseUrl": "./mx/",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "types": ["vite/client"]
   }
 }

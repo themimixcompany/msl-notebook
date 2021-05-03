@@ -26,7 +26,7 @@ let activeSockets = {};
 
 //connect
 //Connect to a WebSocket on a machine.
-const connect = function(machineKey:string, portKey:string, componentToNotify:LitElement) {
+const connect = function(machineKey:string, portKey:string, componentToNotify) {
 
   console.log("connecting to", machineKey, portKey);
 
@@ -76,11 +76,7 @@ const connect = function(machineKey:string, portKey:string, componentToNotify:Li
                 activeSockets[socketKey] = newSocket;
 
                 //Let other components know status has changed
-                let myEvent = new CustomEvent('status-changed', {
-                  detail: {
-                    message: activeSockets
-                  }
-                });
+                let myEvent = new CustomEvent('status-changed');
                 componentToNotify.dispatchEvent(myEvent);
                };
 

@@ -1,0 +1,23 @@
+{
+    "echo": {
+        "name": "WSS Echo",
+        "ip": "echo.websocket.org",
+        "ports" : ["wss-text"]
+      },
+    "kaazing": {
+        "name": "WS Kaazing",
+        "ip": "demos.kaazing.com/echo",
+        "ports" : ["ws-text"]
+      },
+    "demo": {
+        "name": "Demo Websocket.me",
+        "ip": "demo.websocket.me/v3/channel_1",
+        "ports" : ["wss-text"]
+      },
+    "local": {
+        "name": "Local Mimix",
+        "ip": "localhost",
+        "ports" : ["mx-world","mx-msl","mx-admin"]
+      }
+  
+  }

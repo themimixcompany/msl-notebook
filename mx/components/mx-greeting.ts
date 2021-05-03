@@ -32,7 +32,7 @@ export class mxGreeting extends LitElement {
     greeting ver ${mslNotebook.version}<br>
     <input @change=${this.nameBoxChanged} placeholder="Your Name Here"><br>
       <h1>Hello, ${this.name}!</h1>
-      <p>Click wss-text to test WS connection.</p>
+      <p>Click either wss-text link to test WS connection.</p>
     `;
 
   }

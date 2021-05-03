@@ -15,22 +15,23 @@ export class mxConnect extends LitElement {
     `;
 
   //Define public properties (databinding)
-  @property() connections: {};
+  @property() connections: string[] = [];
 
 
-  //Someone clicked a connect link
+  //Connect link clicked
   addConnection(machineKey: string, portKey: string) {
     console.log(Object.keys(mx.socket.list));
-    console.log(mx.socket.keys);
+    console.log(mx.socket.keys); //? no output
     mx.socket.connect(machineKey, portKey, this);
     ;
   }
 
-  //Update connections when changed
+  //Update connections when changed by socket service
   statusChanged(e: Event) {
     console.log("event received");
-    let message = e.detail.message;
-    this.connections = message;
+    //let message = e.detail.message; not used
+    this.connections = Object.keys(mx.socket.list);
+    //this.requestUpdate(); //requires update :-(
   }
 
 
@@ -39,7 +40,6 @@ export class mxConnect extends LitElement {
   machineList() {
     return html`
     machines<br>
-
     <ul>
       ${mx.machine.keys.map((machineKey) => html`<li>${machineKey}:
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html` <a @click=${() => this.addConnection(machineKey, portKey)}>${portKey}</a>`)}
@@ -50,24 +50,21 @@ export class mxConnect extends LitElement {
   }
 
   connectionList() {
-    const itemTemplates = [];
-    for (let oneConnection in this.connections) {
-      itemTemplates.push(html`<li>${oneConnection}</li>`);
-    }
     return html`
     connections<br>
     <ol>
-    ${itemTemplates}
-  </ol>
+    ${this.connections.map((socketKey) => html`<li>${socketKey}</li>`)}
+    </ol>
+    <br>
     `
   }
+
 
   //Show this component on screen
   render() {
 
     //listen for connection status changed
     this.addEventListener("status-changed", this.statusChanged);
-
     return html`
     ${this.machineList()}
     ${this.connectionList()}

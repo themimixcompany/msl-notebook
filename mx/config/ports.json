@@ -1,0 +1,24 @@
+{
+    "mx-world": {
+      "type": "world",
+      "protocol": "http"
+    },
+    "mx-msl": {
+      "type": "msl",
+      "protocol": "ws",
+      "port": "60000"
+    },
+    "mx-admin": {
+      "type": "admin",
+      "protocol": "ws",
+      "port": "60500"
+    },
+    "ws-text": {
+      "type": "text",
+      "protocol": "ws"
+    },
+    "wss-text": {
+      "type": "text",
+      "protocol": "wss"
+    }
+  }

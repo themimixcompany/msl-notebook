@@ -7,51 +7,11 @@
 
 //machines
 //Available Machines
-const machines = {
-  "test1": {
-      "name": "WSS Echo",
-      "ip": "echo.websocket.org",
-      "ports" : ["wss-text"]
-    },
-  "test2": {
-      "name": "WS Kaazing",
-      "ip": "demos.kaazing.com/echo",
-      "ports" : ["ws-text"]
-    },
-  "local": {
-      "name": "Local Mimix",
-      "ip": "localhost",
-      "ports" : ["mx-world","mx-msl","mx-admin"]
-    }
-
-}
+import machines from "config/machines.json";
 
 //ports
 //Port Defintions
-const ports = {
-  "mx-world": {
-    "type": "world",
-    "protocol": "http"
-  },
-  "mx-msl": {
-    "type": "msl",
-    "protocol": "ws",
-    "port": "60000"
-  },
-  "mx-admin": {
-    "type": "admin",
-    "protocol": "ws",
-    "port": "60500"
-  },
-  "ws-text": {
-    "type": "text",
-    "protocol": "ws"
-  },
-  "wss-text": {
-    "type": "text",
-    "protocol": "wss"
-  }
-}
+import ports from "config/ports.json";
 
 //PRIVATE FUNCTIONS
 
