@@ -4,7 +4,6 @@
 // Provides access to a websocket for sending and receiving harnessed messages.
 
 //MSL.js Services
-import { LitElement } from 'lit';
 import {machine} from 'services/machine'
 
 
@@ -22,11 +21,27 @@ const status = {
 //Active Sockets
 let activeSockets = {};
 
+//PRIVATE FUNCTIONS
+
+//notify
+//Send an event to a web component or HTML element
+const notify = function(eventTarget:HTMLElement, name:string, payload:any) {
+
+  //create event
+  let notifyEvent = new CustomEvent(name);
+
+  //attach payload
+  notifyEvent.payload = payload;
+
+  //dispatch
+  eventTarget.dispatchEvent(notifyEvent);
+};
+
 //PUBLIC FUNCTIONS
 
 //connect
 //Connect to a WebSocket on a machine.
-const connect = function(machineKey:string, portKey:string, componentToNotify) {
+const connect = function(machineKey:string, portKey:string, componentToNotify:HTMLElement) {
 
   console.log("connecting to", machineKey, portKey);
 
@@ -48,9 +63,15 @@ const connect = function(machineKey:string, portKey:string, componentToNotify) {
         return false;
       }
 
+      //Quit if no matching port
+      if (!thisPort) {
+        console.log("quit, no port");
+        return false;
+      }
+
       //Quit if the port isn't listed for this machine
       if (!thisMachine.ports.includes(portKey)) {
-        console.log("quit, no port");
+        console.log("quit, no port on this machine");
         return false;
       }
 
@@ -61,7 +82,7 @@ const connect = function(machineKey:string, portKey:string, componentToNotify) {
       }
 
       //Finalize URL
-      var socketURL = thisPort.protocol + "://" + thisMachine.ip + portString;
+      const socketURL = thisPort.protocol + "://" + thisMachine.ip + portString;
       console.log(socketURL);
 
       //Create a key to track in activeSockets
@@ -70,15 +91,28 @@ const connect = function(machineKey:string, portKey:string, componentToNotify) {
       //Not connected? Create new WebSocket and store in activeSockets.
         if (!activeSockets[socketKey] || activeSockets[socketKey].readyState == status.closed) {
           console.log("opening socket",socketKey);
+
+          //Create new socket
           let newSocket = new WebSocket(socketURL);
+
+          //Setup open callback
           newSocket.onopen = function() {
                 console.log("connected",socketKey);
                 activeSockets[socketKey] = newSocket;
 
                 //Let other components know status has changed
-                let myEvent = new CustomEvent('status-changed');
-                componentToNotify.dispatchEvent(myEvent);
+                notify(componentToNotify,"status-changed",activeSockets);
                };
+
+          //Setup close callback
+          newSocket.onclose = function() {
+              console.log("closed",socketKey);
+              delete activeSockets[socketKey];
+
+              //Let other components know status has changed
+              notify(componentToNotify,"status-changed",activeSockets);
+
+          }
 
     }
 
@@ -88,11 +122,8 @@ const connect = function(machineKey:string, portKey:string, componentToNotify) {
         activeSockets[socketKey] = new WebSocket(socketURL); //previously closed; reopen
       };
 
-
-
       //Return live socket.
       return activeSockets[socketKey];
-
 
     }
 

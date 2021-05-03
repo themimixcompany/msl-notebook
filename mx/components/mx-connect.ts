@@ -4,7 +4,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'global/service-loader'
-import { machine } from 'global/service-loader';
 
 @customElement('mx-connect')
 export class mxConnect extends LitElement {
@@ -27,11 +26,10 @@ export class mxConnect extends LitElement {
   }
 
   //Update connections when changed by socket service
-  statusChanged(e: Event) {
+  statusChanged(receivedEvent: Event) {
     console.log("event received");
-    //let message = e.detail.message; not used
-    this.connections = Object.keys(mx.socket.list);
-    //this.requestUpdate(); //requires update :-(
+    console.log(receivedEvent.payload);
+    this.connections = Object.keys(receivedEvent.payload);
   }
 
 
@@ -65,6 +63,7 @@ export class mxConnect extends LitElement {
 
     //listen for connection status changed
     this.addEventListener("status-changed", this.statusChanged);
+
     return html`
     ${this.machineList()}
     ${this.connectionList()}

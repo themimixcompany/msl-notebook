@@ -4,11 +4,15 @@
   <!-- MSL Notebook Startup Script. Do Not use type='module'; makes everything global. -->
   <script src="/mx/global/startup.ts"></script>
 
-  <!-- MSL Notebook Components. Use type='module'; isolates scope to import/export. -->
+  <!-- MSL Notebook Web Components. Create the UI. Use type='module'; isolates scope to import/export. -->
   <script type="module" src="/mx/global/component-loader.ts"></script>
 
-  <!-- MSL Notebook Services. Use type='module'; isolates scope to import/export. -->
+  <!-- MSL.js Services. Headless. Use type='module'; isolates scope to import/export. -->
   <script type="module" src="/mx/global/service-loader.ts"></script>
+
+  <!-- Shoelace Web Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.39/dist/themes/base.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.39/dist/shoelace.js"></script>
 
 </head>
 

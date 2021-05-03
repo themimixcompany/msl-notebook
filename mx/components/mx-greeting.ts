@@ -23,7 +23,7 @@ export class mxGreeting extends LitElement {
       }
     });
     this.dispatchEvent(myEvent);
-  }
+  };
 
 
   //Show this component on screen

@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "experimentalDecorators": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
     "baseUrl": "./mx/",
-    "resolveJsonModule": true,
+    "experimentalDecorators": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "target": "es6",
+    "module": "commonjs",
+   
     "types": ["vite/client"]
   }
 }

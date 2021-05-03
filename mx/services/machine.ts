@@ -71,14 +71,14 @@ const findByType = function(portType:string): string[] {
 
 //allMachines
 //Return a copy of all machines
-const allMachines = function():Object {
+const allMachines = function():{} {
   let {...copy} = machines; //copy by destructuring
   return copy;
 }
 
 //allPorts
 //Return a copy of all ports
-const allPorts = function():Object {
+const allPorts = function():{} {
   let {...copy} = ports; //copy by destructuring
   return copy;
 }
