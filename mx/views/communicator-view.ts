@@ -49,7 +49,6 @@ export class communicatorView extends LitElement {
     user ${this.userName}<br>
     <mx-greeting @name-changed=${this.handleEvent}></mx-greeting>
     <mx-connect></mx-connect>
-    <mx-communicator id="mxCommunicator"></mx-communicator>
     `
   }
 

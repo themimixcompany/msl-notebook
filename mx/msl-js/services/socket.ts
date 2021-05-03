@@ -79,6 +79,33 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
 };
 
+//socketMachineKey
+//Gets machineKey from socket
+const socketMachineKey = function(socketKey:string) {
+   return connections[socketKey].machineKey;
+};
+
+//socketPortKey
+//Gets portKey from socket
+const socketPortKey = function(socketKey:string) {
+  return connections[socketKey].portKey;
+};
+
+//socketMachine
+//Gets machine from socket
+const socketMachine = function(socketKey:string) {
+  return machine.list[socketMachineKey(socketKey)];
+};
+
+//socketPort
+//Gets port from socket
+const socketPort = function(socketKey:string) {
+  return machine.ports[socketPortKey(socketKey)];
+};
+
+
+
+
 //PUBLIC FUNCTIONS
 
 //connect
@@ -142,10 +169,20 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
       sendSingleMessage(this, message, componentToNotify, echo);
     }
 
+    //Add machineKey and portKey
+    WebSocket.prototype.machineKey = machineKey;
+    WebSocket.prototype.portKey = portKey;
+
+
     //Setup open callback
     newSocket.onopen = function () {
       console.log("connected", socketKey);
       connections[socketKey] = newSocket;
+
+      //Add getMachine and getPort functions
+      //WebSocket.prototype.getMachine = socketMachine(socketKey);
+      WebSocket.prototype.port = socketPort(socketKey);
+      WebSocket.prototype.machine = socketPort(socketKey);
 
       //Let other components know status has changed
       notify(notifyElement, "status-changed", connections);
@@ -170,12 +207,16 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
 
 const socketKeys = function (): string[] {
   return Object.keys(connections);
-}
+};
+
+
 
 //Service Definition
 
 export const socket = {
   connect: connect,
   list: connections,
-  keys: socketKeys()
+  keys: socketKeys(),
+  machine: socketMachine,
+  port: socketPort
 };

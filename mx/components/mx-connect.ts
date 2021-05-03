@@ -12,7 +12,7 @@ import * as mx from 'msl-js/service-loader'
 export class mxConnect extends LitElement {
   static styles = css`
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
-    ol, input { font-family: Inter; font-size: 24pt }
+    ol, input, h2 { font-family: Inter; font-size: 24pt }
     a { text-decoration: underline;}
     `;
 
@@ -55,9 +55,12 @@ export class mxConnect extends LitElement {
   connectionList() {
     return html`
     connections<br>
-    <ol>
-    ${this.connections.map((socketKey) => html`<li>${socketKey}</li>`)}
-    </ol>
+    ${this.connections.map((socketKey) => html`
+    <h2>${socketKey}</h2>
+    <br>
+    <mx-communicator socket=${socketKey}></mx-communicator>
+    `)}
+  
     <br>
     `
   }
@@ -70,6 +73,10 @@ export class mxConnect extends LitElement {
     this.addEventListener("status-changed", this.statusChanged);
 
     return html`
+    connect ver ${mslNotebook.version}<br>
+
+    <p>Click mx-msl to connect. Then send an MSL message.</p>
+    
     ${this.machineList()}
     ${this.connectionList()}
     <br>

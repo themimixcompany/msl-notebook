@@ -34,7 +34,6 @@ export class mxGreeting extends LitElement {
     greeting ver ${mslNotebook.version}<br>
     <input @change=${this.nameBoxChanged} placeholder="Your Name Here"><br>
       <h1>Hello, ${this.name}!</h1>
-      <p>Click mx-msl to connect. Then send an MSL message.</p>
     `;
 
   }

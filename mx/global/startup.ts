@@ -6,6 +6,6 @@
 
 //Global Constants
 const mslNotebook = {
-    version: "1.6.1"
+    version: "1.7.0"
 };
 

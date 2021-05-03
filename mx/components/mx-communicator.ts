@@ -3,7 +3,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
-import { socket } from 'msl-js/services/socket'
+import * as mx from 'msl-js/services/socket'
 
 
 
@@ -15,8 +15,8 @@ export class mxCommunicator extends LitElement {
     `;
 
   //Define public properties (databinding)
-
   @property() mslResults = '';
+  @property({ attribute: 'socket' }) socketKey: string;
 
   //Private Functions
 
@@ -37,9 +37,10 @@ export class mxCommunicator extends LitElement {
     const eventTarget = event.target as HTMLInputElement
     const latestInput = eventTarget.value;
     //use mxSend w/ true parm to get message and response in JSON
-    socket.list["local-mx-msl"].mxSend(latestInput, this, true);
+    mx.socket.list[this.socketKey].mxSend(latestInput, this, true);
     //eventTarget.value = '';
   }
+
 
 
   //Show this component on screen
@@ -48,9 +49,12 @@ export class mxCommunicator extends LitElement {
     //Add event listeners for events targeting this component
     this.addEventListener("message-received", this.messageReceived);
 
+    let socket = mx.socket.list[this.socketKey];
+    console.log(socket);
+
     return html`
     communicator ver ${mslNotebook.version}<br>
-    <input @change=${this.mslBoxChanged} placeholder="(msl)"></input><br>
+    <input @change=${this.mslBoxChanged} placeholder="${socket.port.type}"></input><br>
     <textarea id="mslResultsBox" rows="5" cols="50">${this.mslResults}</textarea>
     `;
 
