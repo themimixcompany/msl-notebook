@@ -5,6 +5,9 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
 
+
+//<mx-connect>
+//Opens connections to WebSockets
 @customElement('mx-connect')
 export class mxConnect extends LitElement {
   static styles = css`
@@ -27,9 +30,17 @@ export class mxConnect extends LitElement {
 
   //Update connections when changed by socket service
   statusChanged(receivedEvent: Event) {
-    console.log("event received");
+    console.log("status changed");
     console.log(receivedEvent.payload);
     this.connections = Object.keys(receivedEvent.payload);
+    mx.socket.list["local-mx-msl"].mxSend("(@WALT)");
+  }
+
+  //Update history when messages received
+  messageReceived(receivedEvent: Event) {
+    console.log("message received");
+    console.log(receivedEvent.payload);
+    alert(receivedEvent.payload);
   }
 
 
@@ -61,8 +72,9 @@ export class mxConnect extends LitElement {
   //Show this component on screen
   render() {
 
-    //listen for connection status changed
+    //Add event listeners for events targeting this component
     this.addEventListener("status-changed", this.statusChanged);
+    this.addEventListener("message-received", this.messageReceived);
 
     return html`
     ${this.machineList()}

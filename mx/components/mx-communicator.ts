@@ -2,6 +2,9 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+//MSL.js Services
+import { socket } from 'msl-js/services/socket'
+
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
   static styles = css`
@@ -25,6 +28,7 @@ export class mxCommunicator extends LitElement {
 
   //Show this component on screen
   render() {
+
     return html`
     communicator ver ${mslNotebook.version}<br>
     <input @change=${this.mslBoxChanged} placeholder="(msl)"></input>

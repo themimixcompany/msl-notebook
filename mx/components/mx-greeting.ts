@@ -2,6 +2,8 @@
 import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
+//<mx-greeting>
+//Says hello to the name in the input box when changed.
 @customElement('mx-greeting')
 export class mxGreeting extends LitElement {
   static styles = css`
