@@ -5,6 +5,8 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import { socket } from 'msl-js/services/socket'
 
+
+
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
   static styles = css`
@@ -16,36 +18,36 @@ export class mxCommunicator extends LitElement {
 
   @property() mslResults = '';
 
+  //Private Functions
+
+  //Update history when messages received
+  messageReceived(receivedEvent: Event) {
+    console.log("message received by communicator");
+    let latestReceived:string = receivedEvent.payload;
+    console.log(latestReceived);
+    this.mslResults = `${this.mslResults}\n ${latestReceived}`;
+  }
+
 
   //Something changed in the MSL input box
   mslBoxChanged(event: Event) {
     const eventTarget = event.target as HTMLInputElement
     const latestInput = eventTarget.value;
-    this.mslResults = `${this.mslResults}\n ${latestInput}`;
-    eventTarget.value = '';
+    socket.list["local-mx-msl"].mxSend(latestInput, this);
+    //eventTarget.value = '';
   }
 
 
   //Show this component on screen
   render() {
 
+    //Add event listeners for events targeting this component
+    this.addEventListener("message-received", this.messageReceived);
+
     return html`
     communicator ver ${mslNotebook.version}<br>
     <input @change=${this.mslBoxChanged} placeholder="(msl)"></input>
     <textarea id="mslResultsBox" rows="5" cols="100">${this.mslResults}</textarea>
-
-    <!-- Shoelace Tabs -->
-    <sl-tab-group>
-    <sl-tab slot="nav" panel="general">General</sl-tab>
-   <sl-tab slot="nav" panel="custom">Custom</sl-tab>
-   <sl-tab slot="nav" panel="advanced">Advanced</sl-tab>
-  <sl-tab slot="nav" panel="disabled" disabled>Disabled</sl-tab>
-
-  <sl-tab-panel name="general">This is the general tab panel.</sl-tab-panel>
-  <sl-tab-panel name="custom">This is the custom tab panel.</sl-tab-panel>
-  <sl-tab-panel name="advanced">This is the advanced tab panel.</sl-tab-panel>
-  <sl-tab-panel name="disabled">This is a disabled tab panel.</sl-tab-panel>
-  </sl-tab-group>
     `;
 
   }

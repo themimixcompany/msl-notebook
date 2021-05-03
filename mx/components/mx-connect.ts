@@ -33,15 +33,9 @@ export class mxConnect extends LitElement {
     console.log("status changed");
     console.log(receivedEvent.payload);
     this.connections = Object.keys(receivedEvent.payload);
-    mx.socket.list["local-mx-msl"].mxSend("(@WALT)");
   }
 
-  //Update history when messages received
-  messageReceived(receivedEvent: Event) {
-    console.log("message received");
-    console.log(receivedEvent.payload);
-    alert(receivedEvent.payload);
-  }
+
 
 
   //Create HTML Templates
@@ -74,7 +68,6 @@ export class mxConnect extends LitElement {
 
     //Add event listeners for events targeting this component
     this.addEventListener("status-changed", this.statusChanged);
-    this.addEventListener("message-received", this.messageReceived);
 
     return html`
     ${this.machineList()}

@@ -123,7 +123,7 @@ const sendSingleMessage = function (socket:WebSocket, message:string, componentT
       let newSocket = new WebSocket(socketURL);
 
       //Add mxSend function 
-      WebSocket.prototype.mxSend = function (message: string) {
+      WebSocket.prototype.mxSend = function (message: string, componentToNotify:HTMLElement) {
         sendSingleMessage(this, message, componentToNotify);
       }
 
