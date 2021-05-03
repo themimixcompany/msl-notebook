@@ -23,9 +23,12 @@ export class mxCommunicator extends LitElement {
   //Update history when messages received
   messageReceived(receivedEvent: Event) {
     console.log("message received by communicator");
-    let latestReceived:string = receivedEvent.payload;
+    let latestReceived = receivedEvent.payload;
     console.log(latestReceived);
-    this.mslResults = `${this.mslResults}\n ${latestReceived}`;
+    let logMessage:string;
+    const {message,response} = latestReceived;
+    logMessage = `${message} => ${response}`;
+    this.mslResults = `${this.mslResults}\n ${logMessage}`;
   }
 
 
@@ -33,7 +36,8 @@ export class mxCommunicator extends LitElement {
   mslBoxChanged(event: Event) {
     const eventTarget = event.target as HTMLInputElement
     const latestInput = eventTarget.value;
-    socket.list["local-mx-msl"].mxSend(latestInput, this);
+    //use mxSend w/ true parm to get message and response in JSON
+    socket.list["local-mx-msl"].mxSend(latestInput, this, true);
     //eventTarget.value = '';
   }
 
@@ -46,8 +50,8 @@ export class mxCommunicator extends LitElement {
 
     return html`
     communicator ver ${mslNotebook.version}<br>
-    <input @change=${this.mslBoxChanged} placeholder="(msl)"></input>
-    <textarea id="mslResultsBox" rows="5" cols="100">${this.mslResults}</textarea>
+    <input @change=${this.mslBoxChanged} placeholder="(msl)"></input><br>
+    <textarea id="mslResultsBox" rows="5" cols="50">${this.mslResults}</textarea>
     `;
 
   }

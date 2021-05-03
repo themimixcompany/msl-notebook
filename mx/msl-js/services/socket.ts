@@ -1,7 +1,7 @@
 // MSL.js Socket Service
 // by The Mimix Company
 
-// Provides access to a websocket for sending and receiving harnessed messages.
+// Provides access to a websocket for sending and receiving messages with individual (per)
 
 //MSL.js Services
 import { machine } from 'msl-js/services/machine'
@@ -19,154 +19,163 @@ const status = {
 };
 
 //Active Sockets
-let activeSockets = {};
+let connections = {};
 
 //PRIVATE FUNCTIONS
 
 //notify
 //Send an event to a web component or HTML element
-const notify = function (eventTarget: HTMLElement, name: string, payload: any) {
+const notify = function (notifyElement: HTMLElement, eventName: string, payload: any) {
 
   //create event
-  let notifyEvent = new CustomEvent(name);
+  let notifyEvent = new CustomEvent(eventName);
 
   //attach payload
   notifyEvent.payload = payload;
 
   //dispatch
-  eventTarget.dispatchEvent(notifyEvent);
+  notifyElement.dispatchEvent(notifyEvent);
 };
 
 //sendSingleMessage (exposed through .mxSend on the socket)
 //Send a single message over a websocket w/ a per-message callback
-const sendSingleMessage = function (socket:WebSocket, message:string, componentToNotify: HTMLElement) {
+const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean) {
 
   //Setup message received callback
-  socket.onmessage = function (event:Event) {
+  socket.onmessage = function (event: Event) {
 
-    var receivedMessage = event.data;
+    const receivedMessage: string = event.data;
 
     //Debug Info
     console.log("MSL.js PMCS", receivedMessage);
-  
+
     //Save Received Message in History
     //history[messageNumber][messageReceivePosition] = receivedMessage;
 
     //Interpret MSL (Check for (@VER), for example)
     //var isValidMSL = mslParser.parse(receivedMessage);
 
-    notify(componentToNotify,"message-received",receivedMessage);
+    //Setup Notify Message
+    let notifyMessage: string | {}
 
-   };
+    //Simple reply; no message echo
+    notifyMessage = receivedMessage;
+
+    //Echo? JSON reply; original message & response
+    if (echo) {
+      notifyMessage = {
+        "message": message,
+        "response": receivedMessage
+      }
+    }
+
+    //Notify the sender of the received message.
+    notify(notifyElement, "message-received", notifyMessage);
+
+  };
 
   //Send message
   socket.send(message)
 
-  };
+};
 
-  //PUBLIC FUNCTIONS
+//PUBLIC FUNCTIONS
 
-  //connect
-  //Connect to a WebSocket on a machine.
-  const connect = function (machineKey: string, portKey: string, componentToNotify: HTMLElement) {
+//connect
+//Connect to a WebSocket on a machine.
+const connect = function (machineKey: string, portKey: string, notifyElement: HTMLElement) {
 
-    console.log("connecting to", machineKey, portKey);
+  console.log("connecting to", machineKey, portKey);
 
-    // //Quit if user is already connected to this machine and type
-    // if (USER.sockets[type]) {
-    //   if (USER.sockets[type][machineKey]) {
-    //     mxDebug("mslWebSocket user already connected to", machineKey, type);
-    //     return;
-    //   }
-    // }
+  // //Quit if user is already connected to this machine and type
+  // if (USER.sockets[type]) {
+  //   if (USER.sockets[type][machineKey]) {
+  //     mxDebug("mslWebSocket user already connected to", machineKey, type);
+  //     return;
+  //   }
+  // }
 
-    //Get machine & port
-    let thisMachine = machine.list[machineKey];
-    let thisPort = machine.ports[portKey];
+  //Find machine & port on master lists
+  let connectMachine = machine.list[machineKey];
+  let connectPort = machine.ports[portKey];
 
-    //Quit if no matching machine
-    if (!thisMachine) {
-      console.log("quit, no machine");
-      return false;
+  //Quit if no matching machine
+  if (!connectMachine) {
+    console.log("quit, no machine");
+    return false;
+  }
+
+  //Quit if no matching port
+  if (!connectPort) {
+    console.log("quit, no port");
+    return false;
+  }
+
+  //Quit if the port isn't listed for this machine
+  if (!connectMachine.ports.includes(portKey)) {
+    console.log("quit, no port on this machine");
+    return false;
+  }
+
+  //Handle port section of URL
+  let portString = ""; //assume no portString
+  if (connectPort.port) {
+    portString = ":" + connectPort.port;
+  }
+
+  //Finalize URL
+  const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
+  console.log(socketURL);
+
+  //Create a key to track in connections
+  let socketKey = `${machineKey}-${portKey}`;
+
+  //Not connected? Create new WebSocket and store in connections.
+  if (!connections[socketKey] || connections[socketKey].readyState == status.closed) {
+    console.log("opening socket", socketKey);
+
+    //Create new socket
+    let newSocket = new WebSocket(socketURL);
+
+    //Add mxSend function 
+    WebSocket.prototype.mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false) {
+      sendSingleMessage(this, message, componentToNotify, echo);
     }
 
-    //Quit if no matching port
-    if (!thisPort) {
-      console.log("quit, no port");
-      return false;
-    }
+    //Setup open callback
+    newSocket.onopen = function () {
+      console.log("connected", socketKey);
+      connections[socketKey] = newSocket;
 
-    //Quit if the port isn't listed for this machine
-    if (!thisMachine.ports.includes(portKey)) {
-      console.log("quit, no port on this machine");
-      return false;
-    }
-
-    //Handle ports
-    let portString = ""; //assume no portString
-    if (thisPort.port) {
-      portString = ":" + thisPort.port;
-    }
-
-    //Finalize URL
-    const socketURL = thisPort.protocol + "://" + thisMachine.ip + portString;
-    console.log(socketURL);
-
-    //Create a key to track in activeSockets
-    let socketKey = `${machineKey}-${portKey}`;
-
-    //Not connected? Create new WebSocket and store in activeSockets.
-    if (!activeSockets[socketKey] || activeSockets[socketKey].readyState == status.closed) {
-      console.log("opening socket", socketKey);
-
-      //Create new socket
-      let newSocket = new WebSocket(socketURL);
-
-      //Add mxSend function 
-      WebSocket.prototype.mxSend = function (message: string, componentToNotify:HTMLElement) {
-        sendSingleMessage(this, message, componentToNotify);
-      }
-
-      //Setup open callback
-      newSocket.onopen = function () {
-        console.log("connected", socketKey);
-        activeSockets[socketKey] = newSocket;
-
-        //Let other components know status has changed
-        notify(componentToNotify, "status-changed", activeSockets);
-      };
-
-      //Setup close callback
-      newSocket.onclose = function () {
-        console.log("closed", socketKey);
-        delete activeSockets[socketKey];
-
-        //Let other components know status has changed
-        notify(componentToNotify, "status-changed", activeSockets);
-      }
-
-    }
-
-    //Previously closed? Reconnect.
-    if (activeSockets[socketKey] && activeSockets[socketKey].readyState == status.closed) {
-      console.log("reconnect", socketKey);
-      activeSockets[socketKey] = new WebSocket(socketURL); //previously closed; reopen
+      //Let other components know status has changed
+      notify(notifyElement, "status-changed", connections);
     };
 
-    //Return live socket.
-    return activeSockets[socketKey];
+    //Setup close callback
+    newSocket.onclose = function () {
+      console.log("closed", socketKey);
+      delete connections[socketKey];
+
+      //Let other components know status has changed
+      notify(notifyElement, "status-changed", connections);
+    }
 
   }
 
+  //Return live socket.
+  return connections[socketKey];
 
-  const socketKeys = function (): string[] {
-    return Object.keys(activeSockets);
-  }
+}
 
-  //Service Definition
 
-  export const socket = {
-    connect: connect,
-    list: activeSockets,
-    keys: socketKeys()
-  };
+const socketKeys = function (): string[] {
+  return Object.keys(connections);
+}
+
+//Service Definition
+
+export const socket = {
+  connect: connect,
+  list: connections,
+  keys: socketKeys()
+};
