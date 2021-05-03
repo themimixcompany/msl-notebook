@@ -7,11 +7,11 @@
 
 //machines
 //Available Machines
-import machines from "config/machines.json";
+import machines from "msl-js/config/machines.json";
 
 //ports
 //Port Defintions
-import ports from "config/ports.json";
+import ports from "msl-js/config/ports.json";
 
 //PRIVATE FUNCTIONS
 

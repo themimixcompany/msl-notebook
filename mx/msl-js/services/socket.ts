@@ -4,7 +4,7 @@
 // Provides access to a websocket for sending and receiving harnessed messages.
 
 //MSL.js Services
-import {machine} from 'services/machine'
+import {machine} from 'msl-js/services/machine'
 
 
 //SERVICE CONSTANTS

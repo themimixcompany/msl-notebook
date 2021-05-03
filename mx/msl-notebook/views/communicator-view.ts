@@ -3,7 +3,7 @@ import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
 //MSL.js Services
-import * as mx from 'global/service-loader'
+import * as mx from 'msl-js/global/service-loader'
 
 // console.log("find msl");
 // console.log(mx.machine.find("msl"));
