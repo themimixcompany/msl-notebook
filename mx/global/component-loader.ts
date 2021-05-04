@@ -10,6 +10,7 @@ export * from "components/mx-greeting";
 export * from "components/mx-communicator";
 export * from "components/mx-connect";
 export * from "components/mx-logo";
+export * from "components/mx-debug";
 
 
 //Export Views

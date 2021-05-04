@@ -9,9 +9,6 @@ import * as mx from 'msl-js/service-loader'
 // console.log(mx.machine.find("msl"));
 //
 
-console.log("all machines");
-console.log(mx.machine.list);
-
 // console.log("copy to local and change");
 // let myMachineCopy = mx.machine.list();
 // myMachineCopy.test1 = ["hey"];
@@ -46,6 +43,7 @@ export class communicatorView extends LitElement {
   render() {
     return html`
     <mx-greeting @name-changed=${this.handleEvent}></mx-greeting>
+    <mx-debug></mx-debug>
     <mx-connect></mx-connect>
     `
   }

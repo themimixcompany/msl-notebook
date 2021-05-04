@@ -22,9 +22,7 @@ export class mxCommunicator extends LitElement {
 
   //Update history when messages received
   messageReceived(receivedEvent: Event) {
-    console.log("message received by communicator");
     let latestReceived = receivedEvent.payload;
-    console.log(latestReceived);
     let logMessage: string;
     const { message, response } = latestReceived; // => const message = latestReceived.message, etc.
     logMessage = `${message} => ${response}`;
@@ -50,34 +48,6 @@ export class mxCommunicator extends LitElement {
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
     let socket = mx.socket.list[this.socketKey];
-    console.log(socket);
-
-    // //Basics of JSON Accessors
-    // const myJSON = {
-    //   "firstKey": 5,
-    //   "secondKey": "baby",
-    //   "thirdKey": ["bacon","eggs"],
-    //   "fourthKey": [1,2]
-    // }; //Every item must have a quoted key. Values are quoted if they are strings, not if numbers or array.
-
-    // //Access by . Syntax
-    // // ==> 5
-    // const getFirstByLiteralKeyName = myJSON.firstKey //Do not write the quotes in a . accessor. firstKey is a literal, not a variable to be resolved
-    // // ==> 8
-    // const myMath = 3 + getFirstByLiteralKeyName;
-
-    // //Access by "Array" Syntax
-    // // ==> baby
-    // const getSecondByArraySyntax = myJSON["secondKey"] //text literal passed to bracket syntax
-    // const someKeyName = "thirdKey"
-    // // == ["bacon","eggs"]
-    // const getThirdByArraySyntax = myJSON[someKeyName] //variable resolves to text literal.someKeyName is a variable to be resolved, not a literal
-
-
-    // //Find the type of port that the current socket uses? Expansion of socket.port.type
-    // const myPortType = mx.socket.port[mx.socket.list[this.socketKey].portKey].type
-
-    
 
     return html`
     <div class="gridHeader results">

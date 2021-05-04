@@ -4,7 +4,7 @@
 // Provides access to a websocket for sending and receiving messages with individual (per)
 
 //MSL.js Services
-import { machine } from 'msl-js/services/machine'
+import * as mx from 'msl-js/service-loader'
 
 
 //SERVICE CONSTANTS
@@ -47,7 +47,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     const receivedMessage: string = event.data;
 
     //Debug Info
-    console.log("MSL.js PMCS", receivedMessage);
+    mx.debug.log("MSL.js PMCS " + receivedMessage);
 
     //Save Received Message in History
     //history[messageNumber][messageReceivePosition] = receivedMessage;
@@ -89,11 +89,11 @@ const socketPortKey = (socketKey:string) => connections[socketKey].portKey;
 
 //socketMachine
 //Gets machine from socket
-const socketMachine = (socketKey:string) => machine.list[socketMachineKey(socketKey)];
+const socketMachine = (socketKey:string) => mx.machine.list[socketMachineKey(socketKey)];
 
 //socketPort
 //Gets port from socket
-const socketPort = (socketKey:string) => machine.ports[socketPortKey(socketKey)];
+const socketPort = (socketKey:string) => mx.machine.ports[socketPortKey(socketKey)];
 
 
 
@@ -115,8 +115,8 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
   // }
 
   //Find machine & port on master lists
-  let connectMachine = machine.list[machineKey];
-  let connectPort = machine.ports[portKey];
+  let connectMachine = mx.machine.list[machineKey];
+  let connectPort = mx.machine.ports[portKey];
 
   //Quit if no matching machine
   if (!connectMachine) {
