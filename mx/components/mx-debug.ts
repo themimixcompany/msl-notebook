@@ -23,11 +23,9 @@ export class mxDebug extends LitElement {
 
   //Update history when messages received
   messageReceived(receivedEvent: Event) {
-    console.log("message received by debug");
-    let latestReceived:string = receivedEvent.payload;
-    console.log(latestReceived);
-    console.log(this);
-    thisComponent.debugResults = latestReceived;
+    let message:string[] = receivedEvent.payload;
+    let logMessage = message.map((messageArgument) => `${messageArgument} `);
+    thisComponent.debugResults = html`${thisComponent.debugResults}<div class="results greyBk">${logMessage}</div>`;
   }
 
 

@@ -3,22 +3,6 @@ import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
 //MSL.js Services
-import * as mx from 'msl-js/service-loader'
-
-// console.log("find msl");
-// console.log(mx.machine.find("msl"));
-//
-
-// console.log("copy to local and change");
-// let myMachineCopy = mx.machine.list();
-// myMachineCopy.test1 = ["hey"];
-// console.log(myMachineCopy);
-//
-// let mySecondCopy = mx.machine.list();
-// console.log("change remote and refetch");
-// mx.machine.set("test1","name","Howdy!")
-// console.log(mySecondCopy);
-
 
 @customElement('communicator-view')
 export class communicatorView extends LitElement {

@@ -39,16 +39,13 @@ export class mxConnect extends LitElement {
 
   //Connect link clicked
   addConnection(machineKey: string, portKey: string) {
-    console.log(Object.keys(mx.socket.list));
-    console.log(mx.socket.keys); //? no output
     mx.socket.connect(machineKey, portKey, this);
     ;
   }
 
   //Update connections when changed by socket service
   statusChanged(receivedEvent: Event) {
-    console.log("status changed");
-    console.log(receivedEvent.payload);
+    mx.debug.log("active connections updated");
     this.connections = Object.keys(receivedEvent.payload);
   }
 

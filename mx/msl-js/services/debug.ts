@@ -1,10 +1,10 @@
 // MSL.js Debug Service
 // by The Mimix Company
 
+import { mxCommunicator } from "components/mx-communicator";
+
+
 // Sends debugging information to the mx-debug component for display.
-
-//SERVICE CONSTANTS
-
 
 
 //PRIVATE FUNCTIONS
@@ -24,25 +24,33 @@ const notify = function (notifyElement, eventName: string, payload: any) {
 };
 
 
+//PUBLIC PROPERTIES
+
+let echo = false;
+
 //PUBLIC FUNCTIONS
 
 //log
 //Write to the debugging component
-const debugLog = function (message, echoToConsole: boolean = false) {
+const debugLog = function (...message: string[]) {
 
     //Notify document
     notify(document, "debug", message);
 
     //Echo to console if requested
-    if (echoToConsole) {
-        console.log(message);
+    if (echo) {
+        mxCommunicator.con(message);
     }
 
 
 }
 
+const setEcho = function(isEcho: boolean = true) {
+    echo = isEcho;
+};
 
 //Service Definition
 export const debug = {
-    log: debugLog
+    log: debugLog,
+    echo: setEcho
 };

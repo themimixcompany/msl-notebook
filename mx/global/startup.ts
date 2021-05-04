@@ -34,6 +34,6 @@
 // Everything in this file is global to the entire application.
 
 const mslNotebook = {
-    version: "1.7.7"
+    version: "1.7.8"
 };
 
