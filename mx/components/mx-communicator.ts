@@ -15,8 +15,8 @@ export class mxCommunicator extends LitElement {
     `;
 
   //Define public properties (databinding)
-  @property() mslResults;
-  @property({ attribute: 'socket' }) socketKey: string;
+  @property() mslResults: any;
+  @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
 
   //Private Functions
 
@@ -25,8 +25,8 @@ export class mxCommunicator extends LitElement {
     console.log("message received by communicator");
     let latestReceived = receivedEvent.payload;
     console.log(latestReceived);
-    let logMessage:string;
-    const {message,response} = latestReceived;
+    let logMessage: string;
+    const { message, response } = latestReceived; // => const message = latestReceived.message, etc.
     logMessage = `${message} => ${response}`;
     this.mslResults = html`${this.mslResults}<div class="results greyBk">${logMessage}</div>`;
   }
@@ -35,9 +35,9 @@ export class mxCommunicator extends LitElement {
   //Something changed in the MSL input box
   mslBoxChanged(event: Event) {
     const eventTarget = event.target as HTMLInputElement
-    const latestInput = eventTarget.value;
+    const message = eventTarget.value;
     //use mxSend w/ true parm to get message and response in JSON
-    mx.socket.list[this.socketKey].mxSend(latestInput, this, true);
+    mx.socket.list[this.socketKey].mxSend(message, this, true);
     //eventTarget.value = '';
   }
 
@@ -47,10 +47,37 @@ export class mxCommunicator extends LitElement {
   render() {
 
     //Add event listeners for events targeting this component
-    this.addEventListener("message-received", this.messageReceived);
+    this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
     let socket = mx.socket.list[this.socketKey];
     console.log(socket);
+
+    // //Basics of JSON Accessors
+    // const myJSON = {
+    //   "firstKey": 5,
+    //   "secondKey": "baby",
+    //   "thirdKey": ["bacon","eggs"],
+    //   "fourthKey": [1,2]
+    // }; //Every item must have a quoted key. Values are quoted if they are strings, not if numbers or array.
+
+    // //Access by . Syntax
+    // // ==> 5
+    // const getFirstByLiteralKeyName = myJSON.firstKey //Do not write the quotes in a . accessor. firstKey is a literal, not a variable to be resolved
+    // // ==> 8
+    // const myMath = 3 + getFirstByLiteralKeyName;
+
+    // //Access by "Array" Syntax
+    // // ==> baby
+    // const getSecondByArraySyntax = myJSON["secondKey"] //text literal passed to bracket syntax
+    // const someKeyName = "thirdKey"
+    // // == ["bacon","eggs"]
+    // const getThirdByArraySyntax = myJSON[someKeyName] //variable resolves to text literal.someKeyName is a variable to be resolved, not a literal
+
+
+    // //Find the type of port that the current socket uses? Expansion of socket.port.type
+    // const myPortType = mx.socket.port[mx.socket.list[this.socketKey].portKey].type
+
+    
 
     return html`
     <div class="gridHeader results">

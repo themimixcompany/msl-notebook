@@ -56,7 +56,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     //var isValidMSL = mslParser.parse(receivedMessage);
 
     //Setup Notify Message
-    let notifyMessage: string | {}
+    let notifyMessage: string | Object
 
     //Simple reply; no message echo
     notifyMessage = receivedMessage;
@@ -81,27 +81,19 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
 //socketMachineKey
 //Gets machineKey from socket
-const socketMachineKey = function(socketKey:string) {
-   return connections[socketKey].machineKey;
-};
+const socketMachineKey = (socketKey:string) => connections[socketKey].machineKey; 
 
 //socketPortKey
 //Gets portKey from socket
-const socketPortKey = function(socketKey:string) {
-  return connections[socketKey].portKey;
-};
+const socketPortKey = (socketKey:string) => connections[socketKey].portKey;
 
 //socketMachine
 //Gets machine from socket
-const socketMachine = function(socketKey:string) {
-  return machine.list[socketMachineKey(socketKey)];
-};
+const socketMachine = (socketKey:string) => machine.list[socketMachineKey(socketKey)];
 
 //socketPort
 //Gets port from socket
-const socketPort = function(socketKey:string) {
-  return machine.ports[socketPortKey(socketKey)];
-};
+const socketPort = (socketKey:string) => machine.ports[socketPortKey(socketKey)];
 
 
 
@@ -164,16 +156,6 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
     //Create new socket
     let newSocket = new WebSocket(socketURL);
 
-    //Add mxSend function 
-    WebSocket.prototype.mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false) {
-      sendSingleMessage(this, message, componentToNotify, echo);
-    }
-
-    //Add machineKey and portKey
-    WebSocket.prototype.machineKey = machineKey;
-    WebSocket.prototype.portKey = portKey;
-
-
     //Setup open callback
     newSocket.onopen = function () {
       console.log("connected", socketKey);
@@ -184,7 +166,7 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
       WebSocket.prototype.port = socketPort(socketKey);
       WebSocket.prototype.machine = socketPort(socketKey);
 
-      //Let other components know status has changed
+      //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
     };
 
@@ -193,9 +175,18 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
       console.log("closed", socketKey);
       delete connections[socketKey];
 
-      //Let other components know status has changed
+      //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
     }
+
+    //Add mxSend function 
+    WebSocket.prototype.mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false) {
+      sendSingleMessage(this, message, componentToNotify, echo);
+    }
+
+    //Add machineKey and portKey
+    WebSocket.prototype.machineKey = machineKey;
+    WebSocket.prototype.portKey = portKey;
 
   }
 
