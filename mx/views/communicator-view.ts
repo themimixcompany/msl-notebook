@@ -45,8 +45,6 @@ export class communicatorView extends LitElement {
   //Show this view on screen
   render() {
     return html`
-    view ver ${mslNotebook.version}<br>
-    user ${this.userName}<br>
     <mx-greeting @name-changed=${this.handleEvent}></mx-greeting>
     <mx-connect></mx-connect>
     `

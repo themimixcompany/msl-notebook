@@ -11,9 +11,26 @@ import * as mx from 'msl-js/service-loader'
 @customElement('mx-connect')
 export class mxConnect extends LitElement {
   static styles = css`
-    p, textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
-    ol,ul, input, h2 { font-family: Inter; font-size: 18pt }
+    textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
+    ol,ul, input, h2, p, .machine { font-family: Inter; font-size: 18pt }
+    .greyBk {background-color:#ccc}
+    .gridHeader {background-color:#bbb}
     a { text-decoration: underline;}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      grid-auto-rows: minmax(100px, auto);
+    }
+    .one {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .gridHeader, .threeColumns {
+      grid-column: 1 / 4;
+    }
+    
+    
     `;
 
   //Define public properties (databinding)
@@ -40,30 +57,33 @@ export class mxConnect extends LitElement {
 
   //Create HTML Templates
 
-  machineList() {
+  machineGrid() {
     return html`
-    machines<br>
-    <ul>
-      ${mx.machine.keys.map((machineKey) => html`<li>${machineKey}:
-      ${mx.machine.list[machineKey].ports.map((portKey: string) => html` <a @click=${() => this.addConnection(machineKey, portKey)}>${portKey}</a>`)}
-      </li>`)}
-    </ul>
-    <br>
+    ${mx.machine.keys.map((machineKey) => html`
+      <div class="machine greyBk">${machineKey}
+      <p>
+      ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
+      <a @click=${() => this.addConnection(machineKey, portKey)}>${portKey}</a>
+      `)}
+      &nbsp;
+      </p>
+    </div>
+    `)}
     `
   }
 
-  connectionList() {
+  communicators() {
     return html`
-    connections<br>
+
     ${this.connections.map((socketKey) => html`
-    <h2>${socketKey}</h2>
-    <br>
-    <mx-communicator socket=${socketKey}></mx-communicator>
+      <div class="threeColumns">
+        <mx-communicator socket=${socketKey}></mx-communicator>
+      </div>
     `)}
-  
-    <br>
     `
   }
+
+
 
 
   //Show this component on screen
@@ -73,12 +93,14 @@ export class mxConnect extends LitElement {
     this.addEventListener("status-changed", this.statusChanged);
 
     return html`
-    connect ver ${mslNotebook.version}<br>
 
-    <p>Click a server to connect. Then send a message.</p>
+    <p>Click a port to connect. Then send a message.</p>
 
-    ${this.machineList()}
-    ${this.connectionList()}
+    <div class="grid">
+      ${this.machineGrid()}
+      ${this.communicators()}
+    </div>
+    
     <br>
   `;
 

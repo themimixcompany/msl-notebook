@@ -31,9 +31,8 @@ export class mxGreeting extends LitElement {
   //Show this component on screen
   render() {
     return html`
-    greeting ver ${mslNotebook.version}<br>
     <input @change=${this.nameBoxChanged} placeholder="Your Name Here"><br>
-      <h1>Hello, ${this.name}!</h1>
+      <h1>Hello, ${this.name} ${mslNotebook.version}!</h1>
     `;
 
   }

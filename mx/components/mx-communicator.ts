@@ -5,17 +5,17 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/services/socket'
 
-
-
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
   static styles = css`
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
-    input { font-family: Inter; font-size: 24pt }
+    input, .results { font-family: Inter; font-size: 18pt; }
+    .greyBk {background-color:#ccc}
+    .gridHeader {background-color:#bbb}
     `;
 
   //Define public properties (databinding)
-  @property() mslResults = '';
+  @property() mslResults;
   @property({ attribute: 'socket' }) socketKey: string;
 
   //Private Functions
@@ -28,7 +28,7 @@ export class mxCommunicator extends LitElement {
     let logMessage:string;
     const {message,response} = latestReceived;
     logMessage = `${message} => ${response}`;
-    this.mslResults = `${this.mslResults}\n ${logMessage}`;
+    this.mslResults = html`${this.mslResults}<div class="results greyBk">${logMessage}</div>`;
   }
 
 
@@ -53,9 +53,14 @@ export class mxCommunicator extends LitElement {
     console.log(socket);
 
     return html`
-    communicator ver ${mslNotebook.version}<br>
-    <input @change=${this.mslBoxChanged} placeholder="${socket.port.type}"></input><br>
-    <textarea id="mslResultsBox" rows="5" cols="50">${this.mslResults}</textarea>
+    <div class="gridHeader results">
+      ${this.socketKey}
+    </div>
+    <div class="greyBk" style="padding-right:6px;">
+      <input style="width:100%" @change=${this.mslBoxChanged} placeholder="${socket.port.type}"></input>
+    </div>
+    
+    <div>${this.mslResults}</div>
     `;
 
   }
