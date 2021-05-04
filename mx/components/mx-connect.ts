@@ -57,7 +57,7 @@ export class mxConnect extends LitElement {
   machineGrid() {
     return html`
     ${mx.machine.keys.map((machineKey) => html`
-      <div class="machine greyBk">${machineKey}
+      <div class="machine greyBk"><span style="font-weight:600">${machineKey}</span>
       <p>
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <a @click=${() => this.addConnection(machineKey, portKey)}>${portKey}</a>

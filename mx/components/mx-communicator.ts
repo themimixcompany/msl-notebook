@@ -50,7 +50,7 @@ export class mxCommunicator extends LitElement {
     let socket = mx.socket.list[this.socketKey];
 
     return html`
-    <div class="gridHeader results">
+    <div class="gridHeader results" style="font-weight:600">
       ${this.socketKey}
     </div>
     <div class="greyBk" style="padding-right:6px;">

@@ -41,7 +41,7 @@ export class mxDebug extends LitElement {
 
 
     return html`
-    <div class="gridHeader results">
+    <div class="gridHeader results" style="font-weight:600">
       debugging
     </div>
 
