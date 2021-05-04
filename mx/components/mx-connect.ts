@@ -58,6 +58,7 @@ export class mxConnect extends LitElement {
     return html`
     ${mx.machine.keys.map((machineKey) => html`
       <div class="machine greyBk"><span style="font-weight:600">${machineKey}</span>
+      <i class="fas fa-flag" style="font-size:24pt"></i>
       <p>
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <a @click=${() => this.addConnection(machineKey, portKey)}>${portKey}</a>
@@ -71,6 +72,7 @@ export class mxConnect extends LitElement {
 
   communicators() {
     return html`
+    <i class="fas fa-server"></i>
 
     ${this.connections.map((socketKey) => html`
       <div class="threeColumns">

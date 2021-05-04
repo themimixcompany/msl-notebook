@@ -1,8 +1,6 @@
 // MSL Notebook Component Loader
 // by The Mimix Company
 
-import { mxGreeting } from "components/mx-greeting";
-
 // Load each web component from a single file.
 
 //Export Individual Components

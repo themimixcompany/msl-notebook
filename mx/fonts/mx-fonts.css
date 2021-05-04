@@ -1,12 +1,12 @@
 @font-face {
 	font-family: 'Inter';
-	src: url('/mx/fonts/Inter.var.woff2?v=3.11') format('woff2');
+	src: url('/mx/fonts/inter/Inter.var.woff2?v=3.11') format('woff2');
 	font-weight: 100 900;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'Bront';
-	src: url('/mx/fonts/DejaVuSansMono-Bront.ttf');
+	src: url('/mx/fonts/bront/DejaVuSansMono-Bront.ttf');
 	font-style: normal;
 }
