@@ -29,7 +29,11 @@ export class communicatorView extends LitElement {
     <mx-greeting></mx-greeting>
     <mx-debug></mx-debug>
     <mx-connect></mx-connect>
-    <mx-icon set="fab" name="js" color="orange"></mx-icon>
+    <mx-icon class="fas fa-server"></mx-icon>
+    <mx-icon class="far fa-server" size="2" color="orange"></mx-icon>
+    <mx-icon class="fas fa-server" size="3" color="red"></mx-icon>
+    <mx-icon class="fas fa-server" size="4" color="purple"></mx-icon>
+    <mx-icon class="fas fa-server" size="5" color="blue"></mx-icon>
     `
   }
 
