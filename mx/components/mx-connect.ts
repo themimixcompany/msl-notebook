@@ -13,6 +13,7 @@ export class mxConnect extends LitElement {
   static styles = css`
     textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
     ol,ul, input, h2, p, .machine { font-family: Inter; font-size: 18pt }
+    p {margin-top: 5px; margin-bottom: 5px;}
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
     a { text-decoration: underline;}
@@ -56,17 +57,25 @@ export class mxConnect extends LitElement {
 
   machineGrid() {
     return html`
-    ${mx.machine.keys.map((machineKey) => html`
-      <div class="machine greyBk"><span style="font-weight:600">${machineKey}</span>
+    ${mx.machine.keys.map(machineKey => {
+    
+
+      return html`
+      <div class="machine greyBk">
+      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey,"msl") ? 'red' : ''}></mx-icon>
+      <span style="font-weight:600">${machineKey}</span>
       <i class="fas fa-flag" style="font-size:24pt"></i>
-      <p>
+  
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
-      <a @click=${() => this.addConnection(machineKey, portKey)}>${portKey}</a>
-      `)}
-      &nbsp;
+      <p>
+      <a @click=${() => this.addConnection(machineKey, portKey)}>
+      <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? 'red' : ''}></mx-icon>
+      ${portKey}
       </p>
+      `)}
+  
     </div>
-    `)}
+    `})}
     `
   }
 
@@ -74,7 +83,7 @@ export class mxConnect extends LitElement {
     return html`
     <i class="fas fa-server"></i>
 
-    ${this.connections.map((socketKey) => html`
+    ${this.connections.map(socketKey => html`
       <div class="threeColumns">
         <mx-communicator socket=${socketKey}></mx-communicator>
       </div>

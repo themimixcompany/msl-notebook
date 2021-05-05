@@ -48,7 +48,7 @@ export class mxCommunicator extends LitElement {
 
     return html`
     <div class="gridHeader results" style="font-weight:600">
-      ${this.socketKey}
+    ${this.socketKey}
     </div>
     <div class="greyBk" style="padding-right:6px;">
       <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>

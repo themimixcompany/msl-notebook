@@ -18,8 +18,8 @@ export class mxIcon extends LitElement {
 
     static styles = css`
     .icon {
-        width: 1em;
-        height: 1em;
+        padding-left: 0.2em;
+        padding-right: 0.2em;
         vertical-align: -0.125em;
       }
     `;
@@ -27,7 +27,7 @@ export class mxIcon extends LitElement {
     //PUBLIC PROPERTIES
     @property() class: string;
     @property() color: string;
-    @property() size: number = 1.5;
+    @property() size: number = 1;
 
     //Show this component on screen
     render() {
@@ -46,7 +46,7 @@ export class mxIcon extends LitElement {
         let [width, height, , , dValue] = matchingIcon;
 
         //Setup for SVG
-        return svg`<svg viewbox="0 0 512 512" style="height:${this.size}em;width:${this.size}em"><path style="fill:${this.color}" d=${dValue}></svg>`;
+        return svg`<svg viewbox="0 0 512 512" class="icon" style="height:${this.size}em;width:${this.size}em"><path style="fill:${this.color}" d=${dValue}></svg>`;
 
     }
 

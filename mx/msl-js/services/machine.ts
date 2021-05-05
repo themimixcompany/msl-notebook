@@ -100,6 +100,12 @@ const setValue = function(machineKey:string,key:string,value:string):boolean {
 
 }
 
+//hasType
+const hasType = function(machineKey:string,socketType:string) {
+  let hasPort = machines[machineKey].ports.map(portKey => ports[portKey].type == socketType)
+  return hasPort.includes(true);
+}
+
 
 //Service Definition
 export const machine = {
@@ -107,5 +113,6 @@ export const machine = {
   ports: allPorts(),
   keys: Object.keys(machines),
   find: findByType,
-  set: setValue
+  set: setValue,
+  hasType: hasType
 };

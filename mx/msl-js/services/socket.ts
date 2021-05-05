@@ -156,8 +156,8 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
   const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
   mx.debug.log("socket url",socketURL);
 
-  //Not connected? Create new WebSocket and store in connections.
-  if (!connections[socketKey] || connections[socketKey].readyState == status.closed) {
+  //Create new WebSocket and store in connections.
+  
     mx.debug.log("opening socket", socketKey);
 
     //Create new socket
@@ -194,8 +194,6 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
     //Add machineKey and portKey
     WebSocket.prototype.machineKey = machineKey;
     WebSocket.prototype.portKey = portKey;
-
-  }
 
   //Return live socket.
   return connections[socketKey];
