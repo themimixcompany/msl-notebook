@@ -115,6 +115,15 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
   //   }
   // }
 
+   //Create a socket key to track in connections
+   let socketKey = `${machineKey}-${portKey}`;
+
+  //Quit if already connected to this port
+  if (connections[socketKey]) {
+    mx.debug.log("already connected to", socketKey);
+    return connections[socketKey];
+  }
+
   //Find machine & port on master lists
   let connectMachine = mx.machine.list[machineKey];
   let connectPort = mx.machine.ports[portKey];
@@ -146,9 +155,6 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
   //Finalize URL
   const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
   mx.debug.log("socket url",socketURL);
-
-  //Create a key to track in connections
-  let socketKey = `${machineKey}-${portKey}`;
 
   //Not connected? Create new WebSocket and store in connections.
   if (!connections[socketKey] || connections[socketKey].readyState == status.closed) {
