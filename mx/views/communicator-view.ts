@@ -3,10 +3,7 @@ import { mxCommunicator } from 'components/mx-communicator';
 import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
-
-//MSL.js Services
-import * as mx from 'msl-js/service-loader'
-  
+ 
 @customElement('communicator-view')
 export class communicatorView extends LitElement {
 
@@ -29,11 +26,7 @@ export class communicatorView extends LitElement {
     <mx-greeting></mx-greeting>
     <mx-debug></mx-debug>
     <mx-connect></mx-connect>
-    <mx-icon class="fas fa-server"></mx-icon>
-    <mx-icon class="far fa-server" size="2" color="orange"></mx-icon>
-    <mx-icon class="fas fa-server" size="3" color="red"></mx-icon>
-    <mx-icon class="fas fa-server" size="4" color="purple"></mx-icon>
-    <mx-icon class="fas fa-server" size="5" color="blue"></mx-icon>
+    <mx-icon class="fab fa-js" size="2" color="orange"></mx-icon>
     `
   }
 
