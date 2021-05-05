@@ -14,7 +14,6 @@ export class mxLogo extends LitElement {
   //Show this component on screen
   render() {
     return html`
-    <i class="fas fa-server"></i>
     <img src=${logo} style="width:500px;margin-bottom:20px;"> 
     <br>
     `;

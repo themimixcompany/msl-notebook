@@ -25,10 +25,11 @@ export class communicatorView extends LitElement {
   render() {
 
     return html`
-    <mx-icon set="fab" name="js" color="orange" width="20" height="20"></mx-icon>
+  
     <mx-greeting></mx-greeting>
     <mx-debug></mx-debug>
     <mx-connect></mx-connect>
+    <mx-icon set="fab" name="js" color="orange"></mx-icon>
     `
   }
 
