@@ -29,21 +29,18 @@ export class mxCommunicator extends LitElement {
     this.mslResults = html`${this.mslResults}<div class="results greyBk">${logMessage}</div>`;
   }
 
-
-  //Something changed in the MSL input box
-  mslBoxChanged(event: Event) {
-    const eventTarget = event.target as HTMLInputElement
-    const message = eventTarget.value;
-    //use mxSend w/ true parm to get message and response in JSON
-    mx.socket.list[this.socketKey].mxSend(message, this, true);
-    //eventTarget.value = '';
+  mslBoxKeyDown(event: Event) {
+    if (event.keyCode == 13) {
+      const eventTarget = event.target as HTMLInputElement
+      const message = eventTarget.value;
+      //use mxSend w/ true parm to get message and response in JSON
+      mx.socket.list[this.socketKey].mxSend(message, this, true);
+      //eventTarget.value = '';
+    }
   }
-
-
 
   //Show this component on screen
   render() {
-
     //Add event listeners for events targeting this component
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
@@ -54,12 +51,10 @@ export class mxCommunicator extends LitElement {
       ${this.socketKey}
     </div>
     <div class="greyBk" style="padding-right:6px;">
-      <input style="width:100%" @change=${this.mslBoxChanged} placeholder="${socket.port.type}"></input>
+      <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
     </div>
-    
+
     <div>${this.mslResults}</div>
     `;
-
   }
-
 }

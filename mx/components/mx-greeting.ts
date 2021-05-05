@@ -17,28 +17,24 @@ export class mxGreeting extends LitElement {
   @property() name = 'World';
 
 
-  //Something changed in the Name input box
-  nameBoxChanged(event: Event) {
-    this.name = (event.target as HTMLInputElement).value;
-    let myEvent = new CustomEvent('name-changed', {
-      detail: {
-        message: this.name
-      }
-    });
-    this.dispatchEvent(myEvent);
-  };
-
+  //The Enter key has been pressed
+  nameKeyDown(event: Event) {
+    if (event.keyCode == 13) {
+      this.name = (event.target as HTMLInputElement).value;
+      let myEvent = new CustomEvent('name-changed', {
+        detail: {
+          message: this.name
+        }
+      });
+    }
+  }
 
   //Show this component on screen
   render() {
-
-
     return html`
     <i class="fas fa-flag" style="width:20px"></i>
-    <input @change=${this.nameBoxChanged} placeholder="Your Name Here"><br>
+    <input @keydown=${this.nameKeyDown} placeholder="Your Name Here"><br>
       <h1>Hello, ${this.name} ${mslNotebook.version}!</h1>
     `;
-
   }
-
 }
