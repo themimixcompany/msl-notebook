@@ -39,7 +39,7 @@ const debugLog = function (...message: string[]) {
 
     //Echo to console if requested
     if (echo) {
-        mxCommunicator.con(message);
+        console.log(message);
     }
 
 
