@@ -61,8 +61,7 @@ export class mxCommunicator extends LitElement {
     return html`
 
     <div class="greyBk" style="padding-right:6px;">
-      <input style="width:95%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" />
-    <mx-icon @click=${this.emptyInput} class="fas fa-trash"/>
+      <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" />
     </div>
 
     <div class="gridHeader results" style="font-weight:600">
