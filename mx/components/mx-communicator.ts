@@ -45,7 +45,8 @@ export class mxCommunicator extends LitElement {
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
     let socket = mx.socket.list[this.socketKey];
-    console.log(socket);
+    
+    mx.socket.init(socket, this);
 
     return html`
     <div class="gridHeader results" style="font-weight:600">

@@ -37,19 +37,27 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
   notifyElement.dispatchEvent(notifyEvent);
 };
 
-//sendSingleMessage (exposed through .mxSend on the socket)
-//Send a single message over a websocket w/ a per-message callback
-const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean) {
+//setupEmptyCallback
+//Used to handle the initial .onmessage that might come from a socket *before* any message is sent.
+const setupEmptyCallback = function (socket: WebSocket, notifyElement:HTMLElement) {
+  //using "" as message reflect that we did not send any message.
+  setupMessageCallback(socket,"",notifyElement,true) 
+}
 
-  //Setup message received callback
+//setupMessageCallback
+//Used to handle the .onmessage event from a socket *after* a message is sent.
+const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean) {
+
   socket.onmessage = function (event: Event) {
 
     const receivedMessage: string = event.data;
+    
+    console.log(notifyElement);
 
     //Debug Info
     mx.debug.echo(false);
-    mx.debug.log("PMCS", socket.port.type, receivedMessage);
-
+    mx.debug.log(`λ ${notifyElement.localName} ${socket.port.type} ${message} => ${receivedMessage}`);
+    
     //Save Received Message in History
     //history[messageNumber][messageReceivePosition] = receivedMessage;
 
@@ -74,6 +82,14 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     notify(notifyElement, "message-received", notifyMessage);
 
   };
+}
+
+//sendSingleMessage (exposed through .mxSend on the socket)
+//Send a single message over a websocket w/ a per-message callback
+const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean) {
+
+  //Setup message received callback
+  setupMessageCallback(socket, message, notifyElement, echo);
 
   //Send message if not blank (Blank sets up receiver w/o sending.)
   if (message != "") {
@@ -189,20 +205,18 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
 
       //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
-      
+
     }
 
-    //Setup initial message callback by calling send w/o a message
-    sendSingleMessage(newSocket,"",notifyElement,false);
 
     //Add mxSend function 
     WebSocket.prototype.mxSend = mxSend;
 
     //Add machine and port
-   newSocket.machineKey = machineKey;
-   newSocket.portKey = portKey;
-   newSocket.machine = mx.machine.list[machineKey];
-   newSocket.port = mx.machine.ports[portKey];
+    newSocket.machineKey = machineKey;
+    newSocket.portKey = portKey;
+    newSocket.machine = mx.machine.list[machineKey];
+    newSocket.port = mx.machine.ports[portKey];
 
   }
 
@@ -232,6 +246,7 @@ const connectAll = function (machineKey, notifyElement) {
 export const socket = {
   connect: connect,
   connectAll: connectAll,
+  init: setupEmptyCallback,
   list: connections,
   keys: socketKeys()
 };
