@@ -17,6 +17,7 @@ export class mxCommunicator extends LitElement {
   //Define public properties (databinding)
   @property() mslResults: any;
   @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
+  @property() inputBoxValue: string;
 
   //Private Functions
 
@@ -30,9 +31,10 @@ export class mxCommunicator extends LitElement {
   }
 
   mslBoxKeyDown(event: Event) {
+    const eventTarget = event.target as HTMLInputElement
+    const message = eventTarget.value;
+    this.inputBoxValue = message;
     if (event.keyCode == 13) {
-      const eventTarget = event.target as HTMLInputElement
-      const message = eventTarget.value;
       //use mxSend w/ true parm to get message and response in JSON
       mx.socket.list[this.socketKey].mxSend(message, this, true);
       //eventTarget.value = '';
@@ -44,8 +46,14 @@ export class mxCommunicator extends LitElement {
     this.mslResults = "";
   }
 
+  //Empty Input Box
+  emptyInput(receivedEvent: Event) {
+    this.inputBoxValue = "";
+  }
+
   //Show this component on screen
   render() {
+
     //Add event listeners for events targeting this component
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
@@ -54,12 +62,16 @@ export class mxCommunicator extends LitElement {
     mx.socket.init(socket, this);
 
     return html`
-    <div class="gridHeader results" style="font-weight:600">
-    ${this.socketKey} <mx-icon @click=${this.emptyResults} size=".9" class="fas fa-trash"></mx-icon>
-    </div>
+
     <div class="greyBk" style="padding-right:6px;">
-      <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
+      <input style="width:95%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" .value=${this.inputBoxValue ? this.inputBoxValue : ""}/>
+    <mx-icon @click=${this.emptyInput} class="fas fa-trash"/>
     </div>
+
+    <div class="gridHeader results" style="font-weight:600">
+    ${this.socketKey} <mx-icon @click=${this.emptyResults} size=".9" class="fas fa-trash"/>
+    </div>
+ 
 
     <div>${this.mslResults}</div>
     `;

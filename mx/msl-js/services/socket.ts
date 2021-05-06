@@ -51,8 +51,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
   socket.onmessage = function (event: Event) {
 
     const receivedMessage: string = event.data;
-    
-    console.log(notifyElement);
 
     //Debug Info
     mx.debug.echo(false);
