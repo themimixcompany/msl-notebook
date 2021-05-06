@@ -17,7 +17,7 @@ export class mxCommunicator extends LitElement {
   //Define public properties (databinding)
   @property() mslResults: any;
   @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
-  @property() inputBoxValue: string;
+
 
   //Private Functions
 
@@ -33,7 +33,6 @@ export class mxCommunicator extends LitElement {
   mslBoxKeyDown(event: Event) {
     const eventTarget = event.target as HTMLInputElement
     const message = eventTarget.value;
-    this.inputBoxValue = message;
     if (event.keyCode == 13) {
       //use mxSend w/ true parm to get message and response in JSON
       mx.socket.list[this.socketKey].mxSend(message, this, true);
@@ -46,13 +45,11 @@ export class mxCommunicator extends LitElement {
     this.mslResults = "";
   }
 
-  //Empty Input Box
-  emptyInput(receivedEvent: Event) {
-    this.inputBoxValue = "";
-  }
-
+ 
   //Show this component on screen
   render() {
+
+    console.log("render");
 
     //Add event listeners for events targeting this component
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
@@ -64,7 +61,7 @@ export class mxCommunicator extends LitElement {
     return html`
 
     <div class="greyBk" style="padding-right:6px;">
-      <input style="width:95%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" .value=${this.inputBoxValue ? this.inputBoxValue : ""}/>
+      <input style="width:95%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" />
     <mx-icon @click=${this.emptyInput} class="fas fa-trash"/>
     </div>
 
