@@ -39,6 +39,11 @@ export class mxCommunicator extends LitElement {
     }
   }
 
+   //Empty Results
+   emptyResults(receivedEvent: Event) {
+    this.mslResults = "";
+  }
+
   //Show this component on screen
   render() {
     //Add event listeners for events targeting this component
@@ -50,7 +55,7 @@ export class mxCommunicator extends LitElement {
 
     return html`
     <div class="gridHeader results" style="font-weight:600">
-    ${this.socketKey}
+    ${this.socketKey} <mx-icon @click=${this.emptyResults} size=".9" class="fas fa-trash"></mx-icon>
     </div>
     <div class="greyBk" style="padding-right:6px;">
       <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>

@@ -28,7 +28,10 @@ export class mxDebug extends LitElement {
     thisComponent.debugResults = html`${thisComponent.debugResults}<div class="results greyBk">${logMessage}</div>`;
   }
 
-
+  //Empty Results
+  emptyResults(receivedEvent: Event) {
+    this.debugResults = "";
+  }
 
   //Show this component on screen
   render() {
@@ -42,7 +45,7 @@ export class mxDebug extends LitElement {
 
     return html`
     <div class="gridHeader results" style="font-weight:600">
-      debugging
+      debugging <mx-icon @click=${this.emptyResults} size=".9" class="fas fa-trash"></mx-icon>
     </div>
 
     <div class="greyBk results">${this.debugResults}</div>
