@@ -56,7 +56,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
     //Debug Info
     mx.debug.echo(false);
-    mx.debug.log(`λ ${notifyElement.localName} ${socket.port.type} ${message} => ${receivedMessage}`);
+    mx.debug.log(`λ ${notifyElement.localName} ${socket.key} ${message} => ${receivedMessage}`);
     
     //Save Received Message in History
     //history[messageNumber][messageReceivePosition] = receivedMessage;
@@ -212,11 +212,12 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
     //Add mxSend function 
     WebSocket.prototype.mxSend = mxSend;
 
-    //Add machine and port
+    //Add machine and port 
     newSocket.machineKey = machineKey;
     newSocket.portKey = portKey;
     newSocket.machine = mx.machine.list[machineKey];
     newSocket.port = mx.machine.ports[portKey];
+    newSocket.key = socketKey;
 
   }
 
