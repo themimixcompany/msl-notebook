@@ -40,8 +40,7 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
 //setupEmptyCallback
 //Used to handle the initial .onmessage that might come from a socket *before* any message is sent.
 const setupEmptyCallback = function (socket: WebSocket, notifyElement:HTMLElement) {
-  //using "" as message reflect that we did not send any message.
-  mx.debug.log("setup empty callback",socket.key);
+  //using "" as message reflects that we did not send any message.
   setupMessageCallback(socket,"",notifyElement,true) 
 }
 
@@ -52,7 +51,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
   socket.onmessage = function (event: Event) {
 
-    console.log(message);
     const receivedMessage: string = event.data;
 
     //Debug Info

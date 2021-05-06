@@ -12,6 +12,7 @@ export class mxCommunicator extends LitElement {
     input, .results { font-family: Inter; font-size: 18pt; }
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
+    a {cursor: pointer; text-decoration:underline}
     `;
 
   //Define public properties (databinding)
@@ -27,17 +28,32 @@ export class mxCommunicator extends LitElement {
     let logMessage: string;
     const { message, response } = latestReceived; // => const message = latestReceived.message, etc.
     logMessage = `${message} => ${response}`;
-    this.mslResults = html`${this.mslResults}<div class="results greyBk">${logMessage}</div>`;
+    this.mslResults = html`
+    ${this.mslResults}
+    <div class="results greyBk">
+    <a @click=${() => this.sendMessage(message)} title="Resend this message.">
+    ${message}
+    </a> => 
+    <a @click=${() => this.sendMessage(response)} title="Resend this response.">
+    ${response}
+    </a>
+    </div>`;
   }
 
   mslBoxKeyDown(event: Event) {
     const eventTarget = event.target as HTMLInputElement
     const message = eventTarget.value;
     if (event.keyCode == 13) {
-      //use mxSend w/ true parm to get message and response in JSON
-      mx.socket.list[this.socketKey].mxSend(message, this, true);
+      //Send message
+      this.sendMessage(message);
       //eventTarget.value = '';
     }
+  }
+
+  //Send Message
+  //use mxSend w/ true parm to get message and response in JSON
+  sendMessage(message:string) {
+    mx.socket.list[this.socketKey].mxSend(message, this, true);
   }
 
    //Empty Results
@@ -48,8 +64,6 @@ export class mxCommunicator extends LitElement {
  
   //Show this component on screen
   render() {
-
-    console.log("render");
 
     //Add event listeners for events targeting this component
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
@@ -65,7 +79,7 @@ export class mxCommunicator extends LitElement {
     </div>
 
     <div class="gridHeader results" style="font-weight:600">
-    ${this.socketKey} <mx-icon @click=${this.emptyResults} size=".9" class="fas fa-trash"/>
+      ${this.socketKey} <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"/>
     </div>
  
 

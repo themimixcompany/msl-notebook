@@ -16,7 +16,7 @@ export class mxConnect extends LitElement {
     p {margin-top: 5px; margin-bottom: 5px;}
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
-    a { text-decoration: underline;}
+    a { text-decoration: underline; cursor: pointer; text-decoration:underline}
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -68,14 +68,14 @@ export class mxConnect extends LitElement {
       return html`
       <div class="machine greyBk">
 
-      <a @click=${() => this.connectAllSockets(machineKey)}>
+      <a @click=${() => this.connectAllSockets(machineKey)} title="Connect to all ports on ${machineKey}.">
       <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey,"msl") ? 'red' : ''}></mx-icon>
       <span style="font-weight:600">${machineKey}</span>
       </a>
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
-      <a @click=${() => this.connectSocket(machineKey,portKey)}>
+      <a @click=${() => this.connectSocket(machineKey,portKey)} title="Connect to this port.">
       <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? 'red' : ''}></mx-icon>
       ${portKey}
       </p>
@@ -110,6 +110,8 @@ export class mxConnect extends LitElement {
     return html`
 
     <p>Click a server or port to connect. Then send a message.</p>
+    <p>Click a message to send it again.</p>
+    <br>
 
     <div class="grid">
       ${this.machineGrid()}

@@ -12,6 +12,7 @@ export class communicatorView extends LitElement {
     css`
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
     input {font-family: Inter, font-size: 24pt}
+
     `];}
 
   //Define public properties (databinding)
@@ -22,7 +23,7 @@ export class communicatorView extends LitElement {
   render() {
 
     return html`
-  
+
     <mx-greeting></mx-greeting>
     <mx-debug></mx-debug>
     <mx-connect></mx-connect>

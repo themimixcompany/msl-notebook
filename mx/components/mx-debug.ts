@@ -45,10 +45,11 @@ export class mxDebug extends LitElement {
 
     return html`
     <div class="gridHeader results" style="font-weight:600">
-      debugging <mx-icon @click=${this.emptyResults} size=".9" class="fas fa-trash"></mx-icon>
+      debugging <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove the debugging results." size=".9" class="fas fa-trash"></mx-icon>
     </div>
 
     <div class="greyBk results">${this.debugResults}</div>
+    <br>
     `;
 
   }

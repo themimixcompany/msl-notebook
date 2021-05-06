@@ -28,10 +28,11 @@ export class mxIcon extends LitElement {
     @property() class: string;
     @property() color: string;
     @property() size: number = 1;
+   
 
     //Show this component on screen
     render() {
-
+        console.log(onclick);
         //Remove "fa-" from class
         this.class = this.class.replace("fa-","");
 
