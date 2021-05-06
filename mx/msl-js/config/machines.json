@@ -17,7 +17,7 @@
     "local": {
         "name": "Local Mimix",
         "ip": "localhost",
-        "ports" : ["mx-world","mx-msl","mx-admin"]
+        "ports" : ["mx-msl","mx-admin"]
       }
   
   }

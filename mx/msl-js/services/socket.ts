@@ -48,7 +48,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
     //Debug Info
     mx.debug.echo(false);
-    mx.debug.log("PMCS",receivedMessage);
+    mx.debug.log("PMCS", socket.port.type, receivedMessage);
 
     //Save Received Message in History
     //history[messageNumber][messageReceivePosition] = receivedMessage;
@@ -75,26 +75,28 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
   };
 
-  //Send message
-  socket.send(message)
+  //Send message if not blank (Blank sets up receiver w/o sending.)
+  if (message != "") {
+    socket.send(message)
+  }
 
 };
 
 //socketMachineKey
 //Gets machineKey from socket
-const socketMachineKey = (socketKey:string) => connections[socketKey].machineKey; 
+const socketMachineKey = (socketKey: string) => connections[socketKey].machineKey;
 
 //socketPortKey
 //Gets portKey from socket
-const socketPortKey = (socketKey:string) => connections[socketKey].portKey;
+const socketPortKey = (socketKey: string) => connections[socketKey].portKey;
 
 //socketMachine
 //Gets machine from socket
-const socketMachine = (socketKey:string) => mx.machine.list[socketMachineKey(socketKey)];
+const socketMachine = (socketKey: string) => mx.machine.list[socketMachineKey(socketKey)];
 
 //socketPort
 //Gets port from socket
-const socketPort = (socketKey:string) => mx.machine.ports[socketPortKey(socketKey)];
+const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketKey)];
 
 
 
@@ -103,75 +105,78 @@ const socketPort = (socketKey:string) => mx.machine.ports[socketPortKey(socketKe
 
 //connect
 //Connect to a WebSocket on a machine.
-const connect = function (machineKey: string, portKey: string, notifyElement: HTMLElement) {
+const connect = function (machineKey: string, portKey, notifyElement: HTMLElement) {
 
-  mx.debug.log("connecting to", machineKey, portKey);
+  let portKeyList = portKey;
 
-  // //Quit if user is already connected to this machine and type
-  // if (USER.sockets[type]) {
-  //   if (USER.sockets[type][machineKey]) {
-  //     mxDebug("mslWebSocket user already connected to", machineKey, type);
-  //     return;
-  //   }
-  // }
 
-   //Create a socket key to track in connections
-   let socketKey = `${machineKey}-${portKey}`;
 
-  //Quit if already connected to this port
-  if (connections[socketKey]) {
-    mx.debug.log("already connected to", socketKey);
-    return connections[socketKey];
+  //Handle single port (vs array) 
+  if (portKey.constructor.name == "String") {
+    portKeyList = [portKey];
   }
 
-  //Find machine & port on master lists
-  let connectMachine = mx.machine.list[machineKey];
-  let connectPort = mx.machine.ports[portKey];
 
-  //Quit if no matching machine
-  if (!connectMachine) {
-    mx.debug.log("connect quit, no machine");
-    return false;
-  }
+  //Open all requested ports
+  for (let portKeyIndex in portKeyList) {
 
-  //Quit if no matching port
-  if (!connectPort) {
-    mx.debug.log("connect quit, no port");
-    return false;
-  }
+    let portKey = portKeyList[portKeyIndex];
 
-  //Quit if the port isn't listed for this machine
-  if (!connectMachine.ports.includes(portKey)) {
-    mx.debug.log("connect quit, no port on this machine");
-    return false;
-  }
 
-  //Handle port section of URL
-  let portString = ""; //assume no portString
-  if (connectPort.port) {
-    portString = ":" + connectPort.port;
-  }
+    mx.debug.log("connecting to", machineKey, portKey);
 
-  //Finalize URL
-  const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
-  mx.debug.log("socket url",socketURL);
+    //Create a socket key to track in connections
+    let socketKey = `${machineKey}-${portKey}`;
 
-  //Create new WebSocket and store in connections.
-  
+    //Quit if already connected to this port
+    if (connections[socketKey]) {
+      mx.debug.log("already connected to", socketKey);
+      return connections[socketKey];
+    }
+
+    //Find machine & port on master lists
+    let connectMachine = mx.machine.list[machineKey];
+    let connectPort = mx.machine.ports[portKey];
+
+    //Quit if no matching machine
+    if (!connectMachine) {
+      mx.debug.log("connect quit, no machine");
+      return false;
+    }
+
+    //Quit if no matching port
+    if (!connectPort) {
+      mx.debug.log("connect quit, no port");
+      return false;
+    }
+
+    //Quit if the port isn't listed for this machine
+    if (!connectMachine.ports.includes(portKey)) {
+      mx.debug.log("connect quit, no port on this machine");
+      return false;
+    }
+
+    //Handle port section of URL
+    let portString = ""; //assume no portString
+    if (connectPort.port) {
+      portString = ":" + connectPort.port;
+    }
+
+    //Finalize URL
+    const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
+    mx.debug.log("socket url", socketURL);
+
+    //Create new WebSocket and store in connections.
+
     mx.debug.log("opening socket", socketKey);
 
     //Create new socket
-    let newSocket = new WebSocket(socketURL);
+    const newSocket = new WebSocket(socketURL);
 
     //Setup open callback
     newSocket.onopen = function () {
       mx.debug.log("connected", socketKey);
       connections[socketKey] = newSocket;
-
-      //Add getMachine and getPort functions
-      //WebSocket.prototype.getMachine = socketMachine(socketKey);
-      WebSocket.prototype.port = socketPort(socketKey);
-      WebSocket.prototype.machine = socketPort(socketKey);
 
       //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
@@ -184,35 +189,49 @@ const connect = function (machineKey: string, portKey: string, notifyElement: HT
 
       //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
+      
     }
+
+    //Setup initial message callback by calling send w/o a message
+    sendSingleMessage(newSocket,"",notifyElement,false);
 
     //Add mxSend function 
-    WebSocket.prototype.mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false) {
-      sendSingleMessage(this, message, componentToNotify, echo);
-    }
+    WebSocket.prototype.mxSend = mxSend;
 
-    //Add machineKey and portKey
-    WebSocket.prototype.machineKey = machineKey;
-    WebSocket.prototype.portKey = portKey;
+    //Add machine and port
+   newSocket.machineKey = machineKey;
+   newSocket.portKey = portKey;
+   newSocket.machine = mx.machine.list[machineKey];
+   newSocket.port = mx.machine.ports[portKey];
 
-  //Return live socket.
-  return connections[socketKey];
+  }
+
+
+  //Return 
+  return true;
 
 }
 
+
+const mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false) {
+  sendSingleMessage(this, message, componentToNotify, echo);
+}
 
 const socketKeys = function (): string[] {
   return Object.keys(connections);
 };
 
 
+const connectAll = function (machineKey, notifyElement) {
+  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement);
+}
+
 
 //Service Definition
 
 export const socket = {
   connect: connect,
+  connectAll: connectAll,
   list: connections,
-  keys: socketKeys(),
-  machine: socketMachine,
-  port: socketPort
+  keys: socketKeys()
 };

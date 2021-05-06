@@ -38,10 +38,15 @@ export class mxConnect extends LitElement {
   @property() connections: string[] = [];
 
 
-  //Connect link clicked
-  addConnection(machineKey: string, portKey: string) {
+  //Socket connect link clicked
+  connectSocket(machineKey: string, portKey: string) {
     mx.socket.connect(machineKey, portKey, this);
     ;
+  }
+
+  //Server connect link clicked
+  connectAllSockets(machineKey: string) {
+    mx.socket.connectAll(machineKey, this);
   }
 
   //Update connections when changed by socket service
@@ -62,13 +67,15 @@ export class mxConnect extends LitElement {
 
       return html`
       <div class="machine greyBk">
+
+      <a @click=${() => this.connectAllSockets(machineKey)}>
       <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey,"msl") ? 'red' : ''}></mx-icon>
       <span style="font-weight:600">${machineKey}</span>
-      <i class="fas fa-flag" style="font-size:24pt"></i>
+      </a>
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
-      <a @click=${() => this.addConnection(machineKey, portKey)}>
+      <a @click=${() => this.connectSocket(machineKey,portKey)}>
       <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? 'red' : ''}></mx-icon>
       ${portKey}
       </p>
@@ -102,7 +109,7 @@ export class mxConnect extends LitElement {
 
     return html`
 
-    <p>Click a port to connect. Then send a message.</p>
+    <p>Click a server or port to connect. Then send a message.</p>
 
     <div class="grid">
       ${this.machineGrid()}
