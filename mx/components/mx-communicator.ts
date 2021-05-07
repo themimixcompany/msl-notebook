@@ -51,39 +51,64 @@ export class mxCommunicator extends LitElement {
   }
 
   //Send Message
-  //use mxSend w/ true parm to get message and response in JSON
+  //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message:string) {
     mx.socket.list[this.socketKey].mxSend(message, this, true);
   }
 
-   //Empty Results
+   //Empty The Results <div>
    emptyResults(receivedEvent: Event) {
     this.mslResults = "";
   }
 
+
+  
  
   //Show this component on screen
   render() {
 
+    //BEFORE TEMPLATE
+
     //Add event listeners for events targeting this component
     this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
+    //Get a reference to the socket for this communicator
     let socket = mx.socket.list[this.socketKey];
-    
+
+    //Initalize this socket w/ a listener (without sending a message)
     mx.socket.init(socket, this);
 
-    return html`
-
+    //HTML TEMPLATE PARTS
+    
+    //Input Box
+    let inputPart = html`
     <div class="greyBk" style="padding-right:6px;">
       <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" />
-    </div>
+    </div>`
 
+    //Results Header
+    let headerPart = html`
     <div class="gridHeader results" style="font-weight:600">
       ${this.socketKey} <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"/>
     </div>
- 
+    `
 
-    <div>${this.mslResults}</div>
+    //Results Div
+    let resultsPart = html`
+    <div>
+      ${this.mslResults}
+    </div>
+    `
+
+    //RENDER TEMPLATE
+
+    return html`
+    ${inputPart}
+    ${headerPart}
+    ${resultsPart}
+
+
+    
     `;
   }
 }

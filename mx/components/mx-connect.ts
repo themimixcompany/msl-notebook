@@ -104,6 +104,8 @@ export class mxConnect extends LitElement {
   //Show this component on screen
   render() {
 
+    //BEFORE TEMPLATE
+    
     //Add event listeners for events targeting this component
     this.addEventListener("status-changed", this.statusChanged);
 

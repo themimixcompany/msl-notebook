@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 
 //Setup for closure over this component. Used in callback from document element.
-let thisComponent:mxDebug;
+let thisComponent: mxDebug;
 
 @customElement('mx-debug')
 export class mxDebug extends LitElement {
@@ -23,7 +23,7 @@ export class mxDebug extends LitElement {
 
   //Update history when messages received
   messageReceived(receivedEvent: Event) {
-    let message:string[] = receivedEvent.payload;
+    let message: string[] = receivedEvent.payload;
     let logMessage = message.map((messageArgument) => `${messageArgument} `);
     thisComponent.debugResults = html`${thisComponent.debugResults}<div class="results greyBk">${logMessage}</div>`;
   }
@@ -36,20 +36,35 @@ export class mxDebug extends LitElement {
   //Show this component on screen
   render() {
 
+    //BEFORE RENDER
+
     //Assign closure value during the instance's constructor
-    thisComponent = this;
+    thisComponent = this; //inside a Lit component, this means "this component"
 
     //Add event listener for document element
+    //not all services are passed a notifyElement, so debug uses document
     document.addEventListener("debug", this.messageReceived); //listen for "debug" and call this.messageReceived w/ the triggering event.
 
+    //TEMPLATE PARTS
 
-    return html`
+    //Debugging Header
+    let headerPart = html`
     <div class="gridHeader results" style="font-weight:600">
       debugging <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove the debugging results." size=".9" class="fas fa-trash"></mx-icon>
     </div>
+  `
 
+    //Debug Results
+    let resultsPart = html`
     <div class="greyBk results">${this.debugResults}</div>
-    <br>
+      <br>
+    `
+
+    //RENDER FINISHED TEMPLATE
+
+    return html`
+    ${headerPart}
+    ${resultsPart}
     `;
 
   }
