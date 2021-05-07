@@ -68,6 +68,7 @@ export class mxCommunicator extends LitElement {
       this.isHidden = !this.isHidden
     }
  
+   
   //Show this component on screen
   render() {
 

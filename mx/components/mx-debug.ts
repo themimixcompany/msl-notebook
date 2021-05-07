@@ -14,6 +14,9 @@ export class mxDebug extends LitElement {
     input, .results { font-family: Inter; font-size: 18pt; }
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
+    .blue {
+      color: navy;
+  }
     `;
 
   //Define public properties (databinding)
@@ -57,7 +60,7 @@ export class mxDebug extends LitElement {
     let headerPart = html`
     <div class="gridHeader results" style="font-weight:600">
       debugging 
-      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove the debugging results." size=".9" class="fas fa-trash"></mx-icon>
+      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove the debugging results." size=".9" class="fas fa-trash blue"></mx-icon>
       <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the debug results." size=".9" class="fas fa-eye"></mx-icon>
     </div>
   `
