@@ -28,6 +28,7 @@ export class mxIcon extends LitElement {
     @property() class: string;
     @property() color: string;
     @property() size: number = 1;
+    @property() viewBox: string;
    
 
     //Show this component on screen
@@ -46,8 +47,18 @@ export class mxIcon extends LitElement {
         //Destructure array to find SVG info
         let [width, height, , , dValue] = matchingIcon;
 
-        //Setup for SVG
-        return svg`<svg viewbox="0 0 512 512" class="icon" style="height:${this.size}em;width:${this.size}em"><path style="fill:${this.color}" d=${dValue}></svg>`;
+        //Build viewBox with width and height
+        let viewBox = `0 0 ${width} ${height}`
+
+        //Create SVG
+        let svgPart = svg`
+        <svg viewBox=${viewBox} class="icon" style="height:${this.size}em;width:${this.size}em"><path style="fill:${this.color}" d=${dValue}></svg>
+        `
+
+        //Return SVG
+        return html`
+        ${svgPart}
+        `
 
     }
 
