@@ -32,7 +32,7 @@ export class mxIcon extends LitElement {
 
     //Show this component on screen
     render() {
-        console.log(onclick);
+        //console.log(onclick);
         //Remove "fa-" from class
         this.class = this.class.replace("fa-","");
 
