@@ -18,6 +18,7 @@ export class mxCommunicator extends LitElement {
   //Define public properties (databinding)
   @property() mslResults: any;
   @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
+  @property() isHidden: boolean = false;
 
 
   //Private Functions
@@ -62,7 +63,10 @@ export class mxCommunicator extends LitElement {
   }
 
 
-  
+    //Show or Hide Results
+    showOrHideResults() {
+      this.isHidden = !this.isHidden
+    }
  
   //Show this component on screen
   render() {
@@ -83,13 +87,15 @@ export class mxCommunicator extends LitElement {
     //Input Box
     let inputPart = html`
     <div class="greyBk" style="padding-right:6px;">
-      <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}" />
+      <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
     </div>`
 
     //Results Header
     let headerPart = html`
     <div class="gridHeader results" style="font-weight:600">
-      ${this.socketKey} <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"/>
+      ${this.socketKey}
+      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
+      <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
     </div>
     `
 
@@ -105,7 +111,7 @@ export class mxCommunicator extends LitElement {
     return html`
     ${inputPart}
     ${headerPart}
-    ${resultsPart}
+    ${this.isHidden ? "" : resultsPart}
 
 
     

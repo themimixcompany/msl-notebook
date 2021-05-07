@@ -18,6 +18,7 @@ export class mxDebug extends LitElement {
 
   //Define public properties (databinding)
   @property() debugResults: any;
+  @property() isHidden: boolean = false;
 
   //Private Functions
 
@@ -31,6 +32,11 @@ export class mxDebug extends LitElement {
   //Empty Results
   emptyResults(receivedEvent: Event) {
     this.debugResults = "";
+  }
+
+  //Show or Hide Results
+  showOrHideResults() {
+    this.isHidden = !this.isHidden
   }
 
   //Show this component on screen
@@ -50,7 +56,9 @@ export class mxDebug extends LitElement {
     //Debugging Header
     let headerPart = html`
     <div class="gridHeader results" style="font-weight:600">
-      debugging <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove the debugging results." size=".9" class="fas fa-trash"></mx-icon>
+      debugging 
+      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove the debugging results." size=".9" class="fas fa-trash"></mx-icon>
+      <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the debug results." size=".9" class="fas fa-eye"></mx-icon>
     </div>
   `
 
@@ -64,7 +72,7 @@ export class mxDebug extends LitElement {
 
     return html`
     ${headerPart}
-    ${resultsPart}
+    ${this.isHidden ? "" : resultsPart}
     `;
 
   }
