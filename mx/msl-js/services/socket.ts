@@ -39,9 +39,9 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
 
 //setupEmptyCallback
 //Used to handle the initial .onmessage that might come from a socket *before* any message is sent.
-const setupEmptyCallback = function (socket: WebSocket, notifyElement:HTMLElement) {
+const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement) {
   //using "" as message reflects that we did not send any message.
-  setupMessageCallback(socket,"",notifyElement,true) 
+  setupMessageCallback(socket, "", notifyElement, true)
 }
 
 //setupMessageCallback
@@ -56,7 +56,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     //Debug Info
     mx.debug.echo(false);
     mx.debug.log(`λ ${notifyElement.localName} ${socket.key} ${message} => ${receivedMessage}`);
-    
+
     //Save Received Message in History
     //history[messageNumber][messageReceivePosition] = receivedMessage;
 
@@ -135,19 +135,13 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
   //Open all requested ports
   for (let portKeyIndex in portKeyList) {
 
+    //portKey of one port to connect to
     let portKey = portKeyList[portKeyIndex];
-
 
     mx.debug.log("connecting to", machineKey, portKey);
 
     //Create a socket key to track in connections
     let socketKey = `${machineKey}-${portKey}`;
-
-    //Quit if already connected to this port
-    if (connections[socketKey]) {
-      mx.debug.log("already connected to", socketKey);
-      return connections[socketKey];
-    }
 
     //Find machine & port on master lists
     let connectMachine = mx.machine.list[machineKey];
@@ -181,24 +175,32 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
     const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
     mx.debug.log("socket url", socketURL);
 
-    //Create new WebSocket and store in connections.
 
-    mx.debug.log("opening socket", socketKey);
+    //Create new socket or access existing one
+    let socket: WebSocket = connections[socketKey];
 
-    //Create new socket
-    const newSocket = new WebSocket(socketURL);
+    //Connect or grab existing connection
+    if (socket) {
+      mx.debug.log("already connected to", socketKey)
+    }
+    else {
+      mx.debug.log("opening socket", socketKey);
+      //Create new socket
+      socket = new WebSocket(socketURL);
+    };
+
 
     //Setup open callback
-    newSocket.onopen = function () {
+    socket.onopen = function () {
       mx.debug.log("connected", socketKey);
-      connections[socketKey] = newSocket;
+      connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
     };
 
     //Setup close callback
-    newSocket.onclose = function () {
+    socket.onclose = function () {
       mx.debug.log("closed", socketKey);
       delete connections[socketKey];
 
@@ -212,11 +214,11 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
     WebSocket.prototype.mxSend = mxSend;
 
     //Add machine and port 
-    newSocket.machineKey = machineKey;
-    newSocket.portKey = portKey;
-    newSocket.machine = mx.machine.list[machineKey];
-    newSocket.port = mx.machine.ports[portKey];
-    newSocket.key = socketKey;
+    socket.machineKey = machineKey;
+    socket.portKey = portKey;
+    socket.machine = mx.machine.list[machineKey];
+    socket.port = mx.machine.ports[portKey];
+    socket.key = socketKey;
 
   }
 
