@@ -73,7 +73,8 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     if (echo) {
       notifyMessage = {
         "message": message,
-        "response": receivedMessage
+        "response": receivedMessage,
+        "socket": socket
       }
     }
 
@@ -89,6 +90,23 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
   //Setup message received callback
   setupMessageCallback(socket, message, notifyElement, echo);
+
+  //For MSL wires, also listen on admin.
+  if (socket.port.type.toLowerCase() == "msl") {
+
+    //Get this socket's machineKey
+    let machineKey = socket.machineKey;
+
+    // Find admin port on this machine
+    let adminPort = mx.machine.findInMachine(machineKey,"admin");
+
+    // Find admin socket in active connections
+    let adminSocketKey = `${machineKey}-${adminPort}`;
+    let adminSocket = connections[adminSocketKey];
+
+     //Setup message received callback on admin port
+    setupMessageCallback(adminSocket, message, notifyElement, echo);
+  }
 
   //Send message if not blank (Blank sets up receiver w/o sending.)
   if (message != "") {

@@ -27,13 +27,12 @@ export class mxCommunicator extends LitElement {
   messageReceived(receivedEvent: Event) {
     let latestReceived = receivedEvent.payload;
     let logMessage: string;
-    const { message, response } = latestReceived; // => const message = latestReceived.message, etc.
-    logMessage = `${message} => ${response}`;
+    const { message, response, socket } = latestReceived; // => const message = latestReceived.message, etc.
     this.mslResults = html`
     ${this.mslResults}
     <div class="results greyBk">
     <a @click=${() => this.sendMessage(message)} title="Resend this message.">
-    ${message}
+    ${message} [${socket.key}]
     </a> => 
     <a @click=${() => this.sendMessage(response)} title="Resend this response.">
     ${response}

@@ -15,6 +15,23 @@ import ports from "msl-js/config/ports.json";
 
 //PRIVATE FUNCTIONS
 
+//findTypeInMachine
+const findTypeInMachine = function(machineKey:string,portType:string) {
+
+  let machinePorts = machines[machineKey].ports
+
+  //Test each port to see if it is of portType
+  for (let onePortIndex in machinePorts) {
+    let portKey = machinePorts[onePortIndex];
+    if (isPortType(portKey,portType)){
+      return portKey;
+    }
+  }
+
+  //No matches.
+  return false;
+}
+
 //isPortType
 //Test if a port is of a matching type
 const isPortType = function(portKey:string,portType:string) {
@@ -113,6 +130,7 @@ export const machine = {
   ports: allPorts(),
   keys: Object.keys(machines),
   find: findByType,
+  findInMachine: findTypeInMachine,
   set: setValue,
   hasType: hasType
 };
