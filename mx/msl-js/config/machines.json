@@ -18,6 +18,11 @@
         "name": "Local Mimix",
         "ip": "localhost",
         "ports" : ["mx-msl","mx-admin"]
-      }
+      },
+    "engine": {
+        "name": "DO Engine",
+        "ip": "engine.mcenter.io",
+        "ports": ["mx-msl","mx-admin"]
+    }
   
   }
