@@ -46,8 +46,7 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean) {
-
+const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket) {
 
   socket.onmessage = function (event: Event) {
 
@@ -74,12 +73,27 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
       notifyMessage = {
         "message": message,
         "response": receivedMessage,
-        "socket": socket
+        "socket": socket,
+        "sender": sendingSocket
       }
     }
 
     //Notify the sender of the received message.
     notify(notifyElement, "message-received", notifyMessage);
+
+    //If this listener received a message on a different wire than sent, re-attach original listener
+    
+    //Get names of the sockets
+    let listeningKey = socket.key;
+    let originalKey = sendingSocket.key;
+
+    //Test if they are different
+    if (listeningKey != originalKey) {
+
+      //Re-attach original listener
+      setupEmptyCallback(socket,socket.creator);
+
+    }
 
   };
 }
@@ -105,7 +119,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     let adminSocket = connections[adminSocketKey];
 
      //Setup message received callback on admin port
-    setupMessageCallback(adminSocket, message, notifyElement, echo);
+    setupMessageCallback(adminSocket, message, notifyElement, echo, socket);
   }
 
   //Send message if not blank (Blank sets up receiver w/o sending.)
@@ -261,12 +275,19 @@ const connectAll = function (machineKey, notifyElement) {
 }
 
 
+const initSocket = function (socket: WebSocket, notifyElement: HTMLElement) {
+
+  //Remember socket creator
+  socket.creator = notifyElement;
+  setupEmptyCallback(socket, notifyElement);
+}
+
 //Service Definition
 
 export const socket = {
   connect: connect,
   connectAll: connectAll,
-  init: setupEmptyCallback,
+  init: initSocket,
   list: connections,
   keys: socketKeys()
 };
