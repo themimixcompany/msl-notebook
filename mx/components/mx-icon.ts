@@ -34,8 +34,6 @@ export class mxIcon extends LitElement {
     //Show this component on screen
     render() {
 
-        console.log(this);
-
         //Setup for finding font in class
         let classAttribute = this.className
         

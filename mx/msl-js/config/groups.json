@@ -1,0 +1,7 @@
+{
+    "relay-engine": {
+        "name": "Local to Remote relay",
+        "relay": true,
+        "machines": ["local","engine"]
+      }
+  }

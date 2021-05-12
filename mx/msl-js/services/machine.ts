@@ -5,6 +5,10 @@
 
 //SERVICE CONSTANTS
 
+//groups
+//Groups of Machines
+import groups from "msl-js/config/groups.json";
+
 //machines
 //Available Machines
 import machines from "msl-js/config/machines.json";
@@ -86,6 +90,13 @@ const findByType = function(portType:string): string[] {
   return matchingList;
 }
 
+//allGroups
+//Return a copy of all machine groups
+const allGroups = function():{} {
+  let {...copy} = groups; //copy by destructuring
+  return copy;
+}
+
 //allMachines
 //Return a copy of all machines
 const allMachines = function():{} {
@@ -126,9 +137,11 @@ const hasType = function(machineKey:string,socketType:string) {
 
 //Service Definition
 export const machine = {
+  groups: allGroups(),
   list: allMachines(),
   ports: allPorts(),
   keys: Object.keys(machines),
+  groupKeys: Object.keys(groups),
   find: findByType,
   findInMachine: findTypeInMachine,
   set: setValue,

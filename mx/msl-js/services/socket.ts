@@ -87,7 +87,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
-    
+
     //Get names of the sockets
     let listeningKey = socket.key;
     let originalKey = sendingSocket.key;
@@ -96,7 +96,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     if (listeningKey != originalKey) {
 
       //Re-attach original listener
-      setupEmptyCallback(socket,socket.creator);
+      setupEmptyCallback(socket, socket.creator);
 
     }
 
@@ -117,13 +117,13 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     let machineKey = socket.machineKey;
 
     // Find admin port on this machine
-    let adminPort = mx.machine.findInMachine(machineKey,"admin");
+    let adminPort = mx.machine.findInMachine(machineKey, "admin");
 
     // Find admin socket in active connections
     let adminSocketKey = `${machineKey}-${adminPort}`;
     let adminSocket = connections[adminSocketKey];
 
-     //Setup message received callback on admin port
+    //Setup message received callback on admin port
     setupMessageCallback(adminSocket, message, notifyElement, echo, socket);
   }
 
@@ -157,11 +157,9 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 
 //connect
 //Connect to a WebSocket on a machine.
-const connect = function (machineKey: string, portKey, notifyElement: HTMLElement) {
+const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupKey?) {
 
   let portKeyList = portKey;
-
-
 
   //Handle single port (vs array) 
   if (portKey.constructor.name == "String") {
@@ -229,12 +227,50 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
 
     //Setup open callback
     socket.onopen = function () {
+
+      //Store socket in active connections
       mx.debug.log("connected", socketKey);
       connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
-    };
+
+      //Setup for relay groups
+      if (groupKey && socket.port.type == "msl") {
+
+        //Test for all MSL sockets in group open
+
+        //Assume all open
+        let isAllOpen = true;
+
+        //Look at each machine in the group
+        let groupMachines = mx.machine.groups[groupKey].machines
+        for (let machineKeyIndex in groupMachines) {
+
+          //Remember machine key
+          let machineKey = groupMachines[machineKeyIndex];
+
+          //Find MSL port on machine
+          let portKey = mx.machine.findInMachine(machineKey, "msl");
+
+          //Construct socket key
+          let testSocketKey = `${machineKey}-${portKey}`
+
+          //Look for socket in active connections
+          let testSocket = connections[testSocketKey];
+
+          //Set isAllOpen false if not open
+          if (!testSocket) {
+            isAllOpen = false;
+          }
+
+        }
+
+      //If all open, notify component
+      if (isAllOpen) {
+        notify(notifyElement, "all open", groupKey);
+      }
+    }};
 
     //Setup close callback
     socket.onclose = function () {
@@ -260,6 +296,7 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
     //Turn off relay by default
     socket.relay = "";
 
+
   }
 
 
@@ -278,8 +315,8 @@ const socketKeys = function (): string[] {
 };
 
 
-const connectAll = function (machineKey, notifyElement) {
-  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement);
+const connectAll = function (machineKey, notifyElement, groupKey) {
+  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement, groupKey);
 }
 
 

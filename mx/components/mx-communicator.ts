@@ -82,16 +82,6 @@ export class mxCommunicator extends LitElement {
     //Initalize this socket w/ a listener (without sending a message)
     mx.socket.init(socket, this);
 
-    //Force relay for local MSL
-    if (this.socketKey == "local-mx-msl") {
-      socket.relay = "engine-mx-msl";
-    }
-
-    //Force relay for remote MSL engine
-    if (this.socketKey == "engine-mx-msl") {
-      socket.relay = "local-mx-msl";
-    }
-
     //HTML TEMPLATE PARTS
     
     //Input Box
