@@ -46,7 +46,7 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket) {
+const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false") {
 
   socket.onmessage = function (event: Event) {
 
@@ -81,6 +81,11 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     //Notify the sender of the received message.
     notify(notifyElement, "message-received", notifyMessage);
 
+    //Relay if relay is set, not looping back to original machine, and active in connections
+    if (socket.relay && (relay != socket.relay) && connections[socket.relay]) {
+      sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key)
+    }
+
     //If this listener received a message on a different wire than sent, re-attach original listener
     
     //Get names of the sockets
@@ -100,10 +105,10 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
 //sendSingleMessage (exposed through .mxSend on the socket)
 //Send a single message over a websocket w/ a per-message callback
-const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean) {
+const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string = "false") {
 
   //Setup message received callback
-  setupMessageCallback(socket, message, notifyElement, echo);
+  setupMessageCallback(socket, message, notifyElement, echo, socket, relay);
 
   //For MSL wires, also listen on admin.
   if (socket.port.type.toLowerCase() == "msl") {
@@ -251,6 +256,9 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
     socket.machine = mx.machine.list[machineKey];
     socket.port = mx.machine.ports[portKey];
     socket.key = socketKey;
+
+    //Turn off relay by default
+    socket.relay = "";
 
   }
 
