@@ -21,7 +21,7 @@ export class mxDebug extends LitElement {
 
   //Define public properties (databinding)
   @property() debugResults: any;
-  @property() isHidden: boolean = false;
+  @property() isHidden: boolean = true;
 
   //Private Functions
 

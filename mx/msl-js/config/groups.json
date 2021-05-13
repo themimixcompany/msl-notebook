@@ -1,11 +1,20 @@
 {
     "msl-relay": {
-        "name": "Local to Remote MSL relay",
-        "relay": "msl",
+        "name": "Relay group based on type",
+        "relay": true,
+        "type": "msl",
         "machines": ["local","engine"]
       },
+    "port-relay": {
+        "name": "Relay specific ports only",
+        "relay": true,
+        "machines": ["local","echo"],
+        "ports": [
+          ["local-mx-admin","echo-wss-text"]
+        ]
+    },
     "no-relay": {
-        "name": "Local and remote, no relay",
+        "name": "Group open without relay",
         "relay": false,
         "machines": ["local","engine"]
       }

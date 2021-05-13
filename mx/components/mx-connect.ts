@@ -53,8 +53,8 @@ export class mxConnect extends LitElement {
   }
 
   //Server connect link clicked
-  connectAllSockets(machineKey: string, groupKey?) {
-    mx.socket.connectAll(machineKey, this, groupKey);
+  connectAllSockets(machineKey: string, groupKey?, groupPorts?) {
+    mx.socket.connectAll(machineKey, this, groupKey, groupPorts);
   }
 
   //Group connect link clicked
@@ -63,27 +63,16 @@ export class mxConnect extends LitElement {
     //Find all machines in this group
     let group = machine.groups[groupKey];
     let groupMachines: string[] = group.machines;
+    let groupPorts = group.ports;
+    let groupType = group.type;
 
-    //Connect to all sockets on each of them
-    for (let machineIndex in groupMachines) {
-      let machineKey = groupMachines[machineIndex]
-      this.connectAllSockets(machineKey, groupKey);
-    }
+  //Setup for relay groups
 
-  }
+    //Convert group-type into port list. If present, port list takes precedence.
+    if (!groupPorts) {
 
-
-  groupOpened(event: Event) {
-
-    //Handle relays
-
-    //Set all MSL sockets in this group to relay to every other MSL socket in this group
-    let groupKey = event.payload;
-    let group = mx.machine.groups[groupKey];
-    let groupMachines = group.machines;
-
-    //Attach relays if turned on for this group
-    if (group.relay) {
+      //Create a list of ports to relay
+      groupPorts = [];
 
       //Look through all machines in this group
       for (let machineIndex in groupMachines) {
@@ -100,7 +89,7 @@ export class mxConnect extends LitElement {
           let port = mx.machine.ports[portKey];
 
           //If relay type, add relays to this port type on all other machines in the group
-          if (port.type == group.relay) {
+          if (port.type == groupType) {
 
             //Look through all machines in this group
             for (let relayMachineIndex in groupMachines) {
@@ -112,41 +101,85 @@ export class mxConnect extends LitElement {
               if (relayMachineKey != machineKey) {
 
                 //Find the same port type on the relay machine
-                let relayPortKey = mx.machine.findInMachine(relayMachineKey, group.relay);
+                let relayPortKey = mx.machine.findInMachine(relayMachineKey, groupType);
 
                 //Construct socket keys
                 let socketKey = `${machineKey}-${portKey}`
                 let relaySocketKey = `${relayMachineKey}-${relayPortKey}`
 
-                //Get socket
-                let socket = mx.socket.list[socketKey];
-
-
-                //Add relay
-                socket.relay = relaySocketKey;
+                //Add relay pair to list
+                let relayPair = [socketKey, relaySocketKey];
+                groupPorts.push(relayPair);
 
               }
-
             }
-
           }
         }
       }
+    }
 
+    //Connect to all sockets on each of them
+    for (let machineIndex in groupMachines) {
+      let machineKey = groupMachines[machineIndex]
+      this.connectAllSockets(machineKey, groupKey, groupPorts);
     }
 
   }
 
 
+  groupOpened(event: Event) {
 
-  //Create HTML Templates
+    //Handle relays
 
-  machineGrid() {
-    return html`
+    //Set all relay-type sockets in this group to relay to every other relay-type socket in this group
+    let groupKey = event.payload;
+    let group = mx.machine.groups[groupKey];
+    let groupMachines = group.machines;
+    let isRelay = group.relay;
+    let groupType = group.type;
+    let groupPorts = group.ports;
+
+    //Quit if no relays to handle
+    if (!isRelay) {
+      return false;
+    }
+
+    
+
+
+
+    //Attach relays to ports
+
+    //Go through all relay pairs
+    for (let relayPairIndex in groupPorts) {
+
+      //Remember the pair
+      let relayPair = groupPorts[relayPairIndex]
+
+      //Extract the "from" and "to" sockets
+      let [socketKey, relaySocketKey] = relayPair;
+
+      //Get socket
+      let socket = mx.socket.list[socketKey];
+
+      //Add relay
+      socket.relay = relaySocketKey;
+
+    }
+}
+
+
+
+
+
+//Create HTML Templates
+
+machineGrid() {
+  return html`
     ${mx.machine.keys.map(machineKey => {
 
 
-      return html`
+    return html`
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllSockets(machineKey)} title="Connect to all ports on ${machineKey}.">
@@ -165,10 +198,10 @@ export class mxConnect extends LitElement {
     </div>
     `})}
     `
-  }
+}
 
-  communicators() {
-    return html`
+communicators() {
+  return html`
     <i class="fas fa-server"></i>
 
     ${this.connections.map(socketKey => html`
@@ -177,15 +210,15 @@ export class mxConnect extends LitElement {
       </div>
     `)}
     `
-  }
+}
 
-  groups() {
+groups() {
 
-    return html`
+  return html`
     ${mx.machine.groupKeys.map(groupKey => {
 
 
-      return html`
+    return html`
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllMachines(groupKey)} title="Connect to all machines in ${groupKey}.">
@@ -203,21 +236,21 @@ export class mxConnect extends LitElement {
     </div>
     `})}
     `
-  }
+}
 
 
 
 
-  //Show this component on screen
-  render() {
+//Show this component on screen
+render() {
 
-    //BEFORE TEMPLATE
+  //BEFORE TEMPLATE
 
-    //Add event listeners for events targeting this component
-    this.addEventListener("status-changed", this.statusChanged);
-    this.addEventListener("all open", this.groupOpened);
+  //Add event listeners for events targeting this component
+  this.addEventListener("status-changed", this.statusChanged);
+  this.addEventListener("all open", this.groupOpened);
 
-    return html`
+  return html`
 
     <p>Click a server or port to connect. Then send a message.</p>
     <p>Click a message to send it again.</p>
@@ -232,6 +265,6 @@ export class mxConnect extends LitElement {
     <br>
   `;
 
-  }
+}
 
 }

@@ -38,7 +38,7 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
 };
 
 //setupEmptyCallback
-//Used to handle the initial .onmessage that might come from a socket *before* any message is sent.
+//Used to handle the .onmessage that might come from a socket *before* any message is sent.
 const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement) {
   //using "" as message reflects that we did not send any message.
   setupMessageCallback(socket, "", notifyElement, true)
@@ -159,7 +159,7 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 
 //connect
 //Connect to a WebSocket on a machine.
-const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupKey?) {
+const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupKey?, groupPorts?) {
 
   let portKeyList = portKey;
 
@@ -238,28 +238,29 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       notify(notifyElement, "status-changed", connections);
 
       //Setup for relay groups
-      if (groupKey && socket.port.type == "msl") {
+      let group = mx.machine.groups[groupKey];
+      let groupType = group.type;
+      let groupPorts = group.ports;
 
-        //Test for all MSL sockets in group open
+      //If this socket was opened as part of a group
+      if (groupKey) {
+
+        //Test for sockets in group open
 
         //Assume all open
         let isAllOpen = true;
 
-        //Look at each machine in the group
-        let groupMachines = mx.machine.groups[groupKey].machines
-        for (let machineKeyIndex in groupMachines) {
+        //Look at each pair in the relay group
+        for (let relayPairIndex in groupPorts) {
 
-          //Remember machine key
-          let machineKey = groupMachines[machineKeyIndex];
+          //Remember the pair
+          let relayPair = groupPorts[relayPairIndex];
 
-          //Find MSL port on machine
-          let portKey = mx.machine.findInMachine(machineKey, "msl");
-
-          //Construct socket key
-          let testSocketKey = `${machineKey}-${portKey}`
+          //Extract the relaySocketKey
+          let [,relaySocketKey] = relayPair;
 
           //Look for socket in active connections
-          let testSocket = connections[testSocketKey];
+          let testSocket = connections[relaySocketKey];
 
           //Set isAllOpen false if not open
           if (!testSocket) {
@@ -317,8 +318,8 @@ const socketKeys = function (): string[] {
 };
 
 
-const connectAll = function (machineKey, notifyElement, groupKey) {
-  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement, groupKey);
+const connectAll = function (machineKey, notifyElement, groupKey, groupPorts) {
+  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement, groupKey, groupPorts);
 }
 
 
