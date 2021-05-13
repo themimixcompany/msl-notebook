@@ -99,8 +99,8 @@ export class mxConnect extends LitElement {
           let portKey = machine.ports[portIndex];
           let port = mx.machine.ports[portKey];
 
-          //If MSL type, add relays to MSL port on all other machines in the group
-          if (port.type == "msl") {
+          //If relay type, add relays to this port type on all other machines in the group
+          if (port.type == group.relay) {
 
             //Look through all machines in this group
             for (let relayMachineIndex in groupMachines) {
@@ -111,8 +111,8 @@ export class mxConnect extends LitElement {
               //Add relay if not the same machine
               if (relayMachineKey != machineKey) {
 
-                //Find the MSL port on the relay machine
-                let relayPortKey = mx.machine.findInMachine(relayMachineKey, "msl");
+                //Find the same port type on the relay machine
+                let relayPortKey = mx.machine.findInMachine(relayMachineKey, group.relay);
 
                 //Construct socket keys
                 let socketKey = `${machineKey}-${portKey}`

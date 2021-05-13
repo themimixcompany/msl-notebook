@@ -1,7 +1,7 @@
 {
-    "relay-engine": {
-        "name": "Local to Remote relay",
-        "relay": true,
+    "msl-relay": {
+        "name": "Local to Remote MSL relay",
+        "relay": "msl",
         "machines": ["local","engine"]
       },
     "no-relay": {
