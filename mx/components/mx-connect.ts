@@ -147,14 +147,14 @@ export class mxConnect extends LitElement {
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllSockets(machineKey)} title="Connect to all ports on ${machineKey}.">
-      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? 'red' : ''}></mx-icon>
+      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? 'navy' : ''}></mx-icon>
       <span style="font-weight:600">${machineKey}</span>
       </a>
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
       <a @click=${() => this.connectSocket(machineKey, portKey)} title="Connect to this port.">
-      <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? 'red' : ''}></mx-icon>
+      <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? 'navy' : mx.machine.ports[portKey].type == 'admin' ? 'purple' : ''}></mx-icon>
       ${portKey}
       </p>
       `)}
@@ -177,6 +177,7 @@ export class mxConnect extends LitElement {
   }
 
   groups() {
+
     return html`
     ${mx.machine.groupKeys.map(groupKey => {
 
@@ -191,7 +192,7 @@ export class mxConnect extends LitElement {
   
       ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
       <p>
-      <mx-icon class="fas fa-router" color=${mx.machine.hasType(machineKey, "msl") ? 'red' : ''}></mx-icon>
+      <mx-icon class="fas fa-router" color=${mx.machine.hasType(machineKey, "msl") ? 'navy' : ''}></mx-icon>
       ${machineKey}
       </p>
       `)}
