@@ -222,13 +222,13 @@ groups() {
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllMachines(groupKey)} title="Connect to all machines in ${groupKey}.">
-      <mx-icon class="fas fa-server" color="navy"></mx-icon>
+      <mx-icon class="fas ${mx.machine.groups[groupKey].ports ? "fa-project-diagram" : mx.machine.groups[groupKey].relay ? "fa-network-wired" : "fa-object-ungroup"}" color="navy"></mx-icon>
       <span style="font-weight:600">${groupKey}</span>
       </a>
   
       ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
       <p>
-      <mx-icon class="fas fa-router" color=${mx.machine.hasType(machineKey, "msl") ? 'navy' : ''}></mx-icon>
+      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? 'navy' : ''}></mx-icon>
       ${machineKey}
       </p>
       `)}
