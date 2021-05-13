@@ -123,8 +123,10 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     let adminSocketKey = `${machineKey}-${adminPort}`;
     let adminSocket = connections[adminSocketKey];
 
-    //Setup message received callback on admin port
+    //Setup message received callback on admin port, if open
+    if (adminSocket) {
     setupMessageCallback(adminSocket, message, notifyElement, echo, socket);
+  }
   }
 
   //Send message if not blank (Blank sets up receiver w/o sending.)

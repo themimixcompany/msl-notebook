@@ -3,5 +3,10 @@
         "name": "Local to Remote relay",
         "relay": true,
         "machines": ["local","engine"]
+      },
+    "no-relay": {
+        "name": "Local and remote, no relay",
+        "relay": false,
+        "machines": ["local","engine"]
       }
   }
