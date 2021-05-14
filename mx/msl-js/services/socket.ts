@@ -125,8 +125,8 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-    setupMessageCallback(adminSocket, message, notifyElement, echo, socket);
-  }
+      setupMessageCallback(adminSocket, message, notifyElement, echo, socket);
+    }
   }
 
   //Send message if not blank (Blank sets up receiver w/o sending.)
@@ -239,41 +239,81 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
 
       //Setup for relay groups
       let group = mx.machine.groups[groupKey];
-      let groupType = group.type;
-      let groupPorts = group.ports;
 
-      //If this socket was opened as part of a group
-      if (groupKey) {
+      //If this socket was opened as part of a relay group
+      if (group.relay) {
 
-        //Test for sockets in group open
+        //Construct a list of ports in the group w/o repeats
+        let portArray:string[] = [];
+
+        //Add each port in the group only once
+        for (let relayPairIndex in groupPorts) {
+
+        //Remember the pair
+        let relayPair = groupPorts[relayPairIndex];
+
+        //Extract the "from" socketKey and the relaySocketKey
+        let [fromSocketKey, relaySocketKey] = relayPair;
+
+        //Push fromSocketKey if new
+        if (!portArray.includes(fromSocketKey)) {
+            portArray.push(fromSocketKey);
+        }
+
+        //Push relaySocketKey if new
+        if (!portArray.includes(relaySocketKey)){
+            portArray.push(relaySocketKey);
+        }
+
+      }
+
+  
+        //Test if all relay ports are open
 
         //Assume all open
         let isAllOpen = true;
 
-        //Look at each pair in the relay group
-        for (let relayPairIndex in groupPorts) {
+        //Look through all relay ports
+        for (let relayPortIndex in portArray) {
 
-          //Remember the pair
-          let relayPair = groupPorts[relayPairIndex];
+          //Remember port
+          let relaySocketKey = portArray[relayPortIndex];
 
-          //Extract the relaySocketKey
-          let [,relaySocketKey] = relayPair;
+          //Look for port in open connections
+          let relaySocket = connections[relaySocketKey]
 
-          //Look for socket in active connections
-          let testSocket = connections[relaySocketKey];
-
-          //Set isAllOpen false if not open
-          if (!testSocket) {
+          //If not open, set isAllOpen false
+          if (!relaySocket) {
             isAllOpen = false;
           }
 
         }
 
-      //If all open, notify component
-      if (isAllOpen) {
-        notify(notifyElement, "all open", groupKey);
+        //If all open, add relays, if any
+        if (isAllOpen) {
+
+
+         //Add each relay in the group
+          for (let relayPairIndex in groupPorts) {
+
+          //Remember the pair
+          let relayPair = groupPorts[relayPairIndex];
+
+          //Extract the "from" socketKey and the relaySocketKey
+          let [fromSocketKey, relaySocketKey] = relayPair;
+
+            //Get the socket from active connections
+            let fromSocket = connections[fromSocketKey]
+
+            //Attach the relay
+            fromSocket.relay = relaySocketKey;
+
+          }
+
+        }
+
       }
-    }};
+    };
 
     //Setup close callback
     socket.onclose = function () {

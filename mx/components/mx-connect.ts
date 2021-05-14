@@ -127,46 +127,7 @@ export class mxConnect extends LitElement {
   }
 
 
-  groupOpened(event: Event) {
-
-    //Handle relays
-
-    //Set all relay-type sockets in this group to relay to every other relay-type socket in this group
-    let groupKey = event.payload;
-    let group = mx.machine.groups[groupKey];
-    let groupMachines = group.machines;
-    let isRelay = group.relay;
-    let groupType = group.type;
-    let groupPorts = group.ports;
-
-    //Quit if no relays to handle
-    if (!isRelay) {
-      return false;
-    }
-
-    
-
-
-
-    //Attach relays to ports
-
-    //Go through all relay pairs
-    for (let relayPairIndex in groupPorts) {
-
-      //Remember the pair
-      let relayPair = groupPorts[relayPairIndex]
-
-      //Extract the "from" and "to" sockets
-      let [socketKey, relaySocketKey] = relayPair;
-
-      //Get socket
-      let socket = mx.socket.list[socketKey];
-
-      //Add relay
-      socket.relay = relaySocketKey;
-
-    }
-}
+  
 
 
 
@@ -248,11 +209,11 @@ render() {
 
   //Add event listeners for events targeting this component
   this.addEventListener("status-changed", this.statusChanged);
-  this.addEventListener("all open", this.groupOpened);
+
 
   return html`
 
-    <p>Click a server or port to connect. Then send a message.</p>
+    <p>Click a server, port, or group to connect. Then send a message.</p>
     <p>Click a message to send it again.</p>
     <br>
 
