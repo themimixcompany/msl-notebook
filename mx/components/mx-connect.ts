@@ -4,9 +4,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
-import { machine } from 'msl-js/service-loader';
-import { mxDebug } from './mx-debug';
-
 
 //<mx-connect>
 //Opens connections to WebSockets
@@ -59,77 +56,8 @@ export class mxConnect extends LitElement {
 
   //Group connect link clicked
   connectAllMachines(groupKey: string) {
-
-    //Find all machines in this group
-    let group = machine.groups[groupKey];
-    let groupMachines: string[] = group.machines;
-    let groupPorts = group.ports;
-    let groupType = group.type;
-
-  //Setup for relay groups
-
-    //Convert group-type into port list. If present, port list takes precedence.
-    if (!groupPorts) {
-
-      //Create a list of ports to relay
-      groupPorts = [];
-
-      //Look through all machines in this group
-      for (let machineIndex in groupMachines) {
-
-        //Remember the machine
-        let machineKey = groupMachines[machineIndex];
-        let machine = mx.machine.list[machineKey];
-
-        //Look through all ports on the machine
-        for (let portIndex in machine.ports) {
-
-          //Remember the port
-          let portKey = machine.ports[portIndex];
-          let port = mx.machine.ports[portKey];
-
-          //If relay type, add relays to this port type on all other machines in the group
-          if (port.type == groupType) {
-
-            //Look through all machines in this group
-            for (let relayMachineIndex in groupMachines) {
-
-              //Remember the relay machine
-              let relayMachineKey = groupMachines[relayMachineIndex];
-
-              //Add relay if not the same machine
-              if (relayMachineKey != machineKey) {
-
-                //Find the same port type on the relay machine
-                let relayPortKey = mx.machine.findInMachine(relayMachineKey, groupType);
-
-                //Construct socket keys
-                let socketKey = `${machineKey}-${portKey}`
-                let relaySocketKey = `${relayMachineKey}-${relayPortKey}`
-
-                //Add relay pair to list
-                let relayPair = [socketKey, relaySocketKey];
-                groupPorts.push(relayPair);
-
-              }
-            }
-          }
-        }
-      }
-    }
-
-    //Connect to all sockets on each of them
-    for (let machineIndex in groupMachines) {
-      let machineKey = groupMachines[machineIndex]
-      this.connectAllSockets(machineKey, groupKey, groupPorts);
-    }
-
+    mx.socket.connectGroup(groupKey, this);
   }
-
-
-  
-
-
 
 
 

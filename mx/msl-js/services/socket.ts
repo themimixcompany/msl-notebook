@@ -161,6 +161,7 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 //Connect to a WebSocket on a machine.
 const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupKey?, groupPorts?) {
 
+
   let portKeyList = portKey;
 
   //Handle single port (vs array) 
@@ -235,6 +236,7 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
+
       notify(notifyElement, "status-changed", connections);
 
       //Setup for relay groups
@@ -363,6 +365,74 @@ const connectAll = function (machineKey, notifyElement, groupKey, groupPorts) {
 }
 
 
+const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
+
+  //Find all machines in this group
+  let group = mx.machine.groups[groupKey];
+  let groupMachines: string[] = group.machines;
+  let groupPorts = group.ports;
+  let groupType = group.type;
+
+//Setup for relay groups
+
+  //Convert group-type into port list. If present, port list takes precedence.
+  if (!groupPorts) {
+
+    //Create a list of ports to relay
+    groupPorts = [];
+
+    //Look through all machines in this group
+    for (let machineIndex in groupMachines) {
+
+      //Remember the machine
+      let machineKey = groupMachines[machineIndex];
+      let machine = mx.machine.list[machineKey];
+
+      //Look through all ports on the machine
+      for (let portIndex in machine.ports) {
+
+        //Remember the port
+        let portKey = machine.ports[portIndex];
+        let port = mx.machine.ports[portKey];
+
+        //If relay type, add relays to this port type on all other machines in the group
+        if (port.type == groupType) {
+
+          //Look through all machines in this group
+          for (let relayMachineIndex in groupMachines) {
+
+            //Remember the relay machine
+            let relayMachineKey = groupMachines[relayMachineIndex];
+
+            //Add relay if not the same machine
+            if (relayMachineKey != machineKey) {
+
+              //Find the same port type on the relay machine
+              let relayPortKey = mx.machine.findInMachine(relayMachineKey, groupType);
+
+              //Construct socket keys
+              let socketKey = `${machineKey}-${portKey}`
+              let relaySocketKey = `${relayMachineKey}-${relayPortKey}`
+
+              //Add relay pair to list
+              let relayPair = [socketKey, relaySocketKey];
+              groupPorts.push(relayPair);
+
+            }
+          }
+        }
+      }
+    }
+  }
+
+  //Connect to all sockets on each of them
+  for (let machineIndex in groupMachines) {
+    let machineKey = groupMachines[machineIndex]
+    connectAll(machineKey, notifyElement, groupKey, groupPorts);
+  }
+
+}
+
 const initSocket = function (socket: WebSocket, notifyElement: HTMLElement) {
 
   //Remember socket creator
@@ -375,6 +445,7 @@ const initSocket = function (socket: WebSocket, notifyElement: HTMLElement) {
 export const socket = {
   connect: connect,
   connectAll: connectAll,
+  connectGroup: connectGroup,
   init: initSocket,
   list: connections,
   keys: socketKeys()
