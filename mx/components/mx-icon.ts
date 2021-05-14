@@ -33,7 +33,7 @@ export class mxIcon extends LitElement {
 
     //Show this component on screen
     render() {
-
+        
         //Setup for finding font in class
         let classAttribute = this.className
         
@@ -56,7 +56,7 @@ export class mxIcon extends LitElement {
         //Create SVG
         let svgPart = svg`
         <svg viewBox=${viewBox} class="${classAttribute} icon" style="height:${this.size}em; width:${this.size}em;">
-            <path style="fill:${this.color}" d=${dValue}></path>
+            <path style="fill:${this.color}" d="${dValue}"></path>
         </svg>
         `
 

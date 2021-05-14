@@ -71,10 +71,10 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     //Echo? JSON reply; original message & response
     if (echo) {
       notifyMessage = {
-        "message": message,
-        "response": receivedMessage,
-        "socket": socket,
-        "sender": sendingSocket
+        "sentMessage": message,
+        "sentSocketKey": sendingSocket.key,
+        "receivedMessage": receivedMessage,
+        "receivedSocketKey": socket.key
       }
     }
 

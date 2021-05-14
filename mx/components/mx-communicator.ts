@@ -13,6 +13,12 @@ export class mxCommunicator extends LitElement {
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
     a {cursor: pointer; text-decoration:underline}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      grid-auto-rows: minmax(100px, auto);
+    }
     `;
 
   //Define public properties (databinding)
@@ -24,20 +30,45 @@ export class mxCommunicator extends LitElement {
   //Private Functions
 
   //Update history when messages received
-  messageReceived(receivedEvent: Event) {
-    let latestReceived = receivedEvent.payload;
-    let logMessage: string;
-    const { message, response, socket } = latestReceived; // => const message = latestReceived.message, etc.
+  messageReceived(event: Event) {
+   
+    //Extract sent and received message info
+    const { sentMessage,sentSocketKey,receivedMessage,receivedSocketKey } = event.payload
+
+    //Setup Colors
+    let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? 'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? 'purple' : ''
+    let ReceivedWireColor = mx.socket.list[receivedSocketKey].port.type == 'msl' ? 'navy' : mx.socket.list[receivedSocketKey].port.type == 'admin' ? 'purple' : ''
+
+    //Setup Icons
+    let sentMessageIcon = sentSocketKey == this.socketKey ? 'fas fa-keyboard' : 'fas fa-project-diagram';
+
+    //Build single result template
+    let singleResult = html`
+    <div class="grid results greyBk">
+    <div>
+      ${sentMessage ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
+    </div>
+    <div>
+    ${sentMessage ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${sentSocketKey}` : ""}
+    </div>
+    <div>
+    ${sentMessage ? html`==>` : ""}
+    </div>
+    <div>
+      <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${receivedSocketKey}
+    </div>
+    <div>
+      <mx-icon class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
+    </div>
+    </div>
+`;
+
+
+    //Add new result to results property
     this.mslResults = html`
     ${this.mslResults}
-    <div class="results greyBk">
-    <a @click=${() => this.sendMessage(message)} title="Resend this message.">
-    ${message} [${socket.key}]
-    </a> => 
-    <a @click=${() => this.sendMessage(response)} title="Resend this response.">
-    ${response}
-    </a>
-    </div>`;
+    ${singleResult}
+    `;
   }
 
   mslBoxKeyDown(event: Event) {
@@ -101,9 +132,27 @@ export class mxCommunicator extends LitElement {
 
     //Results Div
     let resultsPart = html`
+
+    <div class="grid results greyBk" style="color:white;font-weight:500;">
     <div>
-      ${this.mslResults}
+     sent message
     </div>
+    <div>
+     to socket
+    </div>
+    <div>
+      =>
+    </div>
+    <div>
+     from socket
+    </div>
+    <div>
+     received message
+    </div>
+</div>
+
+  ${this.mslResults}
+
     `
 
     //RENDER TEMPLATE
