@@ -52,8 +52,8 @@ export class mxCommunicator extends LitElement {
     let isAdditionalResponse = sentMessage == lastSentMessage && sentSocketKey == lastSentSocketKey;
 
     //Setup Colors
-    let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? 'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? 'purple' : ''
-    let ReceivedWireColor = mx.socket.list[receivedSocketKey].port.type == 'msl' ? 'navy' : mx.socket.list[receivedSocketKey].port.type == 'admin' ? 'purple' : ''
+    let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028':  'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+    let ReceivedWireColor = mx.socket.list[receivedSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[receivedSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
 
     //Setup Icons
     let sentMessageIcon = sentSocketKey == this.socketKey ? 'fas fa-keyboard' : 'fas fa-project-diagram';
@@ -62,7 +62,7 @@ export class mxCommunicator extends LitElement {
     let singleResult = html`
     <div class="grid results greyBk">
     <div>
-      ${sentMessage && !isAdditionalResponse ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
+      ${sentMessage && !isAdditionalResponse ? html`<mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(sentMessage)} title="Send this message to ${this.socketKey}." class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
     </div>
     <div>
     ${sentMessage && !isAdditionalResponse ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${sentSocketKey}` : ""}
@@ -74,7 +74,7 @@ export class mxCommunicator extends LitElement {
       <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${receivedSocketKey}
     </div>
     <div>
-      <mx-icon class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
+      <mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(receivedMessage)} title="Send this message to ${this.socketKey}." class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
     </div>
     </div>
 `;

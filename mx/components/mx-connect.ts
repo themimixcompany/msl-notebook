@@ -29,7 +29,10 @@ export class mxConnect extends LitElement {
     .gridHeader, .threeColumns {
       grid-column: 1 / 4;
     }
-    
+    .threeRows {
+      grid-column: 1;
+      grid-row: 1 / 5;
+    }
     
     `;
 
@@ -72,14 +75,14 @@ machineGrid() {
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllSockets(machineKey)} title="Connect to all ports on ${machineKey}.">
-      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? 'navy' : ''}></mx-icon>
+      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : ''}></mx-icon>
       <span style="font-weight:600">${machineKey}</span>
       </a>
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
       <a @click=${() => this.connectSocket(machineKey, portKey)} title="Connect to this port.">
-      <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? 'navy' : mx.machine.ports[portKey].type == 'admin' ? 'purple' : ''}></mx-icon>
+      <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? 'darkOrange' : 'purple' : ''}></mx-icon>
       ${portKey}
       </p>
       `)}
@@ -117,7 +120,7 @@ groups() {
   
       ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
       <p>
-      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? 'navy' : ''}></mx-icon>
+      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : ''}></mx-icon>
       ${machineKey}
       </p>
       `)}
@@ -127,7 +130,29 @@ groups() {
     `
 }
 
+visualKey() {
 
+  return html`
+  <div class="machine greyBk threeRows">
+  
+  <mx-icon class="fas fa-key"></mx-icon>
+  <span style="font-weight:600">key</span>
+
+  <p><mx-icon class="fas fa-server" color="#ec2028"></mx-icon>local msl engine</p>
+  <p><mx-icon class="fas fa-router" color="#ec2028"></mx-icon>local msl port</p>
+  <p><mx-icon class="fas fa-router" color="orange"></mx-icon>local admin port</p>
+  <p><mx-icon class="fas fa-server" color="navy"></mx-icon>remote msl engine</p>
+  <p><mx-icon class="fas fa-router" color="navy"></mx-icon>remote msl port</p>
+  <p><mx-icon class="fas fa-router" color="purple"></mx-icon>remote admin port</p>
+  <p><mx-icon class="fas fa-server"></mx-icon>websocket server</p>
+  <p><mx-icon class="fas fa-router"></mx-icon>websocket text port</p>
+  <p><mx-icon class="fas fa-network-wired" color="navy"></mx-icon>type relay group</p>
+  <p><mx-icon class="fas fa-project-diagram" color="navy"></mx-icon>port relay group</p>
+  <p><mx-icon class="fas fa-object-ungroup" color="navy"></mx-icon>non-relay group</p>
+  
+  </div>
+  `
+}
 
 
 //Show this component on screen
@@ -142,10 +167,11 @@ render() {
   return html`
 
     <p>Click a server, port, or group to connect. Then send a message.</p>
-    <p>Click a message to send it again.</p>
+    <p>Click a message icon to send it again.</p>
     <br>
 
     <div class="grid">
+     ${this.visualKey()}
       ${this.machineGrid()}
       ${this.groups()}
       ${this.communicators()}
