@@ -26,6 +26,14 @@ export class mxCommunicator extends LitElement {
   @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
 
+  //Private properties
+  lastMessage  = {
+    sentMessage: "",
+    sentSocketKey: "",
+    receivedMessage: "",
+    receivedSocketKey: ""
+  };
+
 
   //Private Functions
 
@@ -34,6 +42,14 @@ export class mxCommunicator extends LitElement {
    
     //Extract sent and received message info
     const { sentMessage,sentSocketKey,receivedMessage,receivedSocketKey } = event.payload
+
+    //Extract last message info for comparison
+    let lastSentMessage = this.lastMessage.sentMessage;
+    let lastSentSocketKey = this.lastMessage.sentSocketKey;
+    
+
+    //Detect additional responses from same sent message
+    let isAdditionalResponse = sentMessage == lastSentMessage && sentSocketKey == lastSentSocketKey;
 
     //Setup Colors
     let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? 'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? 'purple' : ''
@@ -46,13 +62,13 @@ export class mxCommunicator extends LitElement {
     let singleResult = html`
     <div class="grid results greyBk">
     <div>
-      ${sentMessage ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
+      ${sentMessage && !isAdditionalResponse ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
     </div>
     <div>
-    ${sentMessage ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${sentSocketKey}` : ""}
+    ${sentMessage && !isAdditionalResponse ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${sentSocketKey}` : ""}
     </div>
     <div>
-    ${sentMessage ? html`==>` : ""}
+    ${sentMessage && !isAdditionalResponse ? html`==>` : ""}
     </div>
     <div>
       <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${receivedSocketKey}
@@ -63,6 +79,8 @@ export class mxCommunicator extends LitElement {
     </div>
 `;
 
+    //Remember Last Message
+    this.lastMessage = event.payload;
 
     //Add new result to results property
     this.mslResults = html`
@@ -141,7 +159,7 @@ export class mxCommunicator extends LitElement {
      to socket
     </div>
     <div>
-      =>
+      ==>
     </div>
     <div>
      from socket
