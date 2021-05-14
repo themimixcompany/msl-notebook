@@ -241,7 +241,7 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       let group = mx.machine.groups[groupKey];
 
       //If this socket was opened as part of a relay group
-      if (group.relay) {
+      if (group && group.relay) {
 
         //Construct a list of ports in the group w/o repeats
         let portArray:string[] = [];
