@@ -18,6 +18,7 @@ export class mxHistory extends LitElement {
   //Define public properties (databinding)
   @property() history: any;
   @property() isHidden: boolean = false;
+  socketKey: any;
 
 
   //Private Functions
