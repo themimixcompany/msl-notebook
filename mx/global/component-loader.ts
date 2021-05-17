@@ -8,7 +8,6 @@ export * from "components/mx-communicator";
 export * from "components/mx-connect";
 export * from "components/mx-debug";
 export * from "components/mx-greeting";
-export * from "components/mx-history";
 export * from "components/mx-icon";
 export * from "components/mx-logo";
 

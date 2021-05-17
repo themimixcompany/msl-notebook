@@ -38,12 +38,18 @@ export class mxConnect extends LitElement {
 
   //Define public properties (databinding)
   @property() connections: string[] = [];
-
+  @property() history: {}[];
 
   //Status changed
   statusChanged(receivedEvent: Event) {
     mx.debug.log("active connections updated");
     this.connections = Object.keys(receivedEvent.payload);
+  }
+
+  //History changed
+  historyChanged(receivedEvent: Event) {
+    this.history = receivedEvent.payload;
+    console.log(this.history);
   }
 
   //Socket connect link clicked
@@ -64,14 +70,14 @@ export class mxConnect extends LitElement {
 
 
 
-//Create HTML Templates
+  //Create HTML Templates
 
-machineGrid() {
-  return html`
+  machineGrid() {
+    return html`
     ${mx.machine.keys.map(machineKey => {
 
 
-    return html`
+      return html`
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllSockets(machineKey)} title="Connect to all ports on ${machineKey}.">
@@ -90,27 +96,27 @@ machineGrid() {
     </div>
     `})}
     `
-}
+  }
 
-communicators() {
-  return html`
+  communicators() {
+    return html`
     <i class="fas fa-server"></i>
 
     ${this.connections.map(socketKey => html`
       <div class="threeColumns">
-        <mx-communicator socket=${socketKey}></mx-communicator>
+        <mx-communicator socket=${socketKey} .history=${this.history} .connector=${this}></mx-communicator>
       </div>
     `)}
     `
-}
+  }
 
-groups() {
+  groups() {
 
-  return html`
+    return html`
     ${mx.machine.groupKeys.map(groupKey => {
 
 
-    return html`
+      return html`
       <div class="machine greyBk">
 
       <a @click=${() => this.connectAllMachines(groupKey)} title="Connect to all machines in ${groupKey}.">
@@ -128,11 +134,22 @@ groups() {
     </div>
     `})}
     `
-}
+  }
 
-visualKey() {
+  historyPart() {
+    return html`
+    <div class="threeColumns machine greyBk">
+   History
+   </div>
+ <div class="grid results greyBk threeColumns" style="color:white;font-weight:500;">
+  ${this.history}
+ </div>
+ `
+  }
 
-  return html`
+  visualKey() {
+
+    return html`
   <div class="machine greyBk threeRows">
   
   <mx-icon class="fas fa-key"></mx-icon>
@@ -152,19 +169,20 @@ visualKey() {
   
   </div>
   `
-}
+  }
 
 
-//Show this component on screen
-render() {
+  //Show this component on screen
+  render() {
 
-  //BEFORE TEMPLATE
+    //BEFORE TEMPLATE
 
-  //Add event listeners for events targeting this component
-  this.addEventListener("status-changed", this.statusChanged);
+    //Add event listeners for events targeting this component
+    this.addEventListener("status-changed", this.statusChanged);
+    this.addEventListener("history-changed", this.historyChanged);
 
 
-  return html`
+    return html`
 
     <p>Click a server, port, or group to connect. Then send a message.</p>
     <p>Click a message icon to send it again.</p>
@@ -174,12 +192,13 @@ render() {
      ${this.visualKey()}
       ${this.machineGrid()}
       ${this.groups()}
+      ${this.historyPart()}
       ${this.communicators()}
     </div>
     
     <br>
   `;
 
-}
+  }
 
 }

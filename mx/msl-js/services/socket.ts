@@ -39,14 +39,38 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
 
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent.
-const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement) {
+const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement, history: {}[] = []) {
+
+  //Find position in history
+  let messageNumber = history.length;
+
+  //Get Message in History
+  let historyItem = history[messageNumber];
+
+  //If no history, create empty item
+  if (!historyItem) {
+    historyItem = {};
+  }
+
+  //Store empty message under the socketKey
+  historyItem[socket.key] = [""]
+
+  //Save in history
+  history.push(historyItem)
+
+  //Notify component of history change;
+  notify(notifyElement, "history-changed", history);
+
   //using "" as message reflects that we did not send any message.
-  setupMessageCallback(socket, "", notifyElement, true)
+  setupMessageCallback(socket, "", notifyElement, true, socket, "", history)
 }
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false") {
+const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false", history) {
+
+  //Determine messageNumber 
+  let messageNumber = history.length - 1;
 
   socket.onmessage = function (event: Event) {
 
@@ -56,8 +80,25 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     mx.debug.echo(false);
     mx.debug.log(`λ ${notifyElement.localName} ${socket.key} ${message} => ${receivedMessage}`);
 
-    //Save Received Message in History
-    //history[messageNumber][messageReceivePosition] = receivedMessage;
+    //Get Message in History
+    let historyItem = history[messageNumber];
+
+    //If no history, create empty item
+    if (!historyItem) {
+      historyItem = {};
+    }
+
+    //If no array for this socketKey, add it
+    if (!historyItem[socket.key]) {
+      historyItem[socket.key] = [];
+    }
+
+
+    //Save receiving socket and message
+    historyItem[socket.key].push(receivedMessage);
+
+    //Notify component of history change;
+    notify(notifyElement.connector, "history-changed", history);
 
     //Interpret MSL (Check for (@VER), for example)
     //var isValidMSL = mslParser.parse(receivedMessage);
@@ -82,7 +123,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     notify(notifyElement, "message-received", notifyMessage);
 
     //Relay if relay is set, not looping back to original machine, and active in connections
-    if (socket.relay && (relay != socket.relay) && connections[socket.relay]) {
+    if (relay && (relay != socket.relay) && connections[socket.relay]) {
       sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key)
     }
 
@@ -105,10 +146,19 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
 //sendSingleMessage (exposed through .mxSend on the socket)
 //Send a single message over a websocket w/ a per-message callback
-const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string = "false") {
+const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string = "false", history: {}[] = []) {
+
+  //Create a history item
+  let historyItem = {}
+
+  //Store this outgoing message under the socketKey
+  historyItem[socket.key] = [message]
+
+  //Save in history
+  history.push(historyItem)
 
   //Setup message received callback
-  setupMessageCallback(socket, message, notifyElement, echo, socket, relay);
+  setupMessageCallback(socket, message, notifyElement, echo, socket, relay, history);
 
   //For MSL wires, also listen on admin.
   if (socket.port.type.toLowerCase() == "msl") {
@@ -125,7 +175,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-      setupMessageCallback(adminSocket, message, notifyElement, echo, socket);
+      setupEmptyCallback(adminSocket,notifyElement,history);
     }
   }
 
@@ -246,30 +296,30 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       if (group && group.relay) {
 
         //Construct a list of ports in the group w/o repeats
-        let portArray:string[] = [];
+        let portArray: string[] = [];
 
         //Add each port in the group only once
         for (let relayPairIndex in groupPorts) {
 
-        //Remember the pair
-        let relayPair = groupPorts[relayPairIndex];
+          //Remember the pair
+          let relayPair = groupPorts[relayPairIndex];
 
-        //Extract the "from" socketKey and the relaySocketKey
-        let [fromSocketKey, relaySocketKey] = relayPair;
+          //Extract the "from" socketKey and the relaySocketKey
+          let [fromSocketKey, relaySocketKey] = relayPair;
 
-        //Push fromSocketKey if new
-        if (!portArray.includes(fromSocketKey)) {
+          //Push fromSocketKey if new
+          if (!portArray.includes(fromSocketKey)) {
             portArray.push(fromSocketKey);
-        }
+          }
 
-        //Push relaySocketKey if new
-        if (!portArray.includes(relaySocketKey)){
+          //Push relaySocketKey if new
+          if (!portArray.includes(relaySocketKey)) {
             portArray.push(relaySocketKey);
+          }
+
         }
 
-      }
 
-  
         //Test if all relay ports are open
 
         //Assume all open
@@ -295,14 +345,14 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
         if (isAllOpen) {
 
 
-         //Add each relay in the group
+          //Add each relay in the group
           for (let relayPairIndex in groupPorts) {
 
-          //Remember the pair
-          let relayPair = groupPorts[relayPairIndex];
+            //Remember the pair
+            let relayPair = groupPorts[relayPairIndex];
 
-          //Extract the "from" socketKey and the relaySocketKey
-          let [fromSocketKey, relaySocketKey] = relayPair;
+            //Extract the "from" socketKey and the relaySocketKey
+            let [fromSocketKey, relaySocketKey] = relayPair;
 
             //Get the socket from active connections
             let fromSocket = connections[fromSocketKey]
@@ -351,8 +401,8 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
 }
 
 
-const mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false) {
-  sendSingleMessage(this, message, componentToNotify, echo);
+const mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false, history: {}[] = []) {
+  sendSingleMessage(this, message, componentToNotify, echo, "false", history);
 }
 
 const socketKeys = function (): string[] {
@@ -373,7 +423,7 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
   let groupPorts = group.ports;
   let groupType = group.type;
 
-//Setup for relay groups
+  //Setup for relay groups
 
   //Convert group-type into port list. If present, port list takes precedence.
   if (!groupPorts) {

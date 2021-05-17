@@ -25,6 +25,8 @@ export class mxCommunicator extends LitElement {
   @property() mslResults: any;
   @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
+  @property() history: {}[];
+  @property() connector: LitElement;
 
   //Private properties
   lastMessage  = {
@@ -102,9 +104,9 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message:string) {
-    mx.socket.list[this.socketKey].mxSend(message, this, true);
+    mx.socket.list[this.socketKey].mxSend(message, this, true, this.history);
   }
-
+  
    //Empty The Results <div>
    emptyResults(receivedEvent: Event) {
     this.mslResults = "";
@@ -147,6 +149,8 @@ export class mxCommunicator extends LitElement {
       <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
     </div>
     `
+
+   
 
     //Results Div
     let resultsPart = html`
