@@ -38,7 +38,7 @@ export class mxConnect extends LitElement {
 
   //Define public properties (databinding)
   @property() connections: string[] = [];
-  @property() history: {}[];
+  @property() history: {}[] = [];
 
   //Status changed
   statusChanged(receivedEvent: Event) {
@@ -49,6 +49,7 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: Event) {
     this.history = receivedEvent.payload;
+    console.log("history length:",this.history.length);
     console.log(this.history);
   }
 
@@ -142,7 +143,7 @@ export class mxConnect extends LitElement {
    History
    </div>
  <div class="grid results greyBk threeColumns" style="color:white;font-weight:500;">
-  ${this.history}
+  ${this.history.length}
  </div>
  `
   }

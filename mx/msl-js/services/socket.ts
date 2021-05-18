@@ -39,38 +39,57 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
 
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent.
-const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement, history: {}[] = []) {
+const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement, history?: {}[], messageNumber?) {
 
-  //Find position in history
-  let messageNumber = history.length;
+  //Handle history, if provided
+  if (history) {
 
-  //Get Message in History
-  let historyItem = history[messageNumber];
 
-  //If no history, create empty item
-  if (!historyItem) {
-    historyItem = {};
+    //Find position in history or use provided
+    if (messageNumber == undefined) {
+      if (history.length == 0) {
+        messageNumber = 0;
+      } else {
+        messageNumber = history.length - 1;
+      }
+    }
+
+
+    //Get Message in History
+    let historyItem = history[messageNumber];
+
+    //If no history, create empty item
+    if (!historyItem) {
+      console.log("empty callback creating history item")
+      historyItem = {};
+
+      //Store empty message under the socketKey
+      historyItem[socket.key] = [""]
+
+    //Save in history if new message
+      history.push(historyItem)
+    }
+
+    //Notify component of history change;
+    notify(notifyElement, "history-changed", history);
+
   }
-
-  //Store empty message under the socketKey
-  historyItem[socket.key] = [""]
-
-  //Save in history
-  history.push(historyItem)
-
-  //Notify component of history change;
-  notify(notifyElement, "history-changed", history);
 
   //using "" as message reflects that we did not send any message.
   setupMessageCallback(socket, "", notifyElement, true, socket, "", history)
+
+
 }
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false", history) {
+const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false", history?: {}[]) {
 
-  //Determine messageNumber 
-  let messageNumber = history.length - 1;
+  //Setup for messageNumber 
+  let messageNumber;
+  if (history) {
+    messageNumber = history.length - 1;
+  }
 
   socket.onmessage = function (event: Event) {
 
@@ -80,25 +99,25 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     mx.debug.echo(false);
     mx.debug.log(`λ ${notifyElement.localName} ${socket.key} ${message} => ${receivedMessage}`);
 
-    //Get Message in History
-    let historyItem = history[messageNumber];
+    //Handle history, if provided
 
-    //If no history, create empty item
-    if (!historyItem) {
-      historyItem = {};
+    if (history) {
+
+      //Get Message in History
+      let historyItem = history[messageNumber];
+
+      //If no array for this socketKey, add it
+      if (!historyItem[socket.key]) {
+        historyItem[socket.key] = [];
+      }
+
+      //Save receiving socket and message
+      historyItem[socket.key].push(receivedMessage);
+
+      //Notify component of history change;
+      notify(notifyElement.connector, "history-changed", history);
+
     }
-
-    //If no array for this socketKey, add it
-    if (!historyItem[socket.key]) {
-      historyItem[socket.key] = [];
-    }
-
-
-    //Save receiving socket and message
-    historyItem[socket.key].push(receivedMessage);
-
-    //Notify component of history change;
-    notify(notifyElement.connector, "history-changed", history);
 
     //Interpret MSL (Check for (@VER), for example)
     //var isValidMSL = mslParser.parse(receivedMessage);
@@ -148,14 +167,25 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 //Send a single message over a websocket w/ a per-message callback
 const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string = "false", history: {}[] = []) {
 
-  //Create a history item
-  let historyItem = {}
+//Setup for messageNumber
+let messageNumber
 
-  //Store this outgoing message under the socketKey
-  historyItem[socket.key] = [message]
+  //Handle history
+  if (history) {
 
-  //Save in history
-  history.push(historyItem)
+    //Create a history item
+    let historyItem = {}
+
+    //Store this outgoing message under the socketKey
+    historyItem[socket.key] = [message]
+
+    //Remember message number
+    messageNumber = history.length;
+
+    //Save in history
+    history.push(historyItem)
+
+  }
 
   //Setup message received callback
   setupMessageCallback(socket, message, notifyElement, echo, socket, relay, history);
@@ -175,7 +205,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-      setupEmptyCallback(adminSocket,notifyElement,history);
+     setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
     }
   }
 
@@ -483,11 +513,11 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
 
 }
 
-const initSocket = function (socket: WebSocket, notifyElement: HTMLElement) {
+const initSocket = function (socket: WebSocket, notifyElement: HTMLElement, history?: {}[]) {
 
   //Remember socket creator
   socket.creator = notifyElement;
-  setupEmptyCallback(socket, notifyElement);
+  setupEmptyCallback(socket, notifyElement, history);
 }
 
 //Service Definition

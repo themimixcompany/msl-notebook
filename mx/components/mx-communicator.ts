@@ -131,7 +131,7 @@ export class mxCommunicator extends LitElement {
     let socket = mx.socket.list[this.socketKey];
 
     //Initalize this socket w/ a listener (without sending a message)
-    mx.socket.init(socket, this);
+    mx.socket.init(socket, this, this.history)
 
     //HTML TEMPLATE PARTS
     
