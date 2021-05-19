@@ -60,7 +60,7 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
 
     //If no history, create empty item
     if (!historyItem) {
-      console.log("empty callback creating history item")
+
       historyItem = {};
 
       //Store empty message under the socketKey
@@ -70,8 +70,11 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
       history.push(historyItem)
     }
 
+    //Create a copy of history for notifyElement (triggers property updates there)
+    let [...historyCopy] = history;
+
     //Notify component of history change;
-    notify(notifyElement, "history-changed", history);
+    notify(notifyElement, "history-changed", historyCopy);
 
   }
 
@@ -113,6 +116,9 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
       //Save receiving socket and message
       historyItem[socket.key].push(receivedMessage);
+
+      //Create a copy of history for notifyElement (triggers property updates there)
+      let [...historyCopy] = history;
 
       //Notify component of history change;
       notify(notifyElement.connector, "history-changed", history);
@@ -156,6 +162,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     if (listeningKey != originalKey) {
 
       //Re-attach original listener
+      console.log("reattaching original listener")
       setupEmptyCallback(socket, socket.creator);
 
     }

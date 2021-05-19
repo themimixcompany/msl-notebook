@@ -151,6 +151,26 @@ export class mxConnect extends LitElement {
   visualKey() {
 
     return html`
+    Message ${historyIndex}
+    ${socketTemplates}
+    `
+  }
+
+  templateSocketItem(socketKey, messageValues) {
+
+    //Extract sent and received messages from history item
+    let [message,receivedMessage] = messageValues;
+
+    return html`
+    <div style="grid-column: 1 / 4">
+    ${socketKey}: sent ${message} received ${receivedMessage}
+    </div>
+    `
+  }
+
+  templateVisualKey() {
+
+    return html`
   <div class="machine greyBk threeRows">
   
   <mx-icon class="fas fa-key"></mx-icon>

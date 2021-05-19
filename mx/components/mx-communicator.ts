@@ -5,6 +5,9 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
 
+//Setup for Run Once
+let hasRun = false;
+
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
   static styles = css`
@@ -29,7 +32,7 @@ export class mxCommunicator extends LitElement {
   @property() connector: LitElement;
 
   //Private properties
-  lastMessage  = {
+  lastMessage = {
     sentMessage: "",
     sentSocketKey: "",
     receivedMessage: "",
@@ -41,20 +44,20 @@ export class mxCommunicator extends LitElement {
 
   //Update history when messages received
   messageReceived(event: Event) {
-   
+
     //Extract sent and received message info
-    const { sentMessage,sentSocketKey,receivedMessage,receivedSocketKey } = event.payload
+    const { sentMessage, sentSocketKey, receivedMessage, receivedSocketKey } = event.payload
 
     //Extract last message info for comparison
     let lastSentMessage = this.lastMessage.sentMessage;
     let lastSentSocketKey = this.lastMessage.sentSocketKey;
-    
+
 
     //Detect additional responses from same sent message
     let isAdditionalResponse = sentMessage == lastSentMessage && sentSocketKey == lastSentSocketKey;
 
     //Setup Colors
-    let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028':  'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+    let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
     let ReceivedWireColor = mx.socket.list[receivedSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[receivedSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
 
     //Setup Icons
@@ -103,38 +106,47 @@ export class mxCommunicator extends LitElement {
 
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
-  sendMessage(message:string) {
+  sendMessage(message: string) {
     mx.socket.list[this.socketKey].mxSend(message, this, true, this.history);
   }
-  
-   //Empty The Results <div>
-   emptyResults(receivedEvent: Event) {
+
+  //Empty The Results <div>
+  emptyResults(receivedEvent: Event) {
     this.mslResults = "";
   }
 
 
-    //Show or Hide Results
-    showOrHideResults() {
-      this.isHidden = !this.isHidden
-    }
- 
-   
+  //Show or Hide Results
+  showOrHideResults() {
+    this.isHidden = !this.isHidden
+  }
+
+
   //Show this component on screen
   render() {
 
     //BEFORE TEMPLATE
 
-    //Add event listeners for events targeting this component
-    this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
+    //Run Once
 
-    //Get a reference to the socket for this communicator
-    let socket = mx.socket.list[this.socketKey];
+     //Get a reference to the socket for this communicator
+     let socket = mx.socket.list[this.socketKey];
 
-    //Initalize this socket w/ a listener (without sending a message)
-    mx.socket.init(socket, this, this.history)
+    if (!hasRun) {
+      
+      //Add event listeners for events targeting this component
+      this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
+
+      //Initalize this socket w/ a listener (without sending a message)
+      mx.socket.init(socket, this, this.history)
+
+      //Remember we ran once
+      hasRun = true;
+
+    }
 
     //HTML TEMPLATE PARTS
-    
+
     //Input Box
     let inputPart = html`
     <div class="greyBk" style="padding-right:6px;">
@@ -150,7 +162,7 @@ export class mxCommunicator extends LitElement {
     </div>
     `
 
-   
+
 
     //Results Div
     let resultsPart = html`
