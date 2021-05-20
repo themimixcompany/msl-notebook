@@ -136,6 +136,8 @@ export class mxConnect extends LitElement {
 
   templateHistory() {
 
+   
+
     //Setup for historyIndex
     let historyLength = this.history.length
 
@@ -143,6 +145,7 @@ export class mxConnect extends LitElement {
     if (historyLength < 1) {
       return;
     }
+
 
     //Setup for collecting all items from history array
     let historyItemTemplates;

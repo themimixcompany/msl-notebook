@@ -132,8 +132,6 @@ hasRun = false;
      //Get a reference to the socket for this communicator
      let socket = mx.socket.list[this.socketKey];
 
-     console.log("hasRun",this.hasRun,this.socketKey)
-
     if (!this.hasRun) {
       
       //Add event listeners for events targeting this component

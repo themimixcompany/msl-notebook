@@ -121,7 +121,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
       let [...historyCopy] = history;
 
       //Notify component of history change;
-      notify(notifyElement.connector, "history-changed", history);
+      notify(notifyElement.connector, "history-changed", historyCopy);
 
     }
 
