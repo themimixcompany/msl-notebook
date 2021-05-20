@@ -11,22 +11,31 @@ import * as mx from 'msl-js/service-loader'
 export class mxConnect extends LitElement {
   static styles = css`
     textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
-    ol,ul, input, h2, p, .machine { font-family: Inter; font-size: 18pt }
+    ol,ul, input, h2, p, .machine, .results { font-family: Inter; font-size: 18pt }
     p {margin-top: 5px; margin-bottom: 5px;}
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
     a { text-decoration: underline; cursor: pointer; text-decoration:underline}
+    .whiteHeaderText {color:white;font-weight:500;}
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
       gap: 10px;
     }
     .one {
       grid-column: 1;
       grid-row: 1;
     }
-    .gridHeader, .threeColumns {
+    .threeColumns {
       grid-column: 1 / 4;
+    },
+    .fiveColumns {
+      grid-column: 1 / 6;
     }
     .threeRows {
       grid-column: 1;
@@ -134,9 +143,9 @@ export class mxConnect extends LitElement {
     `
   }
 
-  templateHistory() {
 
-   
+
+  templateHistory() {
 
     //Setup for historyIndex
     let historyLength = this.history.length
@@ -146,6 +155,8 @@ export class mxConnect extends LitElement {
       return;
     }
 
+  
+
 
     //Setup for collecting all items from history array
     let historyItemTemplates;
@@ -154,12 +165,17 @@ export class mxConnect extends LitElement {
     for (let historyIndex in this.history) {
       
       //Add the template for this history item to the outgoing HTML
-      historyItemTemplates = html`${historyItemTemplates} ${this.templateHistoryItem(historyIndex)}`;
+      historyItemTemplates = html`
+      ${historyItemTemplates}
+      ${this.templateHistoryItem(historyIndex)}`;
     }
     
     //Return history item templates
     return html`
+        
+    <div class="grid2 greyBk results">
     ${historyItemTemplates}
+    </div>
     `
 
   }
@@ -168,6 +184,24 @@ export class mxConnect extends LitElement {
 
     //Remember history item
     let historyItem = this.history[historyIndex];
+
+    let historyItemHeader = html`
+    <div class="whiteHeaderText">
+    sent message
+    </div>
+    <div class="whiteHeaderText">
+    to socket
+    </div>
+    <div class="whiteHeaderText">
+
+    </div>
+    <div class="whiteHeaderText">
+    from socket
+    </div>
+    <div class="whiteHeaderText">
+    received message
+    </div>
+  `
 
     //Setup for collecting all socket info for this item
     let socketTemplates;
@@ -181,7 +215,7 @@ export class mxConnect extends LitElement {
 
     //Return socket templates HTML
     return html`
-    Message ${historyIndex}
+    ${historyItemHeader}
     ${socketTemplates}
     `
   }
@@ -189,14 +223,38 @@ export class mxConnect extends LitElement {
 
   templateSocketItem(socketKey, messageValues) {
 
-    //Extract sent and received messages from history item
-    let [message,receivedMessage] = messageValues;
+    //Extract sent and received message info
+    const [sentMessage,receivedMessage] = messageValues;
 
-    return html`
-    <div style="grid-column: 1 / 4">
-    ${socketKey}: sent ${message} received ${receivedMessage}
+    //Setup Colors
+    let sentWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+    let ReceivedWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+
+    //Setup Icons
+    let sentMessageIcon = socketKey == socketKey ? 'fas fa-keyboard' : 'fas fa-project-diagram';
+
+    //Build single result template
+    let singleResult = html`
+    <div>
+      ${sentMessage ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}" style="cursor:pointer;"></mx-icon> ${sentMessage}`:""} 
     </div>
-    `
+    <div>
+    ${sentMessage ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${socketKey}`: ""}
+    </div>
+    <div>
+    ${sentMessage ? html`==>` : ""}
+    </div>
+    <div>
+      <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${socketKey}
+    </div>
+    <div>
+      <mx-icon class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
+    </div>
+`;
+
+//Return HTML
+return singleResult;
+
   }
 
   templateVisualKey() {
@@ -223,6 +281,15 @@ export class mxConnect extends LitElement {
   `
   }
 
+    //Results Header
+    templateHistoryHeader() { return html`
+    <div class="gridHeader results" style="font-weight:600">
+      history
+      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
+      <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
+    </div>
+    `
+    }
 
   //Show this component on screen
   render() {
@@ -244,11 +311,13 @@ export class mxConnect extends LitElement {
      ${this.templateVisualKey()}
       ${this.templateMachineGrid()}
       ${this.templateGroups()}
-      ${this.templateHistory()}
-      ${this.templateCommunicators()}
+      <br>
     </div>
-    
+    ${this.templateHistoryHeader()}
+    ${this.templateHistory()}
     <br>
+    ${this.templateCommunicators()}
+   
   `;
 
   }

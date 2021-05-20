@@ -62,12 +62,14 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
     if (!historyItem) {
 
       historyItem = {};
-
-      //Store empty message under the socketKey
-      historyItem[socket.key] = [""]
-
+      
     //Save in history if new message
-      history.push(historyItem)
+      history.push(historyItem);
+    }
+
+    //If no entry under the socketKey, create an empty one
+    if (!historyItem[socket.key]) {
+      historyItem[socket.key] = [""];
     }
 
     //Create a copy of history for notifyElement (triggers property updates there)
@@ -212,7 +214,9 @@ let messageNumber
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-     setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
+      console.log("setting up admin callback")
+      setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
+     
     }
   }
 

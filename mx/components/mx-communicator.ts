@@ -42,7 +42,7 @@ hasRun = false;
 
   //Private Functions
 
-  //Update history when messages received
+  //Update communicator when messages received
   messageReceived(event: Event) {
 
     //Extract sent and received message info
@@ -132,6 +132,8 @@ hasRun = false;
      //Get a reference to the socket for this communicator
      let socket = mx.socket.list[this.socketKey];
 
+
+
     if (!this.hasRun) {
       
       //Add event listeners for events targeting this component
@@ -139,7 +141,7 @@ hasRun = false;
 
   
       //Initalize this socket w/ a listener (without sending a message)
-      mx.socket.init(socket, this, this.history)
+      //mx.socket.init(socket, this, this.history)
 
       //Remember we ran once
       this.hasRun = true;
@@ -169,22 +171,22 @@ hasRun = false;
     let resultsPart = html`
 
     <div class="grid results greyBk" style="color:white;font-weight:500;">
-    <div>
-     sent message
+      <div>
+      sent message
+      </div>
+      <div>
+      to socket
+      </div>
+      <div>
+    
+      </div>
+      <div>
+      from socket
+      </div>
+      <div>
+      received message
+      </div>
     </div>
-    <div>
-     to socket
-    </div>
-    <div>
-      ==>
-    </div>
-    <div>
-     from socket
-    </div>
-    <div>
-     received message
-    </div>
-</div>
 
   ${this.mslResults}
 
