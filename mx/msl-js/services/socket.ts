@@ -62,7 +62,7 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
     if (!historyItem) {
 
       historyItem = {};
-      
+
     //Save in history if new message
       history.push(historyItem);
     }
@@ -151,7 +151,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     if (relay && (relay != socket.relay) && connections[socket.relay]) {
-      sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key)
+      sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key,history)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
