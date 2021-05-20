@@ -5,9 +5,6 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
 
-//Setup for Run Once
-let hasRun = false;
-
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
   static styles = css`
@@ -23,6 +20,9 @@ export class mxCommunicator extends LitElement {
       grid-auto-rows: minmax(100px, auto);
     }
     `;
+
+//Setup for Run Once
+hasRun = false;
 
   //Define public properties (databinding)
   @property() mslResults: any;
@@ -132,16 +132,19 @@ export class mxCommunicator extends LitElement {
      //Get a reference to the socket for this communicator
      let socket = mx.socket.list[this.socketKey];
 
-    if (!hasRun) {
+     console.log("hasRun",this.hasRun,this.socketKey)
+
+    if (!this.hasRun) {
       
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
+  
       //Initalize this socket w/ a listener (without sending a message)
       mx.socket.init(socket, this, this.history)
 
       //Remember we ran once
-      hasRun = true;
+      this.hasRun = true;
 
     }
 

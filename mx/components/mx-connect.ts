@@ -20,7 +20,6 @@ export class mxConnect extends LitElement {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      grid-auto-rows: minmax(100px, auto);
     }
     .one {
       grid-column: 1;
@@ -49,8 +48,6 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: Event) {
     this.history = receivedEvent.payload;
-    console.log("history length:",this.history.length);
-    console.log(this.history);
   }
 
   //Socket connect link clicked
@@ -73,7 +70,7 @@ export class mxConnect extends LitElement {
 
   //Create HTML Templates
 
-  machineGrid() {
+  templateMachineGrid() {
     return html`
     ${mx.machine.keys.map(machineKey => {
 
@@ -99,7 +96,7 @@ export class mxConnect extends LitElement {
     `
   }
 
-  communicators() {
+  templateCommunicators() {
     return html`
     <i class="fas fa-server"></i>
 
@@ -111,7 +108,7 @@ export class mxConnect extends LitElement {
     `
   }
 
-  groups() {
+  templateGroups() {
 
     return html`
     ${mx.machine.groupKeys.map(groupKey => {
@@ -137,24 +134,55 @@ export class mxConnect extends LitElement {
     `
   }
 
-  historyPart() {
+  templateHistory() {
+
+    //Setup for historyIndex
+    let historyLength = this.history.length
+
+    //Only draw if history exists (early return)
+    if (historyLength < 1) {
+      return;
+    }
+
+    //Setup for collecting all items from history array
+    let historyItemTemplates;
+
+    //look at all history items
+    for (let historyIndex in this.history) {
+      
+      //Add the template for this history item to the outgoing HTML
+      historyItemTemplates = html`${historyItemTemplates} ${this.templateHistoryItem(historyIndex)}`;
+    }
+    
+    //Return history item templates
     return html`
-    <div class="threeColumns machine greyBk">
-   History
-   </div>
- <div class="grid results greyBk threeColumns" style="color:white;font-weight:500;">
-  ${this.history.length}
- </div>
- `
+    ${historyItemTemplates}
+    `
+
   }
 
-  visualKey() {
+  templateHistoryItem(historyIndex) {
 
+    //Remember history item
+    let historyItem = this.history[historyIndex];
+
+    //Setup for collecting all socket info for this item
+    let socketTemplates;
+
+    //look at all socket keys on this history item
+    for (let socketKey of Object.keys(this.history[historyIndex])) {
+
+      //Add one socket key's template to the history item
+      socketTemplates = html`${socketTemplates} ${this.templateSocketItem(socketKey,historyItem[socketKey])}`
+    }
+
+    //Return socket templates HTML
     return html`
     Message ${historyIndex}
     ${socketTemplates}
     `
   }
+
 
   templateSocketItem(socketKey, messageValues) {
 
@@ -210,11 +238,11 @@ export class mxConnect extends LitElement {
     <br>
 
     <div class="grid">
-     ${this.visualKey()}
-      ${this.machineGrid()}
-      ${this.groups()}
-      ${this.historyPart()}
-      ${this.communicators()}
+     ${this.templateVisualKey()}
+      ${this.templateMachineGrid()}
+      ${this.templateGroups()}
+      ${this.templateHistory()}
+      ${this.templateCommunicators()}
     </div>
     
     <br>
