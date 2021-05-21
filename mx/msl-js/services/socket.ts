@@ -37,6 +37,8 @@ const notify = function (notifyElement: HTMLElement, eventName: string, payload:
   notifyElement.dispatchEvent(notifyEvent);
 };
 
+//MESSAGE SENDING & CALLBACK SETUP
+
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent.
 const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement, history?: {}[], messageNumber?) {
@@ -63,7 +65,7 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
 
       historyItem = {};
 
-    //Save in history if new message
+      //Save in history if new message
       history.push(historyItem);
     }
 
@@ -111,9 +113,10 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
       //Get Message in History
       let historyItem = history[messageNumber];
 
+
       //If no array for this socketKey, add it
       if (!historyItem[socket.key]) {
-        historyItem[socket.key] = [];
+        historyItem[socket.key] = [message];
       }
 
       //Save receiving socket and message
@@ -151,7 +154,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     if (relay && (relay != socket.relay) && connections[socket.relay]) {
-      sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key,history)
+      sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key, history)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -174,32 +177,44 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
 //sendSingleMessage (exposed through .mxSend on the socket)
 //Send a single message over a websocket w/ a per-message callback
-const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string = "false", history: {}[] = []) {
+const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string, history: {}[] = []) {
 
-//Setup for messageNumber
-let messageNumber
+  console.log("message",message)
+
+  //Setup for messageNumber
+  let messageNumber
 
   //Handle history
   if (history) {
 
-    console.log("relay",socket.key,relay)
-
-    //Check for already relayed message
-    if (socket.key == relay) {
-      console.log("relayed message")
-    }
-
-    //Create a history item
-    let historyItem = {}
-
-    //Store this outgoing message under the socketKey
-    historyItem[socket.key] = [message]
-
     //Remember message number
     messageNumber = history.length;
 
-    //Save in history
-    history.push(historyItem)
+    //Setup for new or existing historyItem
+    let historyItem = {}
+
+    console.log("relay",relay)
+
+    //Check if this is the result of a relayed message (relay = original sender's socketKey)
+    if (relay != "" && relay != "false" && socket.key != relay) {
+
+      console.log("relayed message, using existing history")
+      historyItem = history[messageNumber - 1]
+      
+      //Store this outgoing message under the socketKey
+      historyItem[socket.key] = [message]
+
+    } else {
+
+      //Store this outgoing message under the socketKey
+       historyItem[socket.key] = [message]
+
+
+      //Add new item to end of history array
+      history.push(historyItem)
+
+     
+    }
 
   }
 
@@ -221,8 +236,9 @@ let messageNumber
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-      setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
-     
+      //setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
+      setupMessageCallback(adminSocket, "", notifyElement, echo, socket, relay, history);
+
     }
   }
 
@@ -232,6 +248,8 @@ let messageNumber
   }
 
 };
+
+//UTILITY FUNCTIONS FOR DETERMINING MACHINES & SOCKETS
 
 //socketMachineKey
 //Gets machineKey from socket
@@ -254,8 +272,9 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 
 //PUBLIC FUNCTIONS
 
-//connect
+//CONNECT THE OUTSIDE
 //Connect to a WebSocket on a machine.
+
 const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupKey?, groupPorts?) {
 
 

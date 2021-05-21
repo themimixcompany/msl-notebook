@@ -57,6 +57,7 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: Event) {
     this.history = receivedEvent.payload;
+    console.log(this.history)
   }
 
   //Socket connect link clicked
@@ -185,9 +186,12 @@ export class mxConnect extends LitElement {
     //Remember history item
     let historyItem = this.history[historyIndex];
 
+    //Get first socket in history; this was the originating sender. Used for detecting relay result messages.
+    let originalSendingSocket = Object.keys(historyItem)[0];
+
     let historyItemHeader = html`
     <div class="whiteHeaderText">
-    sent message
+    sent message #${historyIndex * 1 + 1}
     </div>
     <div class="whiteHeaderText">
     to socket
@@ -210,7 +214,7 @@ export class mxConnect extends LitElement {
     for (let socketKey of Object.keys(this.history[historyIndex])) {
 
       //Add one socket key's template to the history item
-      socketTemplates = html`${socketTemplates} ${this.templateSocketItem(socketKey,historyItem[socketKey])}`
+      socketTemplates = html`${socketTemplates} ${this.templateSocketItem(socketKey,historyItem[socketKey],originalSendingSocket)}`
     }
 
     //Return socket templates HTML
@@ -221,7 +225,7 @@ export class mxConnect extends LitElement {
   }
 
 
-  templateSocketItem(socketKey, messageValues) {
+  templateSocketItem(socketKey, messageValues, originalSendingSocket) {
 
     //Extract sent and received message info
     const [sentMessage,receivedMessage] = messageValues;
@@ -231,7 +235,7 @@ export class mxConnect extends LitElement {
     let ReceivedWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
 
     //Setup Icons
-    let sentMessageIcon = socketKey == socketKey ? 'fas fa-keyboard' : 'fas fa-project-diagram';
+    let sentMessageIcon = socketKey == originalSendingSocket ? 'fas fa-keyboard' : 'fas fa-project-diagram';
 
     //Build single result template
     let singleResult = html`
