@@ -57,7 +57,6 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: Event) {
     this.history = receivedEvent.payload;
-    console.log("history changed, keys:", Object.keys(this.history[0]))
   }
 
   //Socket connect link clicked

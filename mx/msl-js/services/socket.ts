@@ -182,6 +182,13 @@ let messageNumber
   //Handle history
   if (history) {
 
+    console.log("relay",socket.key,relay)
+
+    //Check for already relayed message
+    if (socket.key == relay) {
+      console.log("relayed message")
+    }
+
     //Create a history item
     let historyItem = {}
 
@@ -214,7 +221,6 @@ let messageNumber
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-      console.log("setting up admin callback")
       setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
      
     }
