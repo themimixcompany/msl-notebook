@@ -236,6 +236,7 @@ export class mxConnect extends LitElement {
 
     //Setup Icons
     let sentMessageIcon = socketKey == originalSendingSocket ? 'fas fa-keyboard' : 'fas fa-project-diagram';
+    let receivedMessageIcon = sentMessage != "" ? 'fas fa-comment-check' : 'fas fa-comment';
 
     //Build single result template
     let singleResult = html`
@@ -249,10 +250,10 @@ export class mxConnect extends LitElement {
     ${sentMessage ? html`==>` : ""}
     </div>
     <div>
-      <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${socketKey}
+      <mx-icon class= "fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${socketKey}
     </div>
     <div>
-      <mx-icon class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
+      <mx-icon class=${receivedMessageIcon} color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
     </div>
 `;
 
