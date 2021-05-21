@@ -116,6 +116,14 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
       //If no array for this socketKey, add it
       if (!historyItem[socket.key]) {
+
+        console.log("need to add",socket.key,"under",sendingSocket.key);
+
+        //brute force move to bottom
+        let sendingSocketKey = sendingSocket.key;
+        let sendingSocketItem = historyItem[sendingSocketKey];
+        delete historyItem[sendingSocketKey];
+        historyItem[sendingSocketKey] = sendingSocketItem;
         historyItem[socket.key] = [message];
       }
 
@@ -167,7 +175,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     if (listeningKey != originalKey) {
 
       //Re-attach original listener
-      console.log("reattaching original listener")
       setupEmptyCallback(socket, socket.creator);
 
     }
@@ -179,7 +186,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 //Send a single message over a websocket w/ a per-message callback
 const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string, history: {}[] = []) {
 
-  console.log("message",message)
 
   //Setup for messageNumber
   let messageNumber
@@ -193,12 +199,10 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
     //Setup for new or existing historyItem
     let historyItem = {}
 
-    console.log("relay",relay)
 
     //Check if this is the result of a relayed message (relay = original sender's socketKey)
     if (relay != "" && relay != "false" && socket.key != relay) {
 
-      console.log("relayed message, using existing history")
       historyItem = history[messageNumber - 1]
       
       //Store this outgoing message under the socketKey

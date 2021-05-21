@@ -57,7 +57,6 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: Event) {
     this.history = receivedEvent.payload;
-    console.log(this.history)
   }
 
   //Socket connect link clicked
@@ -236,7 +235,7 @@ export class mxConnect extends LitElement {
 
     //Setup Icons
     let sentMessageIcon = socketKey == originalSendingSocket ? 'fas fa-keyboard' : 'fas fa-project-diagram';
-    let receivedMessageIcon = sentMessage != "" ? 'fas fa-comment-check' : 'fas fa-comment';
+    let receivedMessageIcon = sentMessage != "" ? 'fas fa-comment' : 'fas fa-comment-check';
 
     //Build single result template
     let singleResult = html`
