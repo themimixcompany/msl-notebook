@@ -2,7 +2,6 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-//MSL.js Services
 
 //Setup for closure over this component. Used in callback from document element.
 let thisComponent: mxDebug;

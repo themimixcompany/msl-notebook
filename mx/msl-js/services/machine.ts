@@ -129,13 +129,51 @@ const setValue = function(machineKey:string,key:string,value:string):boolean {
 }
 
 //hasType
-const hasType = function(machineKey:string,socketType:string) {
-  let hasPort = machines[machineKey].ports.map(portKey => ports[portKey].type == socketType)
+const hasType = function(machineKey:string,portType:string) {
+  let hasPort = machines[machineKey].ports.map(portKey => ports[portKey].type == portType)
   return hasPort.includes(true);
 }
 
 
 //Service Definition
+
+//groups
+//returns all groups from groups.json.
+//mx.groups[groupKey] => one group
+
+//list
+//returns all machines from machines.json.
+//mx.list[machineKey] => one machine
+
+//ports
+//returns all ports from ports.json.
+//mx.ports[portKey] => one port
+
+//keys
+//returns all machineKeys in machines.json.
+//mx.keys => array of machineKeys
+
+//groupKeys
+//returns all groupKeys in groups.json.
+//mx.groupKeys => array of groupKeys
+
+//find
+//returns a list of machineKeys having portType
+//mx.find(portType) => array of machineKeys where machine has port of portType
+
+//findInMachine
+//returns portKey of first port on machine having portType
+//mx.findInMachine(machineKey, portType) => portKey of matching port
+
+//set
+//set a value on a machine, overriding machines.json
+//mx.set(machineKey, key, value) => sets value at key on machineKey
+
+//hasType
+//returns true if machine machineKey has a port of portType
+//mx.hasType(machineKey, portType) => true if machine has a port of portType
+
+
 export const machine = {
   groups: allGroups(),
   list: allMachines(),

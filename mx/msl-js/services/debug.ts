@@ -1,7 +1,6 @@
 // MSL.js Debug Service
 // by The Mimix Company
 
-import { mxCommunicator } from "components/mx-communicator";
 
 
 // Sends debugging information to the mx-debug component for display.

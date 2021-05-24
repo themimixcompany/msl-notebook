@@ -3,7 +3,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
-import * as mx from 'msl-js/service-loader'
+import * as mx from 'msl-js/service-loader';
 
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
@@ -29,7 +29,7 @@ hasRun = false;
   @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
   @property() history: {}[];
-  @property() connector: LitElement;
+  @property() connector;
 
   //Private properties
   lastMessage = {
@@ -46,7 +46,7 @@ hasRun = false;
   messageReceived(event: Event) {
 
     //Extract sent and received message info
-    const { sentMessage, sentSocketKey, receivedMessage, receivedSocketKey } = event.payload
+    const { sentMessage, sentSocketKey, receivedMessage, receivedSocketKey } = event.payload;
 
     //Extract last message info for comparison
     let lastSentMessage = this.lastMessage.sentMessage;
@@ -163,7 +163,7 @@ hasRun = false;
       <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
       <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
     </div>
-    `
+    `;
 
 
 
@@ -190,7 +190,7 @@ hasRun = false;
 
   ${this.mslResults}
 
-    `
+    `;
 
     //RENDER TEMPLATE
 

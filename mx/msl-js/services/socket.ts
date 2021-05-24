@@ -1,7 +1,7 @@
 // MSL.js Socket Service
 // by The Mimix Company
 
-// Provides access to a websocket for sending and receiving messages with individual (per)
+// Provides access to a websocket for sending and receiving messages with individual (per message) callbacks.
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
@@ -25,7 +25,7 @@ let connections = {};
 
 //notify
 //Send an event to a web component or HTML element
-const notify = function (notifyElement: HTMLElement, eventName: string, payload: any) {
+const notify = function (notifyElement, eventName: string, payload: any) {
 
   //create event
   let notifyEvent = new CustomEvent(eventName);
@@ -116,8 +116,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
       //If no array for this socketKey, add it
       if (!historyItem[socket.key]) {
-
-        console.log("need to add",socket.key,"under",sendingSocket.key);
 
         //brute force move to bottom
         let sendingSocketKey = sendingSocket.key;
@@ -363,7 +361,7 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       let group = mx.machine.groups[groupKey];
 
       //If this socket was opened as part of a relay group
-      if (group && group.relay) {
+      if (groupPorts) {
 
         //Construct a list of ports in the group w/o repeats
         let portArray: string[] = [];
@@ -561,6 +559,9 @@ const initSocket = function (socket: WebSocket, notifyElement: HTMLElement, hist
 }
 
 //Service Definition
+
+//connect
+
 
 export const socket = {
   connect: connect,
