@@ -573,31 +573,32 @@ const takeCallbacks = (socketKey:string, notifyElement, history?: {}[]) => {
 //Service Definition
 
 //connectPort
-//create a websocket connection to one specific port on a machine
-//mx.ConnectPort(machineKey, portKey, notifyElement, relayPorts) => Connect to portKey on machineKey and notify notifyElement when the connection is open or closed. Keep a list of relayPairs for messages.
+//Create a websocket connection to one specific port on a machine.
+//mx.socket.ConnectPort(machineKey, portKey, notifyElement, relayPorts) => Connect to portKey on machineKey and notify notifyElement when the connection is open or closed. Keep a list of relayPairs for messages.
 
 //connectMachine
-//create individual websocket connections for every port defined on a machine
-//mx.connectMachine(machineKey, notifyElement, relayPorts) => Connect separately to every port on machineKey. Notify notifyElement when the connections are open. Keep a list of relayPairs for messages.
+//Create individual websocket connections for every port defined on a machineKey.
+//mx.socket..connectMachine(machineKey, notifyElement, relayPorts) => Connect separately to every port on machineKey. Notify notifyElement when the connections are open. Keep a list of relayPairs for messages.
 
 //connectGroup
-//connect the machines and ports in group defined in groups.json
-//mx.connectGroup(groupKey, notifyElement) => Connect to every machine and port defined in the group. Notify notifyElement when connections are open. Create a list of relayPairs from the group's port types or port lists.
+//Connect the machines and ports in groupKey defined in groups.json.
+//mx.socket.connectGroup(groupKey, notifyElement) => Connect to every machine and port defined in the group. Notify notifyElement when connections are open. Create a list of relayPairs from the group's port types or port lists.
 
 //takeOwnership
-//set a web component or HTML element as the creator and callback for a socket
-//mx.takeOwnership(socketKey, notifyElement, history) => set notifyElement as owner and callback for socketKey. Store any received messages in history.
+//Set a web component or HTML element as the creator and callback for a socket.
+//mx.socket.takeOwnership(socketKey, notifyElement, history) => set notifyElement as owner and callback for socketKey. Store any received messages in history.
 
 //takeCallbacks
-//set a web component to be notified when messages are received by a websocket
+//Set a web component to be notified when messages are received by a websocket.
+//mx.socket.takeCallbacks(socketKey, notifyElement, history) Set as callback for socketKey. Store any received messages in history.
 
 //list
-//return a json object with every open websocket under its socketKey
-//mx.list[machineKey-portKey] => live websocket for portKey on machineKey
+//Return a json object with every open websocket under its socketKey.
+//mx.socket.list[machineKey-portKey] => live websocket for portKey on machineKey
 
 //keys
-//return an array of all active socketKey names, representing all open sockets
-//mx.keys => array of socketKeys
+//Return an array of all active socketKey names, representing all open sockets.
+//mx.socket.keys => array of socketKeys
 
 export const socket = {
   connectPort: connectPort,
