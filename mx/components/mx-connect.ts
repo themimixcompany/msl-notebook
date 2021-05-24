@@ -47,6 +47,7 @@ export class mxConnect extends LitElement {
   //Define public properties (databinding)
   @property() connections: string[] = [];
   @property() history: {}[] = [];
+  @property() isHidden: boolean = false;
 
   //Status changed
   statusChanged(receivedEvent: Event) {
@@ -57,6 +58,16 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: Event) {
     this.history = receivedEvent.payload;
+  }
+
+  //Empty history
+  emptyHistory() {
+    this.history = [];
+  }
+
+   //Show or Hide History
+   showOrHide() {
+    this.isHidden = !this.isHidden
   }
 
   //PORT connect link clicked
@@ -289,8 +300,8 @@ return singleResult;
     templateHistoryHeader() { return html`
     <div class="gridHeader results" style="font-weight:600">
       history
-      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
-      <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
+      <mx-icon @click=${this.emptyHistory} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
+      <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
     </div>
     `
     }
@@ -317,8 +328,9 @@ return singleResult;
       ${this.templateGroups()}
       <br>
     </div>
+
     ${this.templateHistoryHeader()}
-    ${this.templateHistory()}
+    ${this.isHidden ? "" : this.templateHistory()}
     <br>
     ${this.templateCommunicators()}
    

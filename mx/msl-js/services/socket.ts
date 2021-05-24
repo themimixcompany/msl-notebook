@@ -1,14 +1,12 @@
 // MSL.js Socket Service
 // by The Mimix Company
 
-// Provides access to a websocket for sending and receiving messages with individual (per message) callbacks.
+// Create and manage websockets with per-message callback functions, histories, groups, and relays.
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
 
-
-//SERVICE CONSTANTS
-
+//SERVICE CONSTANTS //////////
 
 //WebSocket States
 const status = {
@@ -18,29 +16,17 @@ const status = {
   "closed": 3
 };
 
+//PRIVATE VARIABLES ////////// 
+
 //Active Sockets
 let connections = {};
 
-//PRIVATE FUNCTIONS
+//PRIVATE FUNCTIONS //////////
 
-//notify
-//Send an event to a web component or HTML element
-const notify = function (notifyElement, eventName: string, payload: any) {
-
-  //create event
-  let notifyEvent = new CustomEvent(eventName);
-
-  //attach payload
-  notifyEvent.payload = payload;
-
-  //dispatch
-  notifyElement.dispatchEvent(notifyEvent);
-};
-
-//MESSAGE SENDING & CALLBACK SETUP
+//MESSAGE SENDING & CALLBACK SETUP //////////
 
 //setupEmptyCallback
-//Used to handle the .onmessage that might come from a socket *before* any message is sent.
+//Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement, history?: {}[], messageNumber?) {
 
   //Handle history, if provided
@@ -181,7 +167,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 }
 
 //sendSingleMessage (exposed through .mxSend on the socket)
-//Send a single message over a websocket w/ a per-message callback
+//Send a single message over a websocket with a per-message callback.
 const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string, history: {}[] = []) {
 
 
@@ -251,7 +237,21 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
 };
 
-//UTILITY FUNCTIONS FOR DETERMINING MACHINES & SOCKETS
+//notify
+//Send an event to a web component or HTML element
+const notify = function (notifyElement: HTMLElement, eventName: string, payload: any) {
+
+  //create event
+  let notifyEvent = new CustomEvent(eventName);
+
+  //attach payload
+  notifyEvent.payload = payload;
+
+  //dispatch
+  notifyElement.dispatchEvent(notifyEvent);
+};
+
+//UTILITY FUNCTIONS FOR DETERMINING MACHINES & SOCKETS //////////
 
 //socketMachineKey
 //Gets machineKey from socket
@@ -269,16 +269,13 @@ const socketMachine = (socketKey: string) => mx.machine.list[socketMachineKey(so
 //Gets port from socket
 const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketKey)];
 
-
-
-
 //PUBLIC FUNCTIONS
 
-//CONNECT THE OUTSIDE
+//CONNECTION FUNCTIONS //////////
+
+//connectPort
 //Connect to a WebSocket on a machine.
-
 const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?) {
-
 
   let portKeyList = portKey;
 
@@ -286,7 +283,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
   if (portKey.constructor.name == "String") {
     portKeyList = [portKey];
   }
-
 
   //Open all requested ports
   for (let portKeyIndex in portKeyList) {
@@ -331,7 +327,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     const socketURL = connectPort.protocol + "://" + connectMachine.ip + portString;
     mx.debug.log("socket url", socketURL);
 
-
     //Create new socket or access existing one
     let socket: WebSocket = connections[socketKey];
 
@@ -345,7 +340,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       socket = new WebSocket(socketURL);
     };
 
-
     //Setup open callback
     socket.onopen = function () {
 
@@ -354,7 +348,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
-
       notify(notifyElement, "status-changed", connections);
 
       //If this socket was opened as part of a relay group
@@ -384,7 +377,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
         }
 
-
         //Test if all relay ports are open
 
         //Assume all open
@@ -409,7 +401,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
         //If all open, add relays, if any
         if (isAllOpen) {
 
-
           //Add each relay in the group
           for (let relayPairIndex in relayPairs) {
 
@@ -424,11 +415,8 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
             //Attach the relay
             fromSocket.relay = relaySocketKey;
-
           }
-
         }
-
       }
     };
 
@@ -439,24 +427,26 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
       //Notify the calling component socket that status has changed
       notify(notifyElement, "status-changed", connections);
-
     }
 
+    //Add properties and functions to the new socket
 
     //Add mxSend function 
-    WebSocket.prototype.mxSend = mxSend;
+    socket.mxSend = mxSend;
 
-    //Add machine and port 
+    //Add machine this socket is on.
     socket.machineKey = machineKey;
-    socket.portKey = portKey;
     socket.machine = mx.machine.list[machineKey];
+
+    //Add port this socket is on.
+    socket.portKey = portKey;
     socket.port = mx.machine.ports[portKey];
+
+    //Add this socket's key.
     socket.key = socketKey;
 
     //Turn off relay by default
     socket.relay = "";
-
-
   }
 
 
@@ -466,20 +456,14 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 }
 
 
-const mxSend = function (message: string, componentToNotify: HTMLElement, echo: boolean = false, history: {}[] = []) {
-  sendSingleMessage(this, message, componentToNotify, echo, "false", history);
-}
-
-const socketKeys = function (): string[] {
-  return Object.keys(connections);
-};
-
-
-const connectMachine = function (machineKey, notifyElement, relayPairs?) {
+//connectMachine
+//Connect to all ports on a machine.
+const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?) {
   connectPort(machineKey, mx.machine.list[machineKey].ports, notifyElement, relayPairs);
 }
 
-
+//connectGroup
+//Connect to all machines and ports in a group.
 const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
 
   //Get info about machines and ports in this group
@@ -548,6 +532,25 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
 
 }
 
+//socketKeys
+//Returns an array of socketKeys for all active connections.
+const socketKeys = function (): string[] {
+  return Object.keys(connections);
+};
+
+//MESSAGE FUNCTIONS //////////
+
+//mxSend
+//Send a message. Call w/ .mxSend function on an active socket from connections.
+//In that context, "this" as a parm to sendSingleMessage is the socket itself.
+const mxSend = function (message: string, notifyElement: HTMLElement, echo: boolean = false, history: {}[] = []) {
+  sendSingleMessage(this, message, notifyElement, echo, "false", history);
+}
+
+//CALLBACK OWNERSHIP FUNCTIONS //////////
+
+//takeOwnership
+//Assigns a web component or HTML element as the callback and creator of a socket.
 const takeOwnership = function (socketKey: string, notifyElement: HTMLElement, history?: {}[]) {
 
   //Find socket by key
@@ -560,7 +563,9 @@ const takeOwnership = function (socketKey: string, notifyElement: HTMLElement, h
   takeCallbacks(socketKey, notifyElement, history);
 }
 
-const takeCallbacks = (socketKey:string, notifyElement, history?: {}[]) => {
+//takeCallbacks
+//Assigns a web component or HTML element as the callback receipient for a socket.
+const takeCallbacks = (socketKey:string, notifyElement: HTMLElement, history?: {}[]) => {
 
   //Find socket by key
   let socket = connections[socketKey];
@@ -570,7 +575,7 @@ const takeCallbacks = (socketKey:string, notifyElement, history?: {}[]) => {
 
 }
 
-//Service Definition
+//SERVICE DEFINITION //////////
 
 //connectPort
 //Create a websocket connection to one specific port on a machine.
