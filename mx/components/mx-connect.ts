@@ -190,7 +190,7 @@ export class mxConnect extends LitElement {
 
     let historyItemHeader = html`
     <div class="whiteHeaderText">
-    sent message #${historyIndex * 1 + 1}
+    message #${historyIndex * 1 + 1}
     </div>
     <div class="whiteHeaderText">
     to socket

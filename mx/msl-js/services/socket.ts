@@ -277,7 +277,7 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 //CONNECT THE OUTSIDE
 //Connect to a WebSocket on a machine.
 
-const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupPorts?) {
+const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?) {
 
 
   let portKeyList = portKey;
@@ -358,16 +358,16 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       notify(notifyElement, "status-changed", connections);
 
       //If this socket was opened as part of a relay group
-      if (groupPorts) {
+      if (relayPairs) {
 
         //Construct a list of ports in the group w/o repeats
         let portArray: string[] = [];
 
         //Add each port in the group only once
-        for (let relayPairIndex in groupPorts) {
+        for (let relayPairIndex in relayPairs) {
 
           //Remember the pair
-          let relayPair = groupPorts[relayPairIndex];
+          let relayPair = relayPairs[relayPairIndex];
 
           //Extract the "from" socketKey and the relaySocketKey
           let [fromSocketKey, relaySocketKey] = relayPair;
@@ -411,10 +411,10 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
 
 
           //Add each relay in the group
-          for (let relayPairIndex in groupPorts) {
+          for (let relayPairIndex in relayPairs) {
 
             //Remember the pair
-            let relayPair = groupPorts[relayPairIndex];
+            let relayPair = relayPairs[relayPairIndex];
 
             //Extract the "from" socketKey and the relaySocketKey
             let [fromSocketKey, relaySocketKey] = relayPair;
@@ -475,8 +475,8 @@ const socketKeys = function (): string[] {
 };
 
 
-const connectAll = function (machineKey, notifyElement, groupPorts?) {
-  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement, groupPorts);
+const connectMachine = function (machineKey, notifyElement, relayPairs?) {
+  connectPort(machineKey, mx.machine.list[machineKey].ports, notifyElement, relayPairs);
 }
 
 
@@ -543,28 +543,68 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
   //Connect to all sockets on each of them
   for (let machineIndex in groupMachines) {
     let machineKey = groupMachines[machineIndex]
-    connectAll(machineKey, notifyElement, groupPorts);
+    connectMachine(machineKey, notifyElement, groupPorts);
   }
 
 }
 
-const initSocket = function (socket: WebSocket, notifyElement: HTMLElement, history?: {}[]) {
+const takeOwnership = function (socketKey: string, notifyElement: HTMLElement, history?: {}[]) {
+
+  //Find socket by key
+  let socket = connections[socketKey];
 
   //Remember socket creator
   socket.creator = notifyElement;
+
+  //Setup for callbacks
+  takeCallbacks(socketKey, notifyElement, history);
+}
+
+const takeCallbacks = (socketKey:string, notifyElement, history?: {}[]) => {
+
+  //Find socket by key
+  let socket = connections[socketKey];
+
+  //Setup for callbacks
   setupEmptyCallback(socket, notifyElement, history);
+
 }
 
 //Service Definition
 
-//connect
+//connectPort
+//create a websocket connection to one specific port on a machine
+//mx.ConnectPort(machineKey, portKey, notifyElement, relayPorts) => Connect to portKey on machineKey and notify notifyElement when the connection is open or closed. Keep a list of relayPairs for messages.
 
+//connectMachine
+//create individual websocket connections for every port defined on a machine
+//mx.connectMachine(machineKey, notifyElement, relayPorts) => Connect separately to every port on machineKey. Notify notifyElement when the connections are open. Keep a list of relayPairs for messages.
+
+//connectGroup
+//connect the machines and ports in group defined in groups.json
+//mx.connectGroup(groupKey, notifyElement) => Connect to every machine and port defined in the group. Notify notifyElement when connections are open. Create a list of relayPairs from the group's port types or port lists.
+
+//takeOwnership
+//set a web component or HTML element as the creator and callback for a socket
+//mx.takeOwnership(socketKey, notifyElement, history) => set notifyElement as owner and callback for socketKey. Store any received messages in history.
+
+//takeCallbacks
+//set a web component to be notified when messages are received by a websocket
+
+//list
+//return a json object with every open websocket under its socketKey
+//mx.list[machineKey-portKey] => live websocket for portKey on machineKey
+
+//keys
+//return an array of all active socketKey names, representing all open sockets
+//mx.keys => array of socketKeys
 
 export const socket = {
-  connectPort: connect,
-  connectMachine: connectAll,
+  connectPort: connectPort,
+  connectMachine: connectMachine,
   connectGroup: connectGroup,
-  init: initSocket,
+  takeOwnership: takeOwnership,
+  takeCallbacks: takeCallbacks,
   list: connections,
   keys: socketKeys()
 };

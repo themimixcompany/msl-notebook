@@ -141,7 +141,7 @@ hasRun = false;
 
   
       //Initalize this socket w/ a listener (without sending a message)
-      //mx.socket.init(socket, this, this.history)
+      mx.socket.takeOwnership(this.socketKey, this, this.history)
 
       //Remember we ran once
       this.hasRun = true;
