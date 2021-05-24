@@ -1,3 +1,8 @@
+// <mx-communicator>
+// by The Mimix Company
+
+//Provides two-way communication between the browser and a single websocket using MSL.js. Also collects all other messages triggered by the sent message, such as admin replies and relays.
+
 //Lit Dependencies
 import { html, css, LitElement, CSSResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -5,9 +10,7 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/service-loader';
 
-
 //<mx-communicator>
-//Provides two-way communication between the browser and a single websocket. Also collects all other messages triggered by the sent message, such as admin replies and relays.
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
 
@@ -30,7 +33,7 @@ export class mxCommunicator extends LitElement {
 
   //Define public properties (databinding)
   @property() mslResults: any;
-  @property({ attribute: 'socket' }) socketKey: string; // => let socketKey = attribute named 'socket'
+  @property({ attribute: false }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
   @property() history: {}[];
   @property() connector;
@@ -42,7 +45,6 @@ export class mxCommunicator extends LitElement {
     receivedMessage: "",
     receivedSocketKey: ""
   };
-
 
   //Private Functions
 

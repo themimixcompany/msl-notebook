@@ -1,3 +1,8 @@
+// <mx-history>
+// by The Mimix Company
+
+//Displays the history of websocket communications, as returned from the MSL.js socket service.
+
 //Lit Dependencies
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

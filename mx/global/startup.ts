@@ -28,21 +28,12 @@
 // No Liability
 // As far as the law allows, this software comes as is, without any warranty or condition, and no contributor will be liable to anyone for any damages related to this software or this license, under any kind of legal claim.
 
-
-
 //GLOBAL CONSTANTS
 // Everything in this file is global to the entire application.
 
 const mslNotebook = {
-    version: "1.11.3"
+    version: "1.11.4"
 };
 
 //Clear console
 console.clear();
-
-  
-
-
-
-
-

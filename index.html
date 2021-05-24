@@ -3,14 +3,11 @@
 
   <meta charset="utf-8"/>
 
-  <!-- MSL Notebook Startup Script. Do Not use type='module'; makes everything global. -->
+  <!-- MSL Notebook Startup Script. NOT having type='module' makes everything global. -->
   <script src="/mx/global/startup.ts"></script>
 
-  <!-- MSL Notebook Web Components. Create the UI. Use type='module'; isolates scope to import/export. -->
+  <!-- MSL Notebook Web Components. Create the UI. HAVING type='module' isolates scope to import/export. -->
   <script type="module" src="/mx/global/component-loader.ts"></script>
-
-  <!-- MSL.js Services. Headless. Use type='module'; isolates scope to import/export. -->
-  <script type="module" src="/mx/msl-js/service-loader.ts"></script>
 
   <!-- Mimix Fonts -->
   <link rel="stylesheet" href="/mx/fonts/mx-fonts.css">

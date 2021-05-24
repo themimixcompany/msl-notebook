@@ -2,6 +2,8 @@
 // by The Mimix Company
 
 // Load each web component or view from a single file.
+// Loading this as a script in index.html makes all components available to that page.
+// ie: <script type="module" src="/mx/global/component-loader.ts"></script>
 
 //Export Individual Components
 export * from "components/mx-communicator";

@@ -1,3 +1,8 @@
+// <mx-connect>
+// by The Mimix Company
+
+//Lists ports, machines, and groups available in the config .json files and opens connections to them. Keeps a collective history for all connections it opens. Displays communicators for each socket.
+
 //Lit Dependencies
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -6,7 +11,6 @@ import { customElement, property } from 'lit/decorators.js';
 import * as mx from 'msl-js/service-loader'
 
 //<mx-connect>
-//Opens connections to WebSockets
 @customElement('mx-connect')
 export class mxConnect extends LitElement {
   static styles = css`
@@ -116,7 +120,7 @@ export class mxConnect extends LitElement {
 
     ${this.connections.map(socketKey => html`
       <div class="threeColumns">
-        <mx-communicator socket=${socketKey} .history=${this.history} .connector=${this}></mx-communicator>
+        <mx-communicator .socketKey=${socketKey} .history=${this.history} .connector=${this}></mx-communicator>
       </div>
     `)}
     `
@@ -148,31 +152,25 @@ export class mxConnect extends LitElement {
     `
   }
 
-
+  //Visual key template. Explains icons and colors.
   templateVisualKey() {
-
     return html`
-  <div class="machine greyBk threeRows">
-  
-  <mx-icon class="fas fa-key"></mx-icon>
-  <span style="font-weight:600">key</span>
-
-  <p><mx-icon class="fas fa-server" color="#ec2028"></mx-icon>local msl engine</p>
-  <p><mx-icon class="fas fa-router" color="#ec2028"></mx-icon>local msl port</p>
-  <p><mx-icon class="fas fa-router" color="orange"></mx-icon>local admin port</p>
-  <p><mx-icon class="fas fa-server" color="navy"></mx-icon>remote msl engine</p>
-  <p><mx-icon class="fas fa-router" color="navy"></mx-icon>remote msl port</p>
-  <p><mx-icon class="fas fa-router" color="purple"></mx-icon>remote admin port</p>
-  <p><mx-icon class="fas fa-server"></mx-icon>websocket server</p>
-  <p><mx-icon class="fas fa-router"></mx-icon>websocket text port</p>
-  <p><mx-icon class="fas fa-network-wired" color="navy"></mx-icon>type relay group</p>
-  <p><mx-icon class="fas fa-project-diagram" color="navy"></mx-icon>port relay group</p>
-  <p><mx-icon class="fas fa-object-ungroup" color="navy"></mx-icon>non-relay group</p>
-  
-  </div>
-  `
+    <div class="machine greyBk threeRows">
+      <mx-icon class="fas fa-key"></mx-icon><span style="font-weight:600">key</span>
+      <p><mx-icon class="fas fa-server" color="#ec2028"></mx-icon>local msl engine</p>
+      <p><mx-icon class="fas fa-router" color="#ec2028"></mx-icon>local msl port</p>
+      <p><mx-icon class="fas fa-router" color="orange"></mx-icon>local admin port</p>
+      <p><mx-icon class="fas fa-server" color="navy"></mx-icon>remote msl engine</p>
+      <p><mx-icon class="fas fa-router" color="navy"></mx-icon>remote msl port</p>
+      <p><mx-icon class="fas fa-router" color="purple"></mx-icon>remote admin port</p>
+      <p><mx-icon class="fas fa-server"></mx-icon>websocket server</p>
+      <p><mx-icon class="fas fa-router"></mx-icon>websocket text port</p>
+      <p><mx-icon class="fas fa-network-wired" color="navy"></mx-icon>type relay group</p>
+      <p><mx-icon class="fas fa-project-diagram" color="navy"></mx-icon>port relay group</p>
+      <p><mx-icon class="fas fa-object-ungroup" color="navy"></mx-icon>non-relay group</p>
+    </div>
+    `
   }
-
 
   //Show this component on screen
   render() {
@@ -190,7 +188,7 @@ export class mxConnect extends LitElement {
     <br>
 
     <div class="grid">
-     ${this.templateVisualKey()}
+      ${this.templateVisualKey()}
       ${this.templateMachineGrid()}
       ${this.templateGroups()}
       <br>
