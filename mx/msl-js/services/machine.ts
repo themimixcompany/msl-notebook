@@ -3,7 +3,7 @@
 
 // Provides a list of machines for websocket connections.
 
-//SERVICE CONSTANTS
+//STATIC IMPORTS
 
 //groups
 //Groups of Machines

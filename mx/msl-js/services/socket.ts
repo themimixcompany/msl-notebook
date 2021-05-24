@@ -239,7 +239,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
 //notify
 //Send an event to a web component or HTML element
-const notify = function (notifyElement: HTMLElement, eventName: string, payload: any) {
+const notify = function (notifyElement, eventName: string, payload: any) {
 
   //create event
   let notifyEvent = new CustomEvent(eventName);
@@ -549,9 +549,9 @@ const mxSend = function (message: string, notifyElement: HTMLElement, echo: bool
 
 //CALLBACK OWNERSHIP FUNCTIONS //////////
 
-//takeOwnership
-//Assigns a web component or HTML element as the callback and creator of a socket.
-const takeOwnership = function (socketKey: string, notifyElement: HTMLElement, history?: {}[]) {
+//takeHistory
+//Assigns a web component or HTML element to be notified of history changes.
+const takeHistory = function (socketKey: string, notifyElement: HTMLElement) {
 
   //Find socket by key
   let socket = connections[socketKey];
@@ -559,12 +559,10 @@ const takeOwnership = function (socketKey: string, notifyElement: HTMLElement, h
   //Remember socket creator
   socket.creator = notifyElement;
 
-  //Setup for callbacks
-  takeCallbacks(socketKey, notifyElement, history);
 }
 
 //takeCallbacks
-//Assigns a web component or HTML element as the callback receipient for a socket.
+//Assigns a web component or HTML element as the message callback receipient for a socket.
 const takeCallbacks = (socketKey:string, notifyElement: HTMLElement, history?: {}[]) => {
 
   //Find socket by key
@@ -589,9 +587,9 @@ const takeCallbacks = (socketKey:string, notifyElement: HTMLElement, history?: {
 //Connect the machines and ports in groupKey defined in groups.json.
 //mx.socket.connectGroup(groupKey, notifyElement) => Connect to every machine and port defined in the group. Notify notifyElement when connections are open. Create a list of relayPairs from the group's port types or port lists.
 
-//takeOwnership
-//Set a web component or HTML element as the creator and callback for a socket.
-//mx.socket.takeOwnership(socketKey, notifyElement, history) => set notifyElement as owner and callback for socketKey. Store any received messages in history.
+//takeHistory
+//Set a web component or HTML element to take history notifications for this wire.
+//mx.socket.takeHistory(socketKey, notifyElement) => notify notifyElement of changes when socketKey updates history.
 
 //takeCallbacks
 //Set a web component to be notified when messages are received by a websocket.
@@ -609,7 +607,7 @@ export const socket = {
   connectPort: connectPort,
   connectMachine: connectMachine,
   connectGroup: connectGroup,
-  takeOwnership: takeOwnership,
+  takeHistory: takeHistory,
   takeCallbacks: takeCallbacks,
   list: connections,
   keys: socketKeys()

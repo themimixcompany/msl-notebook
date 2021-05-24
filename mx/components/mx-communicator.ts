@@ -1,12 +1,16 @@
 //Lit Dependencies
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, CSSResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader';
 
+
+//<mx-communicator>
+//Provides two-way communication between the browser and a single websocket. Also collects all other messages triggered by the sent message, such as admin replies and relays.
 @customElement('mx-communicator')
 export class mxCommunicator extends LitElement {
+
   static styles = css`
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
     input, .results { font-family: Inter; font-size: 18pt; }
@@ -21,8 +25,8 @@ export class mxCommunicator extends LitElement {
     }
     `;
 
-//Setup for Run Once
-hasRun = false;
+  //Setup for Run Once
+  hasRun = false;
 
   //Define public properties (databinding)
   @property() mslResults: any;
@@ -94,6 +98,7 @@ hasRun = false;
     `;
   }
 
+  //Check for message input box Enter key pressed to send message
   mslBoxKeyDown(event: Event) {
     const eventTarget = event.target as HTMLInputElement
     const message = eventTarget.value;
@@ -110,17 +115,15 @@ hasRun = false;
     mx.socket.list[this.socketKey].mxSend(message, this, true, this.history);
   }
 
-  //Empty The Results <div>
+  //Empty The Results Area
   emptyResults(receivedEvent: Event) {
     this.mslResults = "";
   }
-
 
   //Show or Hide Results
   showOrHideResults() {
     this.isHidden = !this.isHidden
   }
-
 
   //Show this component on screen
   render() {
@@ -129,19 +132,19 @@ hasRun = false;
 
     //Run Once
 
-     //Get a reference to the socket for this communicator
-     let socket = mx.socket.list[this.socketKey];
-
-
+    //Get a reference to the socket for this communicator
+    let socket = mx.socket.list[this.socketKey];
 
     if (!this.hasRun) {
-      
+
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
-  
-      //Initalize this socket w/ a listener (without sending a message)
-      mx.socket.takeOwnership(this.socketKey, this, this.history)
+      // //Be notified of history changes for this socket
+      // mx.socket.takeHistory(this.socketKey, this)
+
+      //Setup an empty callback for initial connect messages
+      mx.socket.takeCallbacks(this.socketKey, this, this.history);
 
       //Remember we ran once
       this.hasRun = true;
@@ -152,55 +155,48 @@ hasRun = false;
 
     //Input Box
     let inputPart = html`
-    <div class="greyBk" style="padding-right:6px;">
-      <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
-    </div>`
+      <div class="greyBk" style="padding-right:6px;">
+        <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
+      </div>
+    `
 
     //Results Header
     let headerPart = html`
-    <div class="gridHeader results" style="font-weight:600">
-      ${this.socketKey}
-      <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
-      <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
-    </div>
+      <div class="gridHeader results" style="font-weight:600">
+        ${this.socketKey}
+        <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
+        <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
+      </div>
     `;
-
-
 
     //Results Div
     let resultsPart = html`
-
-    <div class="grid results greyBk" style="color:white;font-weight:500;">
-      <div>
-      sent message
+      <div class="grid results greyBk" style="color:white;font-weight:500;">
+        <div>
+        sent message
+        </div>
+        <div>
+        to socket
+        </div>
+        <div>
+      
+        </div>
+        <div>
+        from socket
+        </div>
+        <div>
+        received message
+        </div>
       </div>
-      <div>
-      to socket
-      </div>
-      <div>
-    
-      </div>
-      <div>
-      from socket
-      </div>
-      <div>
-      received message
-      </div>
-    </div>
-
-  ${this.mslResults}
-
+      ${this.mslResults}
     `;
 
     //RENDER TEMPLATE
-
-    return html`
-    ${inputPart}
-    ${headerPart}
-    ${this.isHidden ? "" : resultsPart}
-
-
     
+    return html`
+      ${inputPart}
+      ${headerPart}
+      ${this.isHidden ? "" : resultsPart}
     `;
   }
 }

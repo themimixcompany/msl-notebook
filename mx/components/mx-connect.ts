@@ -47,7 +47,6 @@ export class mxConnect extends LitElement {
   //Define public properties (databinding)
   @property() connections: string[] = [];
   @property() history: {}[] = [];
-  @property() isHidden: boolean = false;
 
   //Status changed
   statusChanged(receivedEvent: Event) {
@@ -63,11 +62,6 @@ export class mxConnect extends LitElement {
   //Empty history
   emptyHistory() {
     this.history = [];
-  }
-
-   //Show or Hide History
-   showOrHide() {
-    this.isHidden = !this.isHidden
   }
 
   //PORT connect link clicked
@@ -86,10 +80,9 @@ export class mxConnect extends LitElement {
     mx.socket.connectGroup(groupKey, this);
   }
 
-
-
   //Create HTML Templates
 
+  //Machine grid. Shows all machines.
   templateMachineGrid() {
     return html`
     ${mx.machine.keys.map(machineKey => {
@@ -116,6 +109,7 @@ export class mxConnect extends LitElement {
     `
   }
 
+  //Communicators template. Draws one communicator for each socket in active connections
   templateCommunicators() {
     return html`
     <i class="fas fa-server"></i>
@@ -128,11 +122,11 @@ export class mxConnect extends LitElement {
     `
   }
 
+  //Groups template. Draws one panel for each group.
   templateGroups() {
 
     return html`
     ${mx.machine.groupKeys.map(groupKey => {
-
 
       return html`
       <div class="machine greyBk">
@@ -154,123 +148,6 @@ export class mxConnect extends LitElement {
     `
   }
 
-
-
-  templateHistory() {
-
-    //Setup for historyIndex
-    let historyLength = this.history.length
-
-    //Only draw if history exists (early return)
-    if (historyLength < 1) {
-      return;
-    }
-
-  
-
-
-    //Setup for collecting all items from history array
-    let historyItemTemplates;
-
-    //look at all history items
-    for (let historyIndex in this.history) {
-      
-      //Add the template for this history item to the outgoing HTML
-      historyItemTemplates = html`
-      ${historyItemTemplates}
-      ${this.templateHistoryItem(historyIndex)}`;
-    }
-    
-    //Return history item templates
-    return html`
-        
-    <div class="grid2 greyBk results">
-    ${historyItemTemplates}
-    </div>
-    `
-
-  }
-
-  templateHistoryItem(historyIndex) {
-
-    //Remember history item
-    let historyItem = this.history[historyIndex];
-
-    //Get first socket in history; this was the originating sender. Used for detecting relay result messages.
-    let originalSendingSocket = Object.keys(historyItem)[0];
-
-    let historyItemHeader = html`
-    <div class="whiteHeaderText">
-    message #${historyIndex * 1 + 1}
-    </div>
-    <div class="whiteHeaderText">
-    to socket
-    </div>
-    <div class="whiteHeaderText">
-
-    </div>
-    <div class="whiteHeaderText">
-    from socket
-    </div>
-    <div class="whiteHeaderText">
-    received message
-    </div>
-  `
-
-    //Setup for collecting all socket info for this item
-    let socketTemplates;
-
-    //look at all socket keys on this history item
-    for (let socketKey of Object.keys(this.history[historyIndex])) {
-
-      //Add one socket key's template to the history item
-      socketTemplates = html`${socketTemplates} ${this.templateSocketItem(socketKey,historyItem[socketKey],originalSendingSocket)}`
-    }
-
-    //Return socket templates HTML
-    return html`
-    ${historyItemHeader}
-    ${socketTemplates}
-    `
-  }
-
-
-  templateSocketItem(socketKey, messageValues, originalSendingSocket) {
-
-    //Extract sent and received message info
-    const [sentMessage,receivedMessage] = messageValues;
-
-    //Setup Colors
-    let sentWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
-    let ReceivedWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
-
-    //Setup Icons
-    let sentMessageIcon = socketKey == originalSendingSocket ? 'fas fa-keyboard' : 'fas fa-project-diagram';
-    let receivedMessageIcon = sentMessage != "" ? 'fas fa-comment' : 'fas fa-comment-check';
-
-    //Build single result template
-    let singleResult = html`
-    <div>
-      ${sentMessage ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}" style="cursor:pointer;"></mx-icon> ${sentMessage}`:""} 
-    </div>
-    <div>
-    ${sentMessage ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${socketKey}`: ""}
-    </div>
-    <div>
-    ${sentMessage ? html`==>` : ""}
-    </div>
-    <div>
-      <mx-icon class= "fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${socketKey}
-    </div>
-    <div>
-      <mx-icon class=${receivedMessageIcon} color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
-    </div>
-`;
-
-//Return HTML
-return singleResult;
-
-  }
 
   templateVisualKey() {
 
@@ -296,15 +173,6 @@ return singleResult;
   `
   }
 
-    //Results Header
-    templateHistoryHeader() { return html`
-    <div class="gridHeader results" style="font-weight:600">
-      history
-      <mx-icon @click=${this.emptyHistory} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
-      <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
-    </div>
-    `
-    }
 
   //Show this component on screen
   render() {
@@ -314,7 +182,6 @@ return singleResult;
     //Add event listeners for events targeting this component
     this.addEventListener("status-changed", this.statusChanged);
     this.addEventListener("history-changed", this.historyChanged);
-
 
     return html`
 
@@ -329,13 +196,11 @@ return singleResult;
       <br>
     </div>
 
-    ${this.templateHistoryHeader()}
-    ${this.isHidden ? "" : this.templateHistory()}
+    <mx-history .history=${this.history}></mx-history>
     <br>
+    
     ${this.templateCommunicators()}
    
   `;
-
   }
-
 }
