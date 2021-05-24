@@ -277,7 +277,7 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 //CONNECT THE OUTSIDE
 //Connect to a WebSocket on a machine.
 
-const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupKey?, groupPorts?) {
+const connect = function (machineKey: string, portKey, notifyElement: HTMLElement, groupPorts?) {
 
 
   let portKeyList = portKey;
@@ -356,9 +356,6 @@ const connect = function (machineKey: string, portKey, notifyElement: HTMLElemen
       //Notify the calling component socket that status has changed
 
       notify(notifyElement, "status-changed", connections);
-
-      //Setup for relay groups
-      let group = mx.machine.groups[groupKey];
 
       //If this socket was opened as part of a relay group
       if (groupPorts) {
@@ -478,14 +475,14 @@ const socketKeys = function (): string[] {
 };
 
 
-const connectAll = function (machineKey, notifyElement, groupKey, groupPorts) {
-  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement, groupKey, groupPorts);
+const connectAll = function (machineKey, notifyElement, groupPorts?) {
+  connect(machineKey, mx.machine.list[machineKey].ports, notifyElement, groupPorts);
 }
 
 
 const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
 
-  //Find all machines in this group
+  //Get info about machines and ports in this group
   let group = mx.machine.groups[groupKey];
   let groupMachines: string[] = group.machines;
   let groupPorts = group.ports;
@@ -546,7 +543,7 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
   //Connect to all sockets on each of them
   for (let machineIndex in groupMachines) {
     let machineKey = groupMachines[machineIndex]
-    connectAll(machineKey, notifyElement, groupKey, groupPorts);
+    connectAll(machineKey, notifyElement, groupPorts);
   }
 
 }
@@ -564,8 +561,8 @@ const initSocket = function (socket: WebSocket, notifyElement: HTMLElement, hist
 
 
 export const socket = {
-  connect: connect,
-  connectAll: connectAll,
+  connectPort: connect,
+  connectMachine: connectAll,
   connectGroup: connectGroup,
   init: initSocket,
   list: connections,

@@ -59,19 +59,19 @@ export class mxConnect extends LitElement {
     this.history = receivedEvent.payload;
   }
 
-  //Socket connect link clicked
-  connectSocket(machineKey: string, portKey: string) {
-    mx.socket.connect(machineKey, portKey, this);
+  //PORT connect link clicked
+  connectPort(machineKey: string, portKey: string) {
+    mx.socket.connectPort(machineKey, portKey, this);
     ;
   }
 
-  //Server connect link clicked
-  connectAllSockets(machineKey: string, groupKey?, groupPorts?) {
-    mx.socket.connectAll(machineKey, this, groupKey, groupPorts);
+  //MACHINE connect link clicked
+  connectMachine(machineKey: string) {
+    mx.socket.connectMachine(machineKey, this);
   }
 
-  //Group connect link clicked
-  connectAllMachines(groupKey: string) {
+  //GROUP connect link clicked
+  connectGroup(groupKey: string) {
     mx.socket.connectGroup(groupKey, this);
   }
 
@@ -87,14 +87,14 @@ export class mxConnect extends LitElement {
       return html`
       <div class="machine greyBk">
 
-      <a @click=${() => this.connectAllSockets(machineKey)} title="Connect to all ports on ${machineKey}.">
+      <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}.">
       <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : ''}></mx-icon>
       <span style="font-weight:600">${machineKey}</span>
       </a>
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
-      <a @click=${() => this.connectSocket(machineKey, portKey)} title="Connect to this port.">
+      <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to this port.">
       <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? 'darkOrange' : 'purple' : ''}></mx-icon>
       ${portKey}
       </p>
@@ -126,7 +126,7 @@ export class mxConnect extends LitElement {
       return html`
       <div class="machine greyBk">
 
-      <a @click=${() => this.connectAllMachines(groupKey)} title="Connect to all machines in ${groupKey}.">
+      <a @click=${() => this.connectGroup(groupKey)} title="Connect to all machines in ${groupKey}.">
       <mx-icon class="fas ${mx.machine.groups[groupKey].ports ? "fa-project-diagram" : mx.machine.groups[groupKey].relay ? "fa-network-wired" : "fa-object-ungroup"}" color="navy"></mx-icon>
       <span style="font-weight:600">${groupKey}</span>
       </a>
