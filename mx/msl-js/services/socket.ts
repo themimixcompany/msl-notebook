@@ -64,19 +64,19 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
     let [...historyCopy] = history;
 
     //Notify component of history change;
-    notify(notifyElement, "history-changed", historyCopy);
+    notify(socket.notifyHistory, "history-changed", historyCopy);
 
   }
 
   //using "" as message reflects that we did not send any message.
-  setupMessageCallback(socket, "", notifyElement, true, socket, "", history)
+  setupMessageCallback(socket, "", true, socket, "", history)
 
 
 }
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false", history?: {}[]) {
+const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false", history?: {}[]) {
 
   //Setup for messageNumber 
   let messageNumber;
@@ -90,7 +90,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
 
     //Debug Info
     mx.debug.echo(false);
-    mx.debug.log(`λ ${notifyElement.localName} ${socket.key} ${message} => ${receivedMessage}`);
+    mx.debug.log(`λ ${socket.notifyMessages.localName} ${socket.key} ${message} => ${receivedMessage}`);
 
     //Handle history, if provided
 
@@ -118,7 +118,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
       let [...historyCopy] = history;
 
       //Notify component of history change;
-      notify(notifyElement.connector, "history-changed", historyCopy);
+      notify(socket.notifyHistory, "history-changed", historyCopy);
 
     }
 
@@ -142,11 +142,12 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     }
 
     //Notify the sender of the received message.
-    notify(notifyElement, "message-received", notifyMessage);
+
+    notify(socket.notifyMessages, "message-received", notifyMessage);
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     if (relay && (relay != socket.relay) && connections[socket.relay]) {
-      sendSingleMessage(connections[socket.relay], receivedMessage, notifyElement, echo, socket.key, history)
+      sendSingleMessage(connections[socket.relay], receivedMessage, echo, socket.key, history)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -158,17 +159,17 @@ const setupMessageCallback = function (socket: WebSocket, message: string, notif
     //Test if they are different
     if (listeningKey != originalKey) {
 
-      //Re-attach original listener
-      setupEmptyCallback(socket, socket.creator);
+      //Re-attach original message listener
+      setupEmptyCallback(socket, socket.notifyMessages);
 
     }
 
   };
 }
 
-//sendSingleMessage (exposed through .mxSend on the socket)
+//sendSingleMessage
 //Send a single message over a websocket with a per-message callback.
-const sendSingleMessage = function (socket: WebSocket, message: string, notifyElement: HTMLElement, echo: boolean, relay: string, history: {}[] = []) {
+const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, history: {}[] = []) {
 
 
   //Setup for messageNumber
@@ -207,7 +208,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
   }
 
   //Setup message received callback
-  setupMessageCallback(socket, message, notifyElement, echo, socket, relay, history);
+  setupMessageCallback(socket, message, echo, socket, relay, history);
 
   //For MSL wires, also listen on admin.
   if (socket.port.type.toLowerCase() == "msl") {
@@ -224,8 +225,8 @@ const sendSingleMessage = function (socket: WebSocket, message: string, notifyEl
 
     //Setup message received callback on admin port, if open
     if (adminSocket) {
-      //setupEmptyCallback(adminSocket, notifyElement, history, messageNumber);
-      setupMessageCallback(adminSocket, "", notifyElement, echo, socket, relay, history);
+      //setupEmptyCallback(adminSocket, history, messageNumber);
+      setupMessageCallback(adminSocket, "", echo, socket, relay, history);
 
     }
   }
@@ -340,6 +341,44 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       socket = new WebSocket(socketURL);
     };
 
+
+    //Add properties and functions to the new socket
+
+    //Add MX functions
+
+    //mxSend. Send a message on the socket. 
+    socket.mxSend = mxSend;
+
+    //mxNotifyStatusChange. Tell who to notify of connect/disconnect.
+    socket.mxNotifyStatusChange = mxNotifyStatusChange;
+
+    //mxNotifyHistory. Tell who to notify of history changes.
+    socket.mxNotifyHistory = mxNotifyHistory;
+
+    //mxNotifyMessages. Tell who to notify of messages.
+    socket.mxNotifyMessages = mxNotifyMessages;
+
+    //Add machine this socket is on.
+    socket.machineKey = machineKey;
+    socket.machine = mx.machine.list[machineKey];
+
+    //Add port this socket is on.
+    socket.portKey = portKey;
+    socket.port = mx.machine.ports[portKey];
+
+    //Add this socket's key.
+    socket.key = socketKey;
+
+    //Turn off relay by default
+    socket.relay = "";
+
+    //Remember who to notify of status changes
+    socket.mxNotifyStatusChange(notifyElement);
+
+    //Remember who to notify of history changes
+    socket.mxNotifyHistory(notifyElement);
+
+
     //Setup open callback
     socket.onopen = function () {
 
@@ -348,7 +387,7 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
-      notify(notifyElement, "status-changed", connections);
+      notify(socket.notifyStatusChange, "status-changed", connections);
 
       //If this socket was opened as part of a relay group
       if (relayPairs) {
@@ -426,35 +465,10 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       delete connections[socketKey];
 
       //Notify the calling component socket that status has changed
-      notify(notifyElement, "status-changed", connections);
+      notify(socket.notifyStatusChange, "status-changed", connections);
     }
 
-    //Add properties and functions to the new socket
-
-    //Add MX functions
-
-    //mxSend. Send a message on the socket. 
-    socket.mxSend = mxSend;
-
-    //mxNotifyHistory. Tell who to notify of history changes.
-    socket.mxNotifyHistory = mxNotifyHistory;
-
-    //mxNotifyMessages. Tell who to notify of messages.
-    socket.mxNotifyMessages = mxNotifyMessages;
-
-    //Add machine this socket is on.
-    socket.machineKey = machineKey;
-    socket.machine = mx.machine.list[machineKey];
-
-    //Add port this socket is on.
-    socket.portKey = portKey;
-    socket.port = mx.machine.ports[portKey];
-
-    //Add this socket's key.
-    socket.key = socketKey;
-
-    //Turn off relay by default
-    socket.relay = "";
+    
   }
 
 
@@ -546,7 +560,8 @@ const socketKeys = function (): string[] {
   return Object.keys(connections);
 };
 
-//MESSAGE FUNCTIONS //////////
+//MX FUNCTIONS ON SOCKET ITSELF //////////
+//Note: These funtions rely on 'this' having separate scope and so cannot be written w/ arrow syntax.
 
 //mxSend
 //Send a message. Call w/ .mxSend function on an active socket from connections.
@@ -554,31 +569,47 @@ const socketKeys = function (): string[] {
 const mxSend = function (message: string, notifyElement: HTMLElement, echo: boolean = false, history: {}[] = []) {
 
   //Send the message w/ notification and history.
-  sendSingleMessage(this, message, notifyElement, echo, "false", history);
-  
+  sendSingleMessage(this, message, echo, "false", history);
+
 }
 
-//CALLBACK OWNERSHIP FUNCTIONS //////////
-
-//mxNotifyHistory. Accessed by .mxNotifyHistory function on an active socket.
-//Assigns a web component or HTML element to be notified when this socket changes the history.
+//mxNotifyStatusChange
+//Accessed by .mxNotifyStatusChange function on an active socket.
+//Assigns a web component or HTML element to be notified when a socket is opened or closed.
 //In that context, "this" is the socket itself.
-const mxNotifyHistory = function (notifyElement: HTMLElement) {
+const mxNotifyStatusChange = function(notifyElement: HTMLElement) {
 
-  //Remember who to notify of history changes for this socket.
-  this.creator = notifyElement;
+ //Remember who to notify of status changes
+ this.notifyStatusChange = notifyElement;
 
 }
 
-//mxNotifyMessages. Accessed by .mxNotifyMessages function on an active socket.
+//mxNotifyMessages
+//Accessed by .mxNotifyMessages function on an active socket.
 //Assigns a web component or HTML element to be notified when a message arrives on a socket.
 //In that context, "this" is the socket itself.
 const mxNotifyMessages = function(notifyElement: HTMLElement, history?: {}[]) {
+
+  //Remember who to notify of messages
+  this.notifyMessages = notifyElement;
 
   //Setup for callbacks
   setupEmptyCallback(this, notifyElement, history);
 
 }
+
+//mxNotifyHistory
+//Accessed by .mxNotifyHistory function on an active socket.
+//Assigns a web component or HTML element to be notified when this socket changes the history.
+//In that context, "this" is the socket itself.
+const mxNotifyHistory = function (notifyElement: HTMLElement) {
+
+  //Remember who to notify of history changes for this socket.
+  this.notifyHistory = notifyElement;
+
+}
+
+
 
 //SERVICE DEFINITION //////////
 
