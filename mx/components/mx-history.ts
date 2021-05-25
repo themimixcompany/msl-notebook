@@ -65,7 +65,7 @@ export class mxHistory extends LitElement {
 
     //Send to Socket (Used for re-sending messages from history)
     sendToSocket(socketKey, message: string) {
-    mx.socket.list[socketKey].mxSend(message, this, true, this.history);
+    mx.socket.list[socketKey].mxSend(message, true, this.history);
   }
 
     //Create HTML Templates
@@ -163,7 +163,7 @@ export class mxHistory extends LitElement {
         //Build single result template
         let singleResult = html`
             <div>
-            ${sentMessage ? html`<mx-icon @click=${() => this.sendToSocket(socketKey,receivedMessage)} class=${sentMessageIcon} color="${sentWireColor}" style="cursor:pointer;" title="resend this message to ${socketKey}"></mx-icon> ${sentMessage}` : ""} 
+            ${sentMessage ? html`<mx-icon @click=${() => this.sendToSocket(socketKey,sentMessage)} class=${sentMessageIcon} color="${sentWireColor}" style="cursor:pointer;" title="Resend this message to ${socketKey}."></mx-icon> ${sentMessage}` : ""} 
             </div>
             <div>
             ${sentMessage ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${socketKey}` : ""}
@@ -175,7 +175,7 @@ export class mxHistory extends LitElement {
             <mx-icon class= "fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${socketKey}
             </div>
             <div>
-            <mx-icon class=${receivedMessageIcon} color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
+            <mx-icon @click=${() => this.sendToSocket(socketKey,receivedMessage)} class=${receivedMessageIcon} color="${ReceivedWireColor}" title="Send this received message to ${socketKey}."></mx-icon>  ${receivedMessage}
             </div>
         `;
 

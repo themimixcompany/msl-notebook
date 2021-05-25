@@ -27,7 +27,7 @@ let connections = {};
 
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
-const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLElement, history?: {}[], messageNumber?) {
+const setupEmptyCallback = function (socket: WebSocket, history?: {}[], messageNumber?) {
 
   //Handle history, if provided
   if (history) {
@@ -46,12 +46,13 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
     //Get Message in History
     let historyItem = history[messageNumber];
 
-    //If no history, create empty item
+    //If no history item, create empty item
     if (!historyItem) {
 
       historyItem = {};
 
       //Save in history if new message
+      console.log(history);
       history.push(historyItem);
     }
 
@@ -76,7 +77,7 @@ const setupEmptyCallback = function (socket: WebSocket, notifyElement: HTMLEleme
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay: String = "false", history?: {}[]) {
+const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay?, history?: {}[]) {
 
   //Setup for messageNumber 
   let messageNumber;
@@ -160,7 +161,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     if (listeningKey != originalKey) {
 
       //Re-attach original message listener
-      setupEmptyCallback(socket, socket.notifyMessages);
+      setupEmptyCallback(socket);
 
     }
 
@@ -566,7 +567,7 @@ const socketKeys = function (): string[] {
 //mxSend
 //Send a message. Call w/ .mxSend function on an active socket from connections.
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
-const mxSend = function (message: string, notifyElement: HTMLElement, echo: boolean = false, history: {}[] = []) {
+const mxSend = function (message: string, echo: boolean = false, history: {}[] = []) {
 
   //Send the message w/ notification and history.
   sendSingleMessage(this, message, echo, "false", history);
@@ -593,8 +594,8 @@ const mxNotifyMessages = function(notifyElement: HTMLElement, history?: {}[]) {
   //Remember who to notify of messages
   this.notifyMessages = notifyElement;
 
-  //Setup for callbacks
-  setupEmptyCallback(this, notifyElement, history);
+  //Setup for message callbacks
+  setupEmptyCallback(this, history);
 
 }
 
@@ -625,13 +626,6 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 //Connect the machines and ports in groupKey defined in groups.json.
 //mx.socket.connectGroup(groupKey, notifyElement) => Connect to every machine and port defined in the group. Notify notifyElement when connections are open. Create a list of relayPairs from the group's port types or port lists.
 
-//takeHistory
-//Set a web component or HTML element to take history notifications for this wire.
-//mx.socket.takeHistory(socketKey, notifyElement) => notify notifyElement of changes when socketKey updates history.
-
-//takeCallbacks
-//Set a web component to be notified when messages are received by a websocket.
-//mx.socket.takeCallbacks(socketKey, notifyElement, history) Set as callback for socketKey. Store any received messages in history.
 
 //list
 //Return a json object with every open websocket under its socketKey.

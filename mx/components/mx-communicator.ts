@@ -73,7 +73,7 @@ export class mxCommunicator extends LitElement {
     let singleResult = html`
     <div class="grid results greyBk">
     <div>
-      ${sentMessage && !isAdditionalResponse ? html`<mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(sentMessage)} title="Send this message to ${this.socketKey}." class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
+      ${sentMessage && !isAdditionalResponse ? html`<mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(sentMessage)} title="Resend this message to ${this.socketKey}." class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
     </div>
     <div>
     ${sentMessage && !isAdditionalResponse ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${sentSocketKey}` : ""}
@@ -85,7 +85,7 @@ export class mxCommunicator extends LitElement {
       <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${receivedSocketKey}
     </div>
     <div>
-      <mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(receivedMessage)} title="Send this message to ${this.socketKey}." class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
+      <mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(receivedMessage)} title="Send this received message to ${this.socketKey}." class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
     </div>
     </div>
 `;
@@ -114,7 +114,7 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
-    mx.socket.list[this.socketKey].mxSend(message, this, true, this.history);
+    mx.socket.list[this.socketKey].mxSend(message, true, this.history);
   }
 
   //Empty The Results Area
