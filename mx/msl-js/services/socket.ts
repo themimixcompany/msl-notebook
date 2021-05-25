@@ -99,7 +99,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Debug Info
     mx.debug.echo(false);
-    mx.debug.log(`λ ${socket.notifyMessages.localName} ${socket.key} ${message} => ${receivedMessage}`);
+    mx.debug.log(`λ ${socket.notifyMessages["localName"]} ${socket.key} ${message} => ${receivedMessage}`);
 
     //Handle history, if provided
 
