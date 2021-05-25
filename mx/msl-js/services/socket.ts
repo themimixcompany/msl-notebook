@@ -29,8 +29,7 @@ let connections = {};
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
 
-  console.log(socket.history);
-
+  //Get history from socket
   let history = socket.history;
 
   //Handle history, if provided
@@ -56,7 +55,6 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
       historyItem = {};
 
       //Save in history if new message
-      console.log(history);
       history.push(historyItem);
     }
 
@@ -83,6 +81,7 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
 //Used to handle the .onmessage event from a socket *after* a message is sent.
 const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay?) {
 
+  //Get history from socket
   let history = socket.history;
 
   //Setup for messageNumber 
@@ -91,8 +90,10 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     messageNumber = history.length - 1;
   }
 
+  //Create onmessage callback
   socket.onmessage = function (event: Event) {
 
+    //Get received message from event
     const receivedMessage: string = event.data;
 
     //Debug Info
@@ -178,6 +179,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 //Send a single message over a websocket with a per-message callback.
 const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string) {
 
+  //Get history from socket
   let history = socket.history;
 
   //Setup for messageNumber
@@ -278,6 +280,28 @@ const socketMachine = (socketKey: string) => mx.machine.list[socketMachineKey(so
 //Gets port from socket
 const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketKey)];
 
+//MX SOCKET FUNCTIONS 
+
+//addMxFunctions
+//Add all .mx functions to a socket.
+const addMxFunctions = (socket) => {
+
+    //mxSend. Send a message on the socket. 
+    socket.mxSend = mxSend;
+
+    //mxNotifyStatusChange. Tell who to notify of connect/disconnect.
+    socket.mxNotifyStatusChange = mxNotifyStatusChange;
+
+    //mxNotifyHistory. Tell who to notify of history changes.
+    socket.mxNotifyHistory = mxNotifyHistory;
+
+    //mxNotifyMessages. Tell who to notify of messages.
+    socket.mxNotifyMessages = mxNotifyMessages;    
+
+}
+
+
+
 //PUBLIC FUNCTIONS
 
 //CONNECTION FUNCTIONS //////////
@@ -286,8 +310,7 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 //Connect to a WebSocket on a machine.
 const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?) {
 
-  console.log("connect history")
-  console.log(history);
+
 
   let portKeyList = portKey;
 
@@ -354,46 +377,35 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       
       //Create history
       socket.history = history;
-      console.log(socket.history)
+
+      //Add MX functions to socket
+      addMxFunctions(socket);
+
+      //Remember who to notify of status changes
+      socket.mxNotifyStatusChange(notifyElement);
+
+      //Remember who to notify of history changes
+      socket.mxNotifyHistory(notifyElement);
+
+      //Add socket properties
+
+      //Add machine this socket is on.
+      socket.machineKey = machineKey;
+      socket.machine = mx.machine.list[machineKey];
+
+      //Add port this socket is on.
+      socket.portKey = portKey;
+      socket.port = mx.machine.ports[portKey];
+
+      //Add this socket's key.
+      socket.key = socketKey;
+
+      //Turn off relay by default
+      socket.relay = "";
+
     };
 
-
-    //Add properties and functions to the new socket
-
-    //Add MX functions
-
-    //mxSend. Send a message on the socket. 
-    socket.mxSend = mxSend;
-
-    //mxNotifyStatusChange. Tell who to notify of connect/disconnect.
-    socket.mxNotifyStatusChange = mxNotifyStatusChange;
-
-    //mxNotifyHistory. Tell who to notify of history changes.
-    socket.mxNotifyHistory = mxNotifyHistory;
-
-    //mxNotifyMessages. Tell who to notify of messages.
-    socket.mxNotifyMessages = mxNotifyMessages;
-
-    //Add machine this socket is on.
-    socket.machineKey = machineKey;
-    socket.machine = mx.machine.list[machineKey];
-
-    //Add port this socket is on.
-    socket.portKey = portKey;
-    socket.port = mx.machine.ports[portKey];
-
-    //Add this socket's key.
-    socket.key = socketKey;
-
-    //Turn off relay by default
-    socket.relay = "";
-
-    //Remember who to notify of status changes
-    socket.mxNotifyStatusChange(notifyElement);
-
-    //Remember who to notify of history changes
-    socket.mxNotifyHistory(notifyElement);
-
+      
 
     //Setup open callback
     socket.onopen = function () {
