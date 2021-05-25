@@ -199,20 +199,20 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     if (relay != "" && relay != "false" && socket.key != relay) {
 
       historyItem = history[messageNumber - 1]
-      
+
       //Store this outgoing message under the socketKey
       historyItem[socket.key] = [message]
 
     } else {
 
       //Store this outgoing message under the socketKey
-       historyItem[socket.key] = [message]
+      historyItem[socket.key] = [message]
 
 
       //Add new item to end of history array
       history.push(historyItem)
 
-     
+
     }
 
   }
@@ -272,35 +272,25 @@ const socketMachineKey = (socketKey: string) => connections[socketKey].machineKe
 //Gets portKey from socket
 const socketPortKey = (socketKey: string) => connections[socketKey].portKey;
 
-//socketMachine
-//Gets machine from socket
-const socketMachine = (socketKey: string) => mx.machine.list[socketMachineKey(socketKey)];
-
-//socketPort
-//Gets port from socket
-const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketKey)];
-
 //MX SOCKET FUNCTIONS 
 
 //addMxFunctions
 //Add all .mx functions to a socket.
-const addMxFunctions = (socket) => {
+const addMxFunctions = (socket: WebSocket) => {
 
-    //mxSend. Send a message on the socket. 
-    socket.mxSend = mxSend;
+  //mxSend. Send a message on the socket. 
+  socket.mxSend = mxSend;
 
-    //mxNotifyStatusChange. Tell who to notify of connect/disconnect.
-    socket.mxNotifyStatusChange = mxNotifyStatusChange;
+  //mxNotifyStatusChange. Tell who to notify of connect/disconnect.
+  socket.mxNotifyStatusChange = mxNotifyStatusChange;
 
-    //mxNotifyHistory. Tell who to notify of history changes.
-    socket.mxNotifyHistory = mxNotifyHistory;
+  //mxNotifyHistory. Tell who to notify of history changes.
+  socket.mxNotifyHistory = mxNotifyHistory;
 
-    //mxNotifyMessages. Tell who to notify of messages.
-    socket.mxNotifyMessages = mxNotifyMessages;    
+  //mxNotifyMessages. Tell who to notify of messages.
+  socket.mxNotifyMessages = mxNotifyMessages;
 
 }
-
-
 
 //PUBLIC FUNCTIONS
 
@@ -309,8 +299,6 @@ const addMxFunctions = (socket) => {
 //connectPort
 //Connect to a WebSocket on a machine.
 const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?) {
-
-
 
   let portKeyList = portKey;
 
@@ -365,47 +353,46 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     //Create new socket or access existing one
     let socket: WebSocket = connections[socketKey];
 
-    //Connect or grab existing connection
+    //If connection exists, quit. (Early return)
     if (socket) {
       mx.debug.log("already connected to", socketKey)
+      return;
     }
-    else {
-      mx.debug.log("opening socket", socketKey);
-      
-      //Create new socket
-      socket = new WebSocket(socketURL);
-      
-      //Create history
-      socket.history = history;
 
-      //Add MX functions to socket
-      addMxFunctions(socket);
+    //Open new socket to URL
 
-      //Remember who to notify of status changes
-      socket.mxNotifyStatusChange(notifyElement);
+    mx.debug.log("opening socket", socketKey);
 
-      //Remember who to notify of history changes
-      socket.mxNotifyHistory(notifyElement);
+    //Create new socket
+    socket = new WebSocket(socketURL);
 
-      //Add socket properties
+    //Create history
+    socket.history = history;
 
-      //Add machine this socket is on.
-      socket.machineKey = machineKey;
-      socket.machine = mx.machine.list[machineKey];
+    //ADD MX FUNCTIONS TO SOCKET //////////
+    addMxFunctions(socket);
 
-      //Add port this socket is on.
-      socket.portKey = portKey;
-      socket.port = mx.machine.ports[portKey];
+    //Remember who to notify of status changes
+    socket.mxNotifyStatusChange(notifyElement);
 
-      //Add this socket's key.
-      socket.key = socketKey;
+    //Remember who to notify of history changes
+    socket.mxNotifyHistory(notifyElement);
 
-      //Turn off relay by default
-      socket.relay = "";
+    //ADD CUSTOM PROPERTIES TO SOCKET //////////
 
-    };
+    //Add machine this socket is on.
+    socket.machineKey = machineKey;
+    socket.machine = mx.machine.list[machineKey];
 
-      
+    //Add port this socket is on.
+    socket.portKey = portKey;
+    socket.port = mx.machine.ports[portKey];
+
+    //Add this socket's key.
+    socket.key = socketKey;
+
+    //Turn off relay by default
+    socket.relay = "";
 
     //Setup open callback
     socket.onopen = function () {
@@ -496,13 +483,11 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       notify(socket.notifyStatusChange, "status-changed", connections);
     }
 
-    
-  }
 
+  }
 
   //Return 
   return true;
-
 }
 
 
@@ -605,10 +590,10 @@ const mxSend = function (message: string, echo: boolean = false) {
 //Accessed by .mxNotifyStatusChange function on an active socket.
 //Assigns a web component or HTML element to be notified when a socket is opened or closed.
 //In that context, "this" is the socket itself.
-const mxNotifyStatusChange = function(notifyElement: HTMLElement) {
+const mxNotifyStatusChange = function (notifyElement: HTMLElement) {
 
- //Remember who to notify of status changes
- this.notifyStatusChange = notifyElement;
+  //Remember who to notify of status changes
+  this.notifyStatusChange = notifyElement;
 
 }
 
@@ -616,7 +601,7 @@ const mxNotifyStatusChange = function(notifyElement: HTMLElement) {
 //Accessed by .mxNotifyMessages function on an active socket.
 //Assigns a web component or HTML element to be notified when a message arrives on a socket.
 //In that context, "this" is the socket itself.
-const mxNotifyMessages = function(notifyElement: HTMLElement) {
+const mxNotifyMessages = function (notifyElement: HTMLElement) {
 
   //Remember who to notify of messages
   this.notifyMessages = notifyElement;
@@ -637,8 +622,6 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 
 }
 
-
-
 //SERVICE DEFINITION //////////
 
 //connectPort
@@ -652,7 +635,6 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 //connectGroup
 //Connect the machines and ports in groupKey defined in groups.json.
 //mx.socket.connectGroup(groupKey, notifyElement) => Connect to every machine and port defined in the group. Notify notifyElement when connections are open. Create a list of relayPairs from the group's port types or port lists.
-
 
 //list
 //Return a json object with every open websocket under its socketKey.
