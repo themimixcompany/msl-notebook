@@ -431,8 +431,16 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
     //Add properties and functions to the new socket
 
-    //Add mxSend function 
+    //Add MX functions
+
+    //mxSend. Send a message on the socket. 
     socket.mxSend = mxSend;
+
+    //mxNotifyHistory. Tell who to notify of history changes.
+    socket.mxNotifyHistory = mxNotifyHistory;
+
+    //mxNotifyMessages. Tell who to notify of messages.
+    socket.mxNotifyMessages = mxNotifyMessages;
 
     //Add machine this socket is on.
     socket.machineKey = machineKey;
@@ -544,32 +552,31 @@ const socketKeys = function (): string[] {
 //Send a message. Call w/ .mxSend function on an active socket from connections.
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
 const mxSend = function (message: string, notifyElement: HTMLElement, echo: boolean = false, history: {}[] = []) {
+
+  //Send the message w/ notification and history.
   sendSingleMessage(this, message, notifyElement, echo, "false", history);
+  
 }
 
 //CALLBACK OWNERSHIP FUNCTIONS //////////
 
-//takeHistory
-//Assigns a web component or HTML element to be notified of history changes.
-const takeHistory = function (socketKey: string, notifyElement: HTMLElement) {
+//mxNotifyHistory. Accessed by .mxNotifyHistory function on an active socket.
+//Assigns a web component or HTML element to be notified when this socket changes the history.
+//In that context, "this" is the socket itself.
+const mxNotifyHistory = function (notifyElement: HTMLElement) {
 
-  //Find socket by key
-  let socket = connections[socketKey];
-
-  //Remember socket creator
-  socket.creator = notifyElement;
+  //Remember who to notify of history changes for this socket.
+  this.creator = notifyElement;
 
 }
 
-//takeCallbacks
-//Assigns a web component or HTML element as the message callback receipient for a socket.
-const takeCallbacks = (socketKey:string, notifyElement: HTMLElement, history?: {}[]) => {
-
-  //Find socket by key
-  let socket = connections[socketKey];
+//mxNotifyMessages. Accessed by .mxNotifyMessages function on an active socket.
+//Assigns a web component or HTML element to be notified when a message arrives on a socket.
+//In that context, "this" is the socket itself.
+const mxNotifyMessages = function(notifyElement: HTMLElement, history?: {}[]) {
 
   //Setup for callbacks
-  setupEmptyCallback(socket, notifyElement, history);
+  setupEmptyCallback(this, notifyElement, history);
 
 }
 
@@ -607,8 +614,6 @@ export const socket = {
   connectPort: connectPort,
   connectMachine: connectMachine,
   connectGroup: connectGroup,
-  takeHistory: takeHistory,
-  takeCallbacks: takeCallbacks,
   list: connections,
   keys: socketKeys()
 };

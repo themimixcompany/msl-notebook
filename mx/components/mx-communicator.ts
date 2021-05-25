@@ -48,7 +48,7 @@ export class mxCommunicator extends LitElement {
 
   //Private Functions
 
-  //Update communicator when messages received
+  //Update results area when a message is received
   messageReceived(event: Event) {
 
     //Extract sent and received message info
@@ -142,11 +142,9 @@ export class mxCommunicator extends LitElement {
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
-      // //Be notified of history changes for this socket
-      // mx.socket.takeHistory(this.socketKey, this)
-
       //Setup an empty callback for initial connect messages
-      mx.socket.takeCallbacks(this.socketKey, this, this.history);
+      socket.mxNotifyMessages(this, this.history);
+      //mx.socket.takeCallbacks(this.socketKey, this, this.history);
 
       //Remember we ran once
       this.hasRun = true;

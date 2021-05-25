@@ -30,6 +30,9 @@ export class communicatorView extends LitElement {
     <mx-greeting></mx-greeting>
     <mx-debug></mx-debug>
     <mx-connect></mx-connect>
+    <mx-icon class="fas fa-envelope" color="purple" size="2"></mx-icon><br>
+    <mx-icon class="fas fa-square-down" color="purple" size="2"></mx-icon><br>
+
     <img src="${logo}" style="width:40px;margin-bottom:20px;margin-top:10px;"> 
     `
   }

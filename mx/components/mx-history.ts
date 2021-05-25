@@ -63,6 +63,11 @@ export class mxHistory extends LitElement {
         this.isHidden = !this.isHidden
     }
 
+    //Send to Socket (Used for re-sending messages from history)
+    sendToSocket(socketKey, message: string) {
+    mx.socket.list[socketKey].mxSend(message, this, true, this.history);
+  }
+
     //Create HTML Templates
 
     //Outer History (Draws all history items)
@@ -142,7 +147,7 @@ export class mxHistory extends LitElement {
     }
 
     //Single socket within a history item
-    templateSocketItem(socketKey, messageValues, originalSendingSocket) {
+    templateSocketItem(socketKey: string, messageValues: string[], originalSendingSocket:string) {
 
         //Extract sent and received message info
         const [sentMessage, receivedMessage] = messageValues;
@@ -158,7 +163,7 @@ export class mxHistory extends LitElement {
         //Build single result template
         let singleResult = html`
             <div>
-            ${sentMessage ? html`<mx-icon class=${sentMessageIcon} color="${sentWireColor}" style="cursor:pointer;"></mx-icon> ${sentMessage}` : ""} 
+            ${sentMessage ? html`<mx-icon @click=${() => this.sendToSocket(socketKey,receivedMessage)} class=${sentMessageIcon} color="${sentWireColor}" style="cursor:pointer;" title="resend this message to ${socketKey}"></mx-icon> ${sentMessage}` : ""} 
             </div>
             <div>
             ${sentMessage ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${socketKey}` : ""}
