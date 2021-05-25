@@ -27,7 +27,11 @@ let connections = {};
 
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
-const setupEmptyCallback = function (socket: WebSocket, history?: {}[], messageNumber?) {
+const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
+
+  console.log(socket.history);
+
+  let history = socket.history;
 
   //Handle history, if provided
   if (history) {
@@ -70,14 +74,16 @@ const setupEmptyCallback = function (socket: WebSocket, history?: {}[], messageN
   }
 
   //using "" as message reflects that we did not send any message.
-  setupMessageCallback(socket, "", true, socket, "", history)
+  setupMessageCallback(socket, "", true, socket, "")
 
 
 }
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay?, history?: {}[]) {
+const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay?) {
+
+  let history = socket.history;
 
   //Setup for messageNumber 
   let messageNumber;
@@ -148,7 +154,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     if (relay && (relay != socket.relay) && connections[socket.relay]) {
-      sendSingleMessage(connections[socket.relay], receivedMessage, echo, socket.key, history)
+      sendSingleMessage(connections[socket.relay], receivedMessage, echo, socket.key)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -170,8 +176,9 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
 //sendSingleMessage
 //Send a single message over a websocket with a per-message callback.
-const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, history: {}[] = []) {
+const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string) {
 
+  let history = socket.history;
 
   //Setup for messageNumber
   let messageNumber
@@ -209,7 +216,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
   }
 
   //Setup message received callback
-  setupMessageCallback(socket, message, echo, socket, relay, history);
+  setupMessageCallback(socket, message, echo, socket, relay);
 
   //For MSL wires, also listen on admin.
   if (socket.port.type.toLowerCase() == "msl") {
@@ -227,7 +234,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     //Setup message received callback on admin port, if open
     if (adminSocket) {
       //setupEmptyCallback(adminSocket, history, messageNumber);
-      setupMessageCallback(adminSocket, "", echo, socket, relay, history);
+      setupMessageCallback(adminSocket, "", echo, socket, relay);
 
     }
   }
@@ -277,7 +284,10 @@ const socketPort = (socketKey: string) => mx.machine.ports[socketPortKey(socketK
 
 //connectPort
 //Connect to a WebSocket on a machine.
-const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?) {
+const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?) {
+
+  console.log("connect history")
+  console.log(history);
 
   let portKeyList = portKey;
 
@@ -338,8 +348,13 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     }
     else {
       mx.debug.log("opening socket", socketKey);
+      
       //Create new socket
       socket = new WebSocket(socketURL);
+      
+      //Create history
+      socket.history = history;
+      console.log(socket.history)
     };
 
 
@@ -481,13 +496,13 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
 //connectMachine
 //Connect to all ports on a machine.
-const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?) {
-  connectPort(machineKey, mx.machine.list[machineKey].ports, notifyElement, relayPairs);
+const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, history?) {
+  connectPort(machineKey, mx.machine.list[machineKey].ports, notifyElement, relayPairs, history);
 }
 
 //connectGroup
 //Connect to all machines and ports in a group.
-const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
+const connectGroup = function (groupKey: string, notifyElement: HTMLElement, history?) {
 
   //Get info about machines and ports in this group
   let group = mx.machine.groups[groupKey];
@@ -550,7 +565,7 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement) {
   //Connect to all sockets on each of them
   for (let machineIndex in groupMachines) {
     let machineKey = groupMachines[machineIndex]
-    connectMachine(machineKey, notifyElement, groupPorts);
+    connectMachine(machineKey, notifyElement, groupPorts, history);
   }
 
 }
@@ -567,10 +582,10 @@ const socketKeys = function (): string[] {
 //mxSend
 //Send a message. Call w/ .mxSend function on an active socket from connections.
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
-const mxSend = function (message: string, echo: boolean = false, history: {}[] = []) {
+const mxSend = function (message: string, echo: boolean = false) {
 
   //Send the message w/ notification and history.
-  sendSingleMessage(this, message, echo, "false", history);
+  sendSingleMessage(this, message, echo, "false");
 
 }
 
@@ -589,13 +604,13 @@ const mxNotifyStatusChange = function(notifyElement: HTMLElement) {
 //Accessed by .mxNotifyMessages function on an active socket.
 //Assigns a web component or HTML element to be notified when a message arrives on a socket.
 //In that context, "this" is the socket itself.
-const mxNotifyMessages = function(notifyElement: HTMLElement, history?: {}[]) {
+const mxNotifyMessages = function(notifyElement: HTMLElement) {
 
   //Remember who to notify of messages
   this.notifyMessages = notifyElement;
 
   //Setup for message callbacks
-  setupEmptyCallback(this, history);
+  setupEmptyCallback(this);
 
 }
 

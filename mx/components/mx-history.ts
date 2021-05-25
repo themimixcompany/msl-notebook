@@ -65,7 +65,7 @@ export class mxHistory extends LitElement {
 
     //Send to Socket (Used for re-sending messages from history)
     sendToSocket(socketKey, message: string) {
-    mx.socket.list[socketKey].mxSend(message, true, this.history);
+    mx.socket.list[socketKey].mxSend(message, true);
   }
 
     //Create HTML Templates

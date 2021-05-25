@@ -70,18 +70,18 @@ export class mxConnect extends LitElement {
 
   //PORT connect link clicked
   connectPort(machineKey: string, portKey: string) {
-    mx.socket.connectPort(machineKey, portKey, this);
+    mx.socket.connectPort(machineKey, portKey, this,[],this.history);
     ;
   }
 
   //MACHINE connect link clicked
   connectMachine(machineKey: string) {
-    mx.socket.connectMachine(machineKey, this);
+    mx.socket.connectMachine(machineKey, this,[],this.history);
   }
 
   //GROUP connect link clicked
   connectGroup(groupKey: string) {
-    mx.socket.connectGroup(groupKey, this);
+    mx.socket.connectGroup(groupKey, this, this.history);
   }
 
   //Create HTML Templates
