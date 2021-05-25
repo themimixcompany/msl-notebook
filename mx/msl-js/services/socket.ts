@@ -81,6 +81,7 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
 //Used to handle the .onmessage event from a socket *after* a message is sent.
 const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay?) {
 
+
   //Get history from socket
   let history = socket.history;
 
@@ -236,8 +237,8 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     //Setup message received callback on admin port, if open
     if (adminSocket) {
       //setupEmptyCallback(adminSocket, history, messageNumber);
-      setupMessageCallback(adminSocket, "", echo, socket, relay);
-
+      console.log("setting up admin callback");
+      adminSocket.mxNotifyMessages(socket.notifyMessages);
     }
   }
 
