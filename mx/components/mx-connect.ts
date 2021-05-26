@@ -9,17 +9,17 @@ import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
-import { socket } from 'msl-js/service-loader';
 
 //<mx-connect>
 @customElement('mx-connect')
 export class mxConnect extends LitElement {
   static styles = css`
-    textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
+    textarea, h3 { color: #ec2028; font-family: Inter Black; font-size: 18pt }
     ol,ul, input, h2, p, .machine, .results { font-family: Inter; font-size: 18pt }
     p {margin-top: 5px; margin-bottom: 5px;}
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
+    .disabled {color:grey}
     a { text-decoration: underline; cursor: pointer; text-decoration:underline}
     .whiteHeaderText {color:white;font-weight:500;}
     .grid {
@@ -56,6 +56,21 @@ export class mxConnect extends LitElement {
   @property() machines: {} = mx.machine.machines;
   @property() connections: string[] = [];
   @property() history: {}[] = [];
+  @property() url: string = "";
+
+  //Key pressed in URL input box? Check for Enter.
+  urlKeyDown(event: Event) {
+
+    //Enter key?
+    if (event.keyCode == 13) {
+
+      //Get URL from input box
+      this.url = (event.target as HTMLInputElement).value;
+
+      //Connect to URL, add it to connection list, and create communicator.
+      mx.socket.connect(this.url, this, this.history);
+    }
+  }
 
   //Machines changed
   machinesChanged(receivedEvent: Event) {
@@ -113,7 +128,7 @@ export class mxConnect extends LitElement {
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
-      <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to this port.">
+      <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to this port." class=${this.connections[`${machineKey}-${portKey}`] ? "disabled" : ""} >
       <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? 'darkOrange' : 'purple' : ''}></mx-icon>
       ${portKey}
       </p>
@@ -183,6 +198,13 @@ export class mxConnect extends LitElement {
     `
   }
 
+  //Connect to URL template. Creates a connection from URL typed in the box.
+  templateConnectURL() {
+    return html`
+    <h3>Connect to a URL <input @keydown=${this.urlKeyDown} placeholder="echo.websocket.org"></h3>
+    `;
+  }
+
   //Show this component on screen
   render() {
 
@@ -191,8 +213,6 @@ export class mxConnect extends LitElement {
     //Run Once
 
     if (!this.hasRun) {
-
-      mx.socket.connect("echo.websocket.org", this, this.history);
 
       //Remember we ran once
       this.hasRun = true;
@@ -207,17 +227,23 @@ export class mxConnect extends LitElement {
 
     return html`
 
-    <p>Click a server, port, or group to connect. Then send a message.</p>
-    <p>Click a message icon to send it again.</p>
-    <br>
+    <ol>
+    <li>Click a <mx-icon class="fas fa-server"></mx-icon> server, <mx-icon class="fas fa-router"></mx-icon> port, or <mx-icon class="fas fa-network-wired"></mx-icon> group icon to connect.</li>
+    <li>Use <mx-icon class="fas fa-keyboard"></mx-icon> communicators to send messages.
+    <li>Click a <mx-icon class="fas fa-keyboard"></mx-icon> sent message, <mx-icon class="fas fa-chart-network"></mx-icon> relay, <mx-icon class="fas fa-comment"></mx-icon> reply, or <mx-icon class="fas fa-comment-check"></mx-icon> additional reply icon to resend.</li>
+    </ol>
+
+
+
+    ${this.templateConnectURL()}
 
     <div class="grid">
       ${this.templateVisualKey()}
       ${this.templateMachineGrid()}
       ${this.templateGroups()}
-      <br>
     </div>
 
+    <br>
     <mx-history .history=${this.history}></mx-history>
     <br>
     

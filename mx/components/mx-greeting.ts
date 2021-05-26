@@ -31,7 +31,6 @@ export class mxGreeting extends LitElement {
   //Show this component on screen
   render() {
     return html`
-    <i class="fas fa-flag" style="width:20px"></i>
     <h1>Hello, ${this.name} ${mslNotebook.version}! <input @keydown=${this.nameKeyDown} placeholder="Your Name Here"></h1>
     `;
   }

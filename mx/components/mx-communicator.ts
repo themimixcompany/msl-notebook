@@ -48,6 +48,11 @@ export class mxCommunicator extends LitElement {
 
   //Private Functions
 
+  //Close Connection
+  closeConnection() {
+    mx.socket.connections[this.socketKey].mxClose();
+  }
+
   //Update results area when a message is received
   messageReceived(event: Event) {
 
@@ -163,9 +168,10 @@ export class mxCommunicator extends LitElement {
     //Results Header
     let headerPart = html`
       <div class="gridHeader results" style="font-weight:600">
-        ${this.socketKey}
+        <mx-icon class="fas fa-keyboard"></mx-icon> ${this.socketKey}
         <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
         <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
+        <mx-icon @click=${this.closeConnection} style="cursor:pointer;"} title="Close this connection." size=".9" class="fas fa-rectangle-xmark"></mx-icon>
       </div>
     `;
 

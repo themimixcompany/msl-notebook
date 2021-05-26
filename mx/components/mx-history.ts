@@ -152,12 +152,13 @@ export class mxHistory extends LitElement {
         //Extract sent and received message info
         const [sentMessage, receivedMessage] = messageValues;
 
+
         //Setup Colors
-        let sentWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
-        let ReceivedWireColor = mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+        let sentWireColor = mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+        let ReceivedWireColor = mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
 
         //Setup Icons
-        let sentMessageIcon = socketKey == originalSendingSocket ? 'fas fa-keyboard' : 'fas fa-project-diagram';
+        let sentMessageIcon = socketKey == originalSendingSocket ? 'fas fa-keyboard' : 'fas fa-chart-network';
         let receivedMessageIcon = sentMessage != "" ? 'fas fa-comment' : 'fas fa-comment-check';
 
         //Build single result template
@@ -187,7 +188,7 @@ export class mxHistory extends LitElement {
     templateHistoryHeader() {
         return html`
             <div class="gridHeader results" style="font-weight:600">
-            history
+            <mx-icon class="fas fa-landmark"></mx-icon> history
             <mx-icon @click=${this.emptyHistory} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
             <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
             </div>

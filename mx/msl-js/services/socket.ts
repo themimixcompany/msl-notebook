@@ -291,6 +291,9 @@ const addMxFunctions = (socket: WebSocket) => {
   //mxNotifyMessages. Tell who to notify of messages.
   socket.mxNotifyMessages = mxNotifyMessages;
 
+  //mxClose. Close socket and notify of status change.
+  socket.mxClose = mxClose;
+
 }
 
 //PUBLIC FUNCTIONS
@@ -625,11 +628,7 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
 
 }
 
-//socketKeys
-//Returns an array of socketKeys for all active connections.
-const socketKeys = function (): string[] {
-  return Object.keys(connections);
-};
+
 
 //MX FUNCTIONS ON SOCKET ITSELF //////////
 //Note: These funtions rely on 'this' having separate scope and so cannot be written w/ arrow syntax.
@@ -680,6 +679,25 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 
 }
 
+//mxClose
+//Accessed by .mxClose function on an active socket.
+//Removes the socket from active connections and notifies the notifyStatusChange element
+//In that context, "this" is the socket itself.
+const mxClose = function() {
+
+  //Remember who to notify 
+  let notifyElement = this.notifyStatusChange;
+
+  //Close socket w/ normal reason code (1000)
+  this.close(1000);
+  
+  //Remove this socket from active connections
+  delete connections[this.key]
+
+  //Notify element of status change
+  notify(notifyElement, "status-changed", connections);
+}
+
 //SERVICE DEFINITION //////////
 
 //connectPort
@@ -705,10 +723,10 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 export const socket = {
   create,
   connect,
-  connectPort: connectPort,
-  connectMachine: connectMachine,
-  connectGroup: connectGroup,
-  list: connections,
-  keys: socketKeys(),
-  
+  connectPort,
+  connectMachine,
+  connectGroup,
+  close,
+  connections,
+  list: connections
 };
