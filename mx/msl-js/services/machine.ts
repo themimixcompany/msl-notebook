@@ -66,8 +66,6 @@ const isMachineType = function(machineKey:string,portType:string) {
   return false;
   }
 
-
-
 //PUBLIC FUNCTIONS
 
 //findByType
@@ -90,43 +88,6 @@ const findByType = function(portType:string): string[] {
   return matchingList;
 }
 
-//allGroups
-//Return a copy of all machine groups
-const allGroups = function():{} {
-  let {...copy} = groups; //copy by destructuring
-  return copy;
-}
-
-//allMachines
-//Return a copy of all machines
-const allMachines = function():{} {
-  let {...copy} = machines; //copy by destructuring
-  return copy;
-}
-
-//allPorts
-//Return a copy of all ports
-const allPorts = function():{} {
-  let {...copy} = ports; //copy by destructuring
-  return copy;
-}
-
-//setValue
-//Set a single value on a machine
-const setValue = function(machineKey:string,key:string,value:string):boolean {
-
-  //Quit if no matching key
-  if (!machines[machineKey] || !machines[machineKey][key]) {
-    return false;
-  }
-
-  //Set new value
-  machines[machineKey][key] = value;
-
-  //Return success
-  return true;
-
-}
 
 //hasType
 const hasType = function(machineKey:string,portType:string) {
@@ -175,13 +136,12 @@ const hasType = function(machineKey:string,portType:string) {
 
 
 export const machine = {
-  groups: allGroups(),
-  list: allMachines(),
-  ports: allPorts(),
-  keys: Object.keys(machines),
-  groupKeys: Object.keys(groups),
+  groups,
+  machines,
+  ports,
+  hasType,
+  list: machines,
   find: findByType,
   findInMachine: findTypeInMachine,
-  set: setValue,
-  hasType: hasType
+  groupKeys: Object.keys(groups),
 };

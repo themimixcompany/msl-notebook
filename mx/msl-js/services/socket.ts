@@ -568,6 +568,48 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement, his
 
 }
 
+//create
+//Create machine and port entries from a URL
+const create = function (socketURL, notifyElement?: HTMLElement) {
+
+  //Split out machine and port from URL
+  let socketURLParts = socketURL.split(":");
+  let [machineKey, portNumber] = socketURLParts;
+
+  //Add "port" to portKey (allows for blank default/80)
+  const portKey = `port${portNumber ? portNumber : 80}`;
+  
+  //Create new machine entry
+    let newMachine =  {
+      "name": machineKey,
+      "ip": machineKey,
+      "ports" : [portKey]
+  }
+
+  //Create new port entry
+  let newPort = {
+      "type": "text",
+      "protocol": "ws"
+    }
+
+  //Add port number if originally present in URL
+  if (portNumber) {
+    newPort["port"] = portNumber
+  }
+
+  //Add machine to machines list
+  mx.machine.list[machineKey] = newMachine;
+
+  //Add port to port list
+  mx.machine.ports[portKey] = newPort;
+
+   //Notify the calling component socket that machine and port lists have changed
+   if (notifyElement) {
+    notify(notifyElement, "machines-changed", [machineKey, portKey]);
+   }
+
+}
+
 //socketKeys
 //Returns an array of socketKeys for all active connections.
 const socketKeys = function (): string[] {
@@ -646,9 +688,11 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 //mx.socket.keys => array of socketKeys
 
 export const socket = {
+  create,
   connectPort: connectPort,
   connectMachine: connectMachine,
   connectGroup: connectGroup,
   list: connections,
-  keys: socketKeys()
+  keys: socketKeys(),
+  
 };

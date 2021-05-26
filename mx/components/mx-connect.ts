@@ -9,6 +9,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
+import { socket } from 'msl-js/service-loader';
 
 //<mx-connect>
 @customElement('mx-connect')
@@ -48,9 +49,19 @@ export class mxConnect extends LitElement {
     
     `;
 
+  //Setup for Run Once
+  hasRun = false;
+
   //Define public properties (databinding)
+  @property() machines: {} = mx.machine.machines;
   @property() connections: string[] = [];
   @property() history: {}[] = [];
+
+  //Machines changed
+  machinesChanged(receivedEvent: Event) {
+    mx.debug.log("available machines updated");
+    this.machines = mx.machine.machines;
+  }
 
   //Status changed
   statusChanged(receivedEvent: Event) {
@@ -89,7 +100,7 @@ export class mxConnect extends LitElement {
   //Machine grid. Shows all machines.
   templateMachineGrid() {
     return html`
-    ${mx.machine.keys.map(machineKey => {
+    ${Object.keys(this.machines).map(machineKey => {
 
 
       return html`
@@ -177,7 +188,20 @@ export class mxConnect extends LitElement {
 
     //BEFORE TEMPLATE
 
+    //Run Once
+
+    if (!this.hasRun) {
+
+      mx.socket.create("echo.websocket.org", this);
+
+      //Remember we ran once
+      this.hasRun = true;
+
+    }
+
+
     //Add event listeners for events targeting this component
+    this.addEventListener("machines-changed", this.machinesChanged);
     this.addEventListener("status-changed", this.statusChanged);
     this.addEventListener("history-changed", this.historyChanged);
 
