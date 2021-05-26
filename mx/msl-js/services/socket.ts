@@ -405,7 +405,8 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
-      notify(socket.notifyStatusChange, "status-changed", connections);
+      let {...connectionsCopy} = connections;
+      notify(socket.notifyStatusChange, "status-changed", connectionsCopy);
 
       //If this socket was opened as part of a relay group
       if (relayPairs) {

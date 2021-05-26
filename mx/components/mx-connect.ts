@@ -19,7 +19,7 @@ export class mxConnect extends LitElement {
     p {margin-top: 5px; margin-bottom: 5px;}
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
-    .disabled {color:grey}
+    .active {color:green}
     a {text-decoration: none; cursor: pointer;}
     a:hover {text-decoration: underline;}
     .whiteHeaderText {color:white;font-weight:500;}
@@ -55,7 +55,7 @@ export class mxConnect extends LitElement {
 
   //Define public properties (databinding)
   @property() machines: {} = mx.machine.machines;
-  @property() connections: string[] = [];
+  @property() connections: {} ={};
   @property() history: {}[] = [];
   @property() url: string = "";
 
@@ -82,7 +82,7 @@ export class mxConnect extends LitElement {
   //Status changed
   statusChanged(receivedEvent: Event) {
     mx.debug.log("active connections updated");
-    this.connections = Object.keys(receivedEvent.payload);
+    this.connections = receivedEvent.payload;
   }
 
   //History changed
@@ -123,7 +123,7 @@ export class mxConnect extends LitElement {
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
         <mx-icon @click=${() => this.connectPort(machineKey, portKey)}  title="Connect to ${portKey} on ${machineKey}." class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? 'darkOrange' : 'purple' : ''} style="cursor:pointer;"></mx-icon>
-        <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to ${portKey} on ${machineKey}." class=${this.connections[`${machineKey}-${portKey}`] ? "disabled" : ""} >${portKey}</a>
+        <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to ${portKey} on ${machineKey}." class=${this.connections[`${machineKey}-${portKey}`] ? "active" : ""} >${portKey}</a>
       </p>
       `)}
   
@@ -137,7 +137,7 @@ export class mxConnect extends LitElement {
     return html`
     <i class="fas fa-server"></i>
 
-    ${this.connections.map(socketKey => html`
+    ${Object.keys(this.connections).map(socketKey => html`
       <div class="threeColumns">
         <mx-communicator .socketKey=${socketKey} .history=${this.history} .connector=${this}></mx-communicator>
       </div>
