@@ -237,7 +237,6 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     //Setup message received callback on admin port, if open
     if (adminSocket) {
       //setupEmptyCallback(adminSocket, history, messageNumber);
-      console.log("setting up admin callback");
       adminSocket.mxNotifyMessages(socket.notifyMessages);
     }
   }

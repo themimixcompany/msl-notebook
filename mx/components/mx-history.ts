@@ -51,11 +51,12 @@ export class mxHistory extends LitElement {
 
     //Define public properties (databinding)
     @property() history: {}[] = [];
+    @property() notifyHistory: HTMLElement;
     @property() isHidden: boolean = false;
 
     //Empty history
     emptyHistory() {
-        this.history = [];
+      this.history = [];
     }
 
     //Show or Hide History
@@ -189,8 +190,11 @@ export class mxHistory extends LitElement {
         return html`
             <div class="gridHeader results" style="font-weight:600">
             <mx-icon class="fas fa-landmark"></mx-icon> history
-            <mx-icon @click=${this.emptyHistory} style="cursor:pointer;" title="Remove this socket's message results." size=".9" class="fas fa-trash"></mx-icon>
-            <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the message results." size=".9" class="fas fa-eye"></mx-icon>
+
+            <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the history." size=".9" class="fas fa-eye"></mx-icon>
+
+            <mx-icon @click=${this.emptyHistory} style="cursor:pointer;" title="Erase the history." size=".9" class="fas fa-trash"></mx-icon>
+
             </div>
         `
     }

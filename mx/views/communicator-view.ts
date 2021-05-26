@@ -29,7 +29,12 @@ export class communicatorView extends LitElement {
     return html`
     <mx-greeting></mx-greeting>
     <mx-connect></mx-connect>
+
+    <br>
+
     <mx-debug></mx-debug>
+
+    <br>
 
     <img src="${logo}" style="width:40px;margin-bottom:20px;margin-top:10px;"> 
     `

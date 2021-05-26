@@ -20,7 +20,8 @@ export class mxConnect extends LitElement {
     .greyBk {background-color:#ccc}
     .gridHeader {background-color:#bbb}
     .disabled {color:grey}
-    a { text-decoration: underline; cursor: pointer; text-decoration:underline}
+    a {text-decoration: none; cursor: pointer;}
+    a:hover {text-decoration: underline;}
     .whiteHeaderText {color:white;font-weight:500;}
     .grid {
       display: grid;
@@ -89,11 +90,6 @@ export class mxConnect extends LitElement {
     this.history = receivedEvent.payload;
   }
 
-  //Empty history
-  emptyHistory() {
-    this.history = [];
-  }
-
   //PORT connect link clicked
   connectPort(machineKey: string, portKey: string) {
     mx.socket.connectPort(machineKey, portKey, this,[],this.history);
@@ -121,16 +117,13 @@ export class mxConnect extends LitElement {
       return html`
       <div class="machine greyBk">
 
-      <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}.">
-      <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : ''}></mx-icon>
-      <span style="font-weight:600">${machineKey}</span>
-      </a>
+      <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : ''} style="cursor:pointer;"></mx-icon>
+      <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span style="font-weight:600">${machineKey}</span></a>
   
       ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
       <p>
-      <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to this port." class=${this.connections[`${machineKey}-${portKey}`] ? "disabled" : ""} >
-      <mx-icon class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? 'darkOrange' : 'purple' : ''}></mx-icon>
-      ${portKey}
+        <mx-icon @click=${() => this.connectPort(machineKey, portKey)}  title="Connect to ${portKey} on ${machineKey}." class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? 'darkOrange' : 'purple' : ''} style="cursor:pointer;"></mx-icon>
+        <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to ${portKey} on ${machineKey}." class=${this.connections[`${machineKey}-${portKey}`] ? "disabled" : ""} >${portKey}</a>
       </p>
       `)}
   
@@ -161,13 +154,11 @@ export class mxConnect extends LitElement {
       return html`
       <div class="machine greyBk">
 
-      <a @click=${() => this.connectGroup(groupKey)} title="Connect to all machines in ${groupKey}.">
-      <mx-icon class="fas ${mx.machine.groups[groupKey].ports ? "fa-project-diagram" : mx.machine.groups[groupKey].relay ? "fa-network-wired" : "fa-object-ungroup"}" color="navy"></mx-icon>
-      <span style="font-weight:600">${groupKey}</span>
-      </a>
+      <mx-icon @click=${() => this.connectGroup(groupKey)} title="Connect to all machines in the ${groupKey} group." class="fas ${mx.machine.groups[groupKey].ports ? "fa-project-diagram" : mx.machine.groups[groupKey].relay ? "fa-network-wired" : "fa-object-ungroup"}" color="navy" style="cursor:pointer;"></mx-icon>
+      <a @click=${() => this.connectGroup(groupKey)} title="Connect to all machines in the ${groupKey} group."><span style="font-weight:600">${groupKey}</span></a>
   
       ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
-      <p>
+      <p style="background-color:grey">
       <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? '#ec2028' : 'navy' : ''}></mx-icon>
       ${machineKey}
       </p>
@@ -244,7 +235,7 @@ export class mxConnect extends LitElement {
     </div>
 
     <br>
-    <mx-history .history=${this.history}></mx-history>
+    <mx-history .history=${this.history} .notifyHistory=${this}></mx-history>
     <br>
     
     ${this.templateCommunicators()}
