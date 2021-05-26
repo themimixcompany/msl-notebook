@@ -568,6 +568,18 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement, his
 
 }
 
+//connect
+//Connect to a URL
+const connect = function (socketURL, notifyElement?: HTMLElement, history?) {
+
+  //Create machine and port entries and capture their keys
+  let [machineKey, portKey] = create(socketURL, notifyElement);
+
+  //Connect to the new machine and port
+  connectPort(machineKey, portKey, notifyElement,[],history);
+
+}
+
 //create
 //Create machine and port entries from a URL
 const create = function (socketURL, notifyElement?: HTMLElement) {
@@ -607,6 +619,9 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
    if (notifyElement) {
     notify(notifyElement, "machines-changed", [machineKey, portKey]);
    }
+
+  //Return a machineKey and portKey
+  return [machineKey, portKey];
 
 }
 
@@ -689,6 +704,7 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 
 export const socket = {
   create,
+  connect,
   connectPort: connectPort,
   connectMachine: connectMachine,
   connectGroup: connectGroup,

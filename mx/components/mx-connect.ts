@@ -192,7 +192,7 @@ export class mxConnect extends LitElement {
 
     if (!this.hasRun) {
 
-      mx.socket.create("echo.websocket.org", this);
+      mx.socket.connect("echo.websocket.org", this, this.history);
 
       //Remember we ran once
       this.hasRun = true;
