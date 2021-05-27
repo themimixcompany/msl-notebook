@@ -5,6 +5,7 @@
     },
     "mx-msl": {
       "type": "msl",
+      "listen": "admin",
       "protocol": "ws",
       "port": "60000"
     },

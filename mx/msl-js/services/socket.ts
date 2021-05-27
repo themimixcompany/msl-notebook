@@ -221,23 +221,27 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
   //Setup message received callback
   setupMessageCallback(socket, message, echo, socket, relay);
 
-  //For MSL wires, also listen on admin.
-  if (socket.port.type.toLowerCase() == "msl") {
+  //If additional "listen" port specified, add a listener for it.
+
+  //Look for listen value on port
+  let listenPortType = socket.port.listen;
+
+  if (listenPortType) {
 
     //Get this socket's machineKey
     let machineKey = socket.machineKey;
 
-    // Find admin port on this machine
-    let adminPort = mx.machine.findInMachine(machineKey, "admin");
+    // Find port of "listen" type machine
+    let listenPort = mx.machine.findInMachine(machineKey, listenPortType);
 
-    // Find admin socket in active connections
-    let adminSocketKey = `${machineKey}-${adminPort}`;
-    let adminSocket = connections[adminSocketKey];
+    // Find listen socket in active connections
+    let listenPortKey = `${machineKey}-${listenPort}`;
+    let listenSocket = connections[listenPortKey];
 
     //Setup message received callback on admin port, if open
-    if (adminSocket) {
+    if (listenSocket) {
       //setupEmptyCallback(adminSocket, history, messageNumber);
-      adminSocket.mxNotifyMessages(socket.notifyMessages);
+      listenSocket.mxNotifyMessages(socket.notifyMessages);
     }
   }
 
@@ -301,7 +305,7 @@ const addMxFunctions = (socket: WebSocket) => {
 
 //connectPort
 //Connect to a WebSocket on a machine.
-const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?) {
+const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?:{}[]) {
 
   let portKeyList = portKey;
 
@@ -497,13 +501,13 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
 //connectMachine
 //Connect to all ports on a machine.
-const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, history?) {
-  connectPort(machineKey, mx.machine.list[machineKey].ports, notifyElement, relayPairs, history);
+const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, history?:{}[]) {
+  connectPort(machineKey, mx.machine.machines[machineKey].ports, notifyElement, relayPairs, history);
 }
 
 //connectGroup
 //Connect to all machines and ports in a group.
-const connectGroup = function (groupKey: string, notifyElement: HTMLElement, history?) {
+const connectGroup = function (groupKey: string, notifyElement: HTMLElement, history?:{}[]) {
 
   //Get info about machines and ports in this group
   let group = mx.machine.groups[groupKey];
@@ -613,7 +617,7 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
   }
 
   //Add machine to machines list
-  mx.machine.list[machineKey] = newMachine;
+  mx.machine.machines[machineKey] = newMachine;
 
   //Add port to port list
   mx.machine.ports[portKey] = newPort;
@@ -726,7 +730,6 @@ export const socket = {
   connectPort,
   connectMachine,
   connectGroup,
-  close,
   connections,
   list: connections
 };
