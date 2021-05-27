@@ -152,6 +152,12 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Notify the sender of the received message.
 
+    //Use original message sender, if provided, then discard.
+    if (socket["originalNotifyMessages"]) {
+      socket.notifyMessages = socket["originalNotifyMessages"];
+      delete socket["originalNotifyMessages"];
+    }
+
     notify(socket.notifyMessages, "message-received", notifyMessage);
 
     //Relay if relay is set, not looping back to original machine, and active in connections
@@ -238,9 +244,13 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     let listenPortKey = `${machineKey}-${listenPort}`;
     let listenSocket = connections[listenPortKey];
 
-    //Setup message received callback on admin port, if open
+    //Setup message received callback on listen port, if open
     if (listenSocket) {
-      //setupEmptyCallback(adminSocket, history, messageNumber);
+
+      //Remember original message listener for this socket
+      listenSocket.originalNotifyMessages = listenSocket.notifyMessages
+      
+      //Change listener for this additional socket to be the one that sent the message
       listenSocket.mxNotifyMessages(socket.notifyMessages);
     }
   }
