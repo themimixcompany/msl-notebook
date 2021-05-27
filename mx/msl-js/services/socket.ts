@@ -107,8 +107,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Get original sender from socket;
     let sendingSocketKey = socket.sender;
 
-    console.log(sendingSocketKey);
-
     //Handle history, if provided
 
     if (history) {
@@ -172,8 +170,26 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     }
 
     //Relay if relay is set, not looping back to original machine, and active in connections
-    if (relay && (relay != socket.relay) && connections[socket.relay]) {
-      sendSingleMessage(connections[socket.relay], receivedMessage, echo, socket.key)
+    // if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
+    //   sendSingleMessage(connections[socket.relayTo], receivedMessage, echo, socket.key)
+    // }
+
+
+    if (socket.relayTo && socket.sender != socket.relayTo) {
+      console.log("-----------");
+      console.log("should relay?")
+      console.log("socket.key:", socket.key);
+      console.log("receivedMessage:", receivedMessage);
+      console.log("socket.sender:", socket.sender);
+      console.log("relay parm:", relay);
+      console.log("relayTo:", socket.relayTo);
+      console.log("relayFrom:", socket.relayFrom);
+    }
+    
+    if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
+      console.log("==========");
+      console.log("did relay");
+      sendSingleMessage(connections[socket.relayTo], receivedMessage, echo, socket.key)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -425,9 +441,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     //Add this socket's key.
     socket.key = socketKey;
 
-    //Turn off relay by default
-    socket.relay = "";
-
     //Setup open callback
     socket.onopen = function () {
 
@@ -497,13 +510,17 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
             let relayPair = relayPairs[relayPairIndex];
 
             //Extract the "from" socketKey and the relaySocketKey
-            let [fromSocketKey, relaySocketKey] = relayPair;
+            let [fromSocketKey, toSocketKey] = relayPair;
 
-            //Get the socket from active connections
+            //Get the sockets from active connections
             let fromSocket = connections[fromSocketKey]
+            let toSocket = connections[toSocketKey]
 
-            //Attach the relay
-            fromSocket.relay = relaySocketKey;
+            //Remember the relay information on each side
+            fromSocket.relayTo = toSocketKey;
+            toSocket.relayFrom = fromSocketKey;
+
+            //fromSocket.relay = toSocketKey;
           }
         }
       }
