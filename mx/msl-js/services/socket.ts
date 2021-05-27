@@ -159,7 +159,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Notify the sender of the received message.
     notify(socket.notifyMessages, "message-received", notifyMessage);
 
-    //Handle temporary listeners setup by "additional listener" ports
+    //Handle temporary listeners setup by additional listen ports
     if (socket["originalNotifyMessages"]) {
 
       //Reset future messages to notify the original component
@@ -189,7 +189,17 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
       console.log("==========");
       console.log("did relay");
-      sendSingleMessage(connections[socket.relayTo], receivedMessage, echo, socket.key)
+
+      //Get toSocket
+      let toSocket = connections[socket.relayTo];
+
+      //Remember original message listener for this socket
+      toSocket.originalNotifyMessages = toSocket.notifyMessages
+
+      //Change listener for this additional socket to be the one that sent the message
+      toSocket.mxNotifyMessages(socket.notifyMessages);
+
+      sendSingleMessage(toSocket, receivedMessage, echo, socket.key)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -257,7 +267,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
   //Setup message received callback
   setupMessageCallback(socket, message, echo, relay);
 
-  //If additional "listen" port specified, add a listener for it.
+  //If additional listen port specified, add a listener for it.
 
   //Look for listen value on port
   let listenPortType = socket.port.listen;
