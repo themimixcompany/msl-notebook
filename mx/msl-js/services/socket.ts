@@ -29,6 +29,9 @@ let connections = {};
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
 
+  //Remember us as original sender
+  socket.sender = socket.key;
+
   //Get history from socket
   let history = socket.history;
 
@@ -72,14 +75,14 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
   }
 
   //using "" as message reflects that we did not send any message.
-  setupMessageCallback(socket, "", true, socket, "")
+  setupMessageCallback(socket, "", true, "")
 
 
 }
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, sendingSocket: WebSocket = socket, relay?) {
+const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?) {
 
 
   //Get history from socket
@@ -101,6 +104,11 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     mx.debug.echo(false);
     mx.debug.log(`λ ${socket.notifyMessages["localName"]} ${socket.key} ${message} => ${receivedMessage}`);
 
+    //Get original sender from socket;
+    let sendingSocketKey = socket.sender;
+
+    console.log(sendingSocketKey);
+
     //Handle history, if provided
 
     if (history) {
@@ -113,7 +121,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       if (!historyItem[socket.key]) {
 
         //brute force move to bottom
-        let sendingSocketKey = sendingSocket.key;
+        
         let sendingSocketItem = historyItem[sendingSocketKey];
         delete historyItem[sendingSocketKey];
         historyItem[sendingSocketKey] = sendingSocketItem;
@@ -144,21 +152,24 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     if (echo) {
       notifyMessage = {
         "sentMessage": message,
-        "sentSocketKey": sendingSocket.key,
+        "sentSocketKey": sendingSocketKey,
         "receivedMessage": receivedMessage,
         "receivedSocketKey": socket.key
       }
     }
 
     //Notify the sender of the received message.
+    notify(socket.notifyMessages, "message-received", notifyMessage);
 
-    //Use original message sender, if provided, then discard.
+    //Handle temporary listeners setup by "additional listener" ports
     if (socket["originalNotifyMessages"]) {
+
+      //Reset future messages to notify the original component
       socket.notifyMessages = socket["originalNotifyMessages"];
+
+      //Remove the temporary designation
       delete socket["originalNotifyMessages"];
     }
-
-    notify(socket.notifyMessages, "message-received", notifyMessage);
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     if (relay && (relay != socket.relay) && connections[socket.relay]) {
@@ -169,7 +180,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Get names of the sockets
     let listeningKey = socket.key;
-    let originalKey = sendingSocket.key;
+    let originalKey = sendingSocketKey;
 
     //Test if they are different
     if (listeningKey != originalKey) {
@@ -188,6 +199,9 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 
   //Get history from socket
   let history = socket.history;
+
+  //Remember us as original sender
+  socket.sender = socket.key;
 
   //Setup for messageNumber
   let messageNumber
@@ -225,7 +239,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
   }
 
   //Setup message received callback
-  setupMessageCallback(socket, message, echo, socket, relay);
+  setupMessageCallback(socket, message, echo, relay);
 
   //If additional "listen" port specified, add a listener for it.
 
@@ -249,6 +263,9 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 
       //Remember original message listener for this socket
       listenSocket.originalNotifyMessages = listenSocket.notifyMessages
+
+      //Remember original "sender" for messages received by this socket
+      listenSocket.sender = socket.key;
       
       //Change listener for this additional socket to be the one that sent the message
       listenSocket.mxNotifyMessages(socket.notifyMessages);
