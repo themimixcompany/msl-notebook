@@ -565,6 +565,10 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
     //Setup close callback
     socket.onclose = function () {
+
+      //Record this response
+      recordClose(actionList, this.key);
+
       mx.debug.log("closed", socketKey);
       delete connections[socketKey];
 
@@ -764,6 +768,11 @@ const recordRelay = function (actionList, to, from, message, notify) {
   recordAction(actionList, action.relay, to, from, message, notify);
 }
 
+//recordDisconnect
+const recordDisconnect = function (actionList, to, notify) {
+  recordAction(actionList, action.disconnect, to, undefined, undefined, notify);
+}
+
 //RESPONSE RECORDING  //////////
 
 //recordResponse
@@ -915,7 +924,12 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 //Accessed by .mxClose function on an active socket.
 //Removes the socket from active connections and notifies the notifyStatusChange element
 //In that context, "this" is the socket itself.
-const mxClose = function () {
+const mxClose = function (actionList?) {
+
+  //Record this action
+  if (actionList) {
+    recordDisconnect(actionList,this.key,this.notifyStatusChange);
+  }
 
   //Remember who to notify 
   let notifyElement = this.notifyStatusChange;

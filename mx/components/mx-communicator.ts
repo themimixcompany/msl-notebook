@@ -51,7 +51,7 @@ export class mxCommunicator extends LitElement {
 
   //Close Connection
   closeConnection() {
-    mx.socket.connections[this.socketKey].mxClose();
+    mx.socket.connections[this.socketKey].mxClose(this.actionList);
   }
 
   //Update results area when a message is received
