@@ -414,6 +414,9 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     //Record this action
     recordConnect(actionList, socketKey, notifyElement);
 
+    //Remember this actionIndex
+    let actionIndex = actionList.length - 1;
+
     //Find machine & port on master lists
     let connectMachine = mx.machine.list[machineKey];
     let connectPort = mx.machine.ports[portKey];
@@ -494,9 +497,13 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       mx.debug.log("connected", socketKey);
       connections[socketKey] = socket;
 
+      //Record this response
+      recordOpen(actionList,actionIndex,socket.key);
+
       //Notify the calling component socket that status has changed
       let { ...connectionsCopy } = connections;
-      notify(socket.notifyStatusChange, "status-changed", connectionsCopy);
+      let actionItem = actionList[actionIndex];
+      notify(actionItem["notify"], "status-changed", connectionsCopy);
 
       //If this socket was opened as part of a relay group
       if (relayPairs) {
@@ -826,6 +833,11 @@ const recordResponse = function (actionList, actionIndex, type, to, from, messag
   console.log("newResponse");
   console.log(actionList);
 
+}
+
+//recordOpen
+const recordOpen = function (actionList, messageNumber, from) {
+  recordResponse(actionList, messageNumber, response.open, undefined, from, undefined);
 }
 
 //recordReceive
