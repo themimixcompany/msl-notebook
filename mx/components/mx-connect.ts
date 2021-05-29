@@ -57,6 +57,7 @@ export class mxConnect extends LitElement {
   @property() machines: {} = mx.machine.machines;
   @property() connections: {} ={};
   @property() history: {}[] = [];
+  @property() actionList: {}[] = [];
   @property() url: string = "";
 
   //Key pressed in URL input box? Check for Enter.
@@ -69,7 +70,7 @@ export class mxConnect extends LitElement {
       this.url = (event.target as HTMLInputElement).value;
 
       //Connect to URL, add it to connection list, and create communicator.
-      mx.socket.connect(this.url, this, this.history);
+      mx.socket.connect(this.url, this, this.history, this.actionList);
     }
   }
 
@@ -92,18 +93,18 @@ export class mxConnect extends LitElement {
 
   //PORT connect link clicked
   connectPort(machineKey: string, portKey: string) {
-    mx.socket.connectPort(machineKey, portKey, this,[],this.history);
+    mx.socket.connectPort(machineKey, portKey, this,[],this.history,this.actionList);
     ;
   }
 
   //MACHINE connect link clicked
   connectMachine(machineKey: string) {
-    mx.socket.connectMachine(machineKey, this,[],this.history);
+    mx.socket.connectMachine(machineKey, this,[],this.history,this.actionList);
   }
 
   //GROUP connect link clicked
   connectGroup(groupKey: string) {
-    mx.socket.connectGroup(groupKey, this, this.history);
+    mx.socket.connectGroup(groupKey, this, this.history,this.actionList);
   }
 
   //Create HTML Templates
@@ -139,7 +140,7 @@ export class mxConnect extends LitElement {
 
     ${Object.keys(this.connections).map(socketKey => html`
       <div class="threeColumns">
-        <mx-communicator .socketKey=${socketKey} .history=${this.history} .connector=${this}></mx-communicator>
+        <mx-communicator .socketKey=${socketKey} .history=${this.history} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
       </div>
     `)}
     `

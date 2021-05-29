@@ -16,6 +16,22 @@ const status = {
   "closed": 3
 };
 
+//WebSocket Actions
+const action = {
+  "connect": 0,
+  "send": 1,
+  "relay": 2,
+  "disconnect": 3
+}
+
+//WebSocket Responses
+const response = {
+  "open": 0,
+  "receive": 1,
+  "roundtrip": 2,
+  "close": 3
+}
+
 //PRIVATE VARIABLES ////////// 
 
 //Active Sockets
@@ -27,7 +43,7 @@ let connections = {};
 
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
-const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
+const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?) {
 
   //Remember us as original sender
   socket.sender = socket.key;
@@ -75,15 +91,17 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?) {
   }
 
   //using "" as message reflects that we did not send any message.
-  setupMessageCallback(socket, "", true, "")
+  setupMessageCallback(socket, "", true, "", actionList)
 
 
 }
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?) {
+const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?, actionList?) {
 
+  //Create a closure for actionIndex
+  let actionIndex = actionList.length - 1;
 
   //Get history from socket
   let history = socket.history;
@@ -99,6 +117,10 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Get received message from event
     const receivedMessage: string = event.data;
+
+    //Record this response
+    recordReceive(actionList, actionIndex, socket.key, receivedMessage)
+    //recordResponse(actionList, actionIndex, response.receive, undefined, socket.key, receivedMessage);
 
     //Debug Info
     mx.debug.echo(false);
@@ -119,7 +141,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       if (!historyItem[socket.key]) {
 
         //brute force move to bottom
-        
+
         let sendingSocketItem = historyItem[sendingSocketKey];
         delete historyItem[sendingSocketKey];
         historyItem[sendingSocketKey] = sendingSocketItem;
@@ -175,20 +197,20 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     // }
 
 
-    if (socket.relayTo && socket.sender != socket.relayTo) {
-      console.log("-----------");
-      console.log("should relay?")
-      console.log("socket.key:", socket.key);
-      console.log("receivedMessage:", receivedMessage);
-      console.log("socket.sender:", socket.sender);
-      console.log("relay parm:", relay);
-      console.log("relayTo:", socket.relayTo);
-      console.log("relayFrom:", socket.relayFrom);
-    }
-    
+    // if (socket.relayTo && socket.sender != socket.relayTo) {
+    //   console.log("-----------");
+    //   console.log("should relay?")
+    //   console.log("socket.key:", socket.key);
+    //   console.log("receivedMessage:", receivedMessage);
+    //   console.log("socket.sender:", socket.sender);
+    //   console.log("relay parm:", relay);
+    //   console.log("relayTo:", socket.relayTo);
+    //   console.log("relayFrom:", socket.relayFrom);
+    // }
+
     if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
-      console.log("==========");
-      console.log("did relay");
+      // console.log("==========");
+      // console.log("did relay");
 
       //Get toSocket
       let toSocket = connections[socket.relayTo];
@@ -197,9 +219,9 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       toSocket.originalNotifyMessages = toSocket.notifyMessages
 
       //Change listener for this additional socket to be the one that sent the message
-      toSocket.mxNotifyMessages(socket.notifyMessages);
+      toSocket.mxNotifyMessages(socket.notifyMessages, actionList);
 
-      sendSingleMessage(toSocket, receivedMessage, echo, socket.key)
+      sendSingleMessage(toSocket, receivedMessage, echo, socket.key, actionList)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -212,7 +234,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     if (listeningKey != originalKey) {
 
       //Re-attach original message listener
-      setupEmptyCallback(socket);
+      setupEmptyCallback(socket,undefined,actionList);
 
     }
 
@@ -221,7 +243,8 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
 //sendSingleMessage
 //Send a single message over a websocket with a per-message callback.
-const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string) {
+const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, actionList?) {
+
 
   //Get history from socket
   let history = socket.history;
@@ -242,8 +265,13 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     let historyItem = {}
 
 
-    //Check if this is the result of a relayed message (relay = original sender's socketKey)
+    //Check if this an outgoing relay message (relay = original sender's socketKey)
     if (relay != "" && relay != "false" && socket.key != relay) {
+
+      console.log("is relay message", message)
+
+       //Record this action
+       recordRelay(actionList,socket.key,relay,message,socket.notifyMessages);
 
       historyItem = history[messageNumber - 1]
 
@@ -251,6 +279,9 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
       historyItem[socket.key] = [message]
 
     } else {
+
+        //Record this action
+        recordSend(actionList,socket.key,message,socket.notifyMessages);
 
       //Store this outgoing message under the socketKey
       historyItem[socket.key] = [message]
@@ -265,7 +296,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
   }
 
   //Setup message received callback
-  setupMessageCallback(socket, message, echo, relay);
+  setupMessageCallback(socket, message, echo, relay, actionList);
 
   //If additional listen port specified, add a listener for it.
 
@@ -292,9 +323,9 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 
       //Remember original "sender" for messages received by this socket
       listenSocket.sender = socket.key;
-      
+
       //Change listener for this additional socket to be the one that sent the message
-      listenSocket.mxNotifyMessages(socket.notifyMessages);
+      listenSocket.mxNotifyMessages(socket.notifyMessages, actionList);
     }
   }
 
@@ -358,7 +389,8 @@ const addMxFunctions = (socket: WebSocket) => {
 
 //connectPort
 //Connect to a WebSocket on a machine.
-const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?:{}[]) {
+const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?: {}[], actionList?: {}[]) {
+
 
   let portKeyList = portKey;
 
@@ -373,10 +405,13 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     //portKey of one port to connect to
     let portKey = portKeyList[portKeyIndex];
 
-    mx.debug.log("connecting to", machineKey, portKey);
-
     //Create a socket key to track in connections
     let socketKey = `${machineKey}-${portKey}`;
+
+    mx.debug.log("connecting to", socketKey);
+
+    //Record this action
+    recordConnect(actionList, socketKey, notifyElement);
 
     //Find machine & port on master lists
     let connectMachine = mx.machine.list[machineKey];
@@ -459,7 +494,7 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
       connections[socketKey] = socket;
 
       //Notify the calling component socket that status has changed
-      let {...connectionsCopy} = connections;
+      let { ...connectionsCopy } = connections;
       notify(socket.notifyStatusChange, "status-changed", connectionsCopy);
 
       //If this socket was opened as part of a relay group
@@ -555,13 +590,13 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
 //connectMachine
 //Connect to all ports on a machine.
-const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, history?:{}[]) {
-  connectPort(machineKey, mx.machine.machines[machineKey].ports, notifyElement, relayPairs, history);
+const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, history?: {}[], actionList?:{}[]) {
+  connectPort(machineKey, mx.machine.machines[machineKey].ports, notifyElement, relayPairs, history, actionList);
 }
 
 //connectGroup
 //Connect to all machines and ports in a group.
-const connectGroup = function (groupKey: string, notifyElement: HTMLElement, history?:{}[]) {
+const connectGroup = function (groupKey: string, notifyElement: HTMLElement, history?: {}[], actionList?: {}[]) {
 
   //Get info about machines and ports in this group
   let group = mx.machine.groups[groupKey];
@@ -624,22 +659,172 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement, his
   //Connect to all sockets on each of them
   for (let machineIndex in groupMachines) {
     let machineKey = groupMachines[machineIndex]
-    connectMachine(machineKey, notifyElement, groupPorts, history);
+    connectMachine(machineKey, notifyElement, groupPorts, history, actionList);
   }
 
 }
 
 //connect
 //Connect to a URL
-const connect = function (socketURL, notifyElement?: HTMLElement, history?) {
+const connect = function (socketURL, notifyElement?: HTMLElement, history?, actionList?) {
+
 
   //Create machine and port entries and capture their keys
   let [machineKey, portKey] = create(socketURL, notifyElement);
 
   //Connect to the new machine and port
-  connectPort(machineKey, portKey, notifyElement,[],history);
+  connectPort(machineKey, portKey, notifyElement, [], history, actionList);
 
 }
+
+// //ACTION EXAMPLES
+
+// const actionConnect = {
+//   "type": action.connect,
+//   "to": "",
+//   "notify": {},
+//   "response": []
+// }
+
+// const actionSend = {
+//   "type": action.send,
+//   "to": "",
+//   "message": "",
+//   "notify": {},
+//   "response": []
+// }
+
+// const actionRelay = {
+//   "type": action.relay,
+//   "to": "",
+//   "from": "",
+//   "message": "",
+//   "notify": {},
+//   "response": []
+// }
+
+// const actionDisconnect = {
+//   "type": action.disconnect,
+//   "to": "",
+//   "notify": {},
+//   "response": []
+// }
+
+// //RESPONSE EXAMPLES
+
+// const responseOpen = {
+//   "type": response.open,
+//   "from": ""
+// }
+
+// const responseReceive = {
+//   "type": response.receive,
+//   "from": "",
+//   "message": ""
+// }
+
+// const responseRoundtrip = {
+//   "type": response.roundtrip,
+//   "from": "",
+//   "to": "",
+//   "message": ""
+// }
+
+// const responseClose = {
+//   "type": response.close,
+//   "from": ""
+// }
+
+
+//ACTION RECORDING //////////
+
+//recordAction
+//Action recording
+const recordAction = function (actionList, type, to: string = "", from: string = "", message: string = "", notify?: HTMLElement) {
+
+  let newAction = {
+    "type": type,
+    "to": to,
+    "from": from,
+    "message": message,
+    "notify": notify
+  }
+
+  actionList.push(newAction);
+
+  console.log("actionList");
+  console.log(actionList);
+
+}
+
+//recordConnect
+const recordConnect = function (actionList, to, notify) {
+  recordAction(actionList, action.connect, to, undefined, undefined, notify);
+}
+
+//recordSend
+const recordSend = function (actionList, to, message, notify) {
+  console.log("recording send",message)
+  recordAction(actionList, action.send, to, undefined, message, notify);
+}
+
+//recordRelay
+const recordRelay = function (actionList, to, from, message, notify) {
+  console.log("recording relay",message)
+  recordAction(actionList, action.relay, to, from, message, notify);
+}
+
+//RESPONSE RECORDING  //////////
+
+//recordResponse
+const recordResponse = function (actionList, messageNumber, type, to, from, message) {
+
+
+  
+  let actionItem:{} = actionList[messageNumber];
+  let responseList:{}[] = actionItem["response"];
+
+  //No action  item? Early return.
+  if (!actionItem) {
+    mx.debug.log("action",messageNumber,"is missing")
+    return false;
+  }
+
+  //No response list? Create it.
+  if (!responseList) {
+    actionItem["response"] = [];
+  }
+
+  //Create new response item
+  let newResponseItem = {
+    "type" : type,
+    "to" : to,
+    "from" : from,
+    "message" : message
+  }
+
+  //Add response to list
+  actionItem["response"].push(newResponseItem);
+
+  //Set 
+
+}
+
+//recordReceive
+const recordReceive = function (actionList, messageNumber, from, message)  {
+  recordResponse(actionList, messageNumber, response.receive, undefined, from, message)
+}
+
+//recordRoundtrip
+const recordRoundtrip = function(actionList, messageNumber, from, to, message) {
+  recordResponse(actionList, messageNumber, response.roundtrip, from, to, message);
+}
+
+//recordClose
+const recordClose = function (actionList,from) {
+  recordResponse(actionList,actionList.length - 1,response.close,undefined,from,undefined);
+}
+
 
 //create
 //Create machine and port entries from a URL
@@ -651,19 +836,19 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
 
   //Add "port" to portKey (allows for blank default/80)
   const portKey = `port${portNumber ? portNumber : 80}`;
-  
+
   //Create new machine entry
-    let newMachine =  {
-      "name": machineKey,
-      "ip": machineKey,
-      "ports" : [portKey]
+  let newMachine = {
+    "name": machineKey,
+    "ip": machineKey,
+    "ports": [portKey]
   }
 
   //Create new port entry
   let newPort = {
-      "type": "text",
-      "protocol": "ws"
-    }
+    "type": "text",
+    "protocol": "ws"
+  }
 
   //Add port number if originally present in URL
   if (portNumber) {
@@ -676,10 +861,10 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
   //Add port to port list
   mx.machine.ports[portKey] = newPort;
 
-   //Notify the calling component socket that machine and port lists have changed
-   if (notifyElement) {
+  //Notify the calling component socket that machine and port lists have changed
+  if (notifyElement) {
     notify(notifyElement, "machines-changed", [machineKey, portKey]);
-   }
+  }
 
   //Return a machineKey and portKey
   return [machineKey, portKey];
@@ -694,10 +879,10 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
 //mxSend
 //Send a message. Call w/ .mxSend function on an active socket from connections.
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
-const mxSend = function (message: string, echo: boolean = false) {
+const mxSend = function (message: string, echo: boolean = false, actionList?) {
 
   //Send the message w/ notification and history.
-  sendSingleMessage(this, message, echo, "false");
+  sendSingleMessage(this, message, echo, "false", actionList);
 
 }
 
@@ -716,13 +901,13 @@ const mxNotifyStatusChange = function (notifyElement: HTMLElement) {
 //Accessed by .mxNotifyMessages function on an active socket.
 //Assigns a web component or HTML element to be notified when a message arrives on a socket.
 //In that context, "this" is the socket itself.
-const mxNotifyMessages = function (notifyElement: HTMLElement) {
+const mxNotifyMessages = function (notifyElement: HTMLElement, actionList) {
 
   //Remember who to notify of messages
   this.notifyMessages = notifyElement;
 
   //Setup for message callbacks
-  setupEmptyCallback(this);
+  setupEmptyCallback(this,undefined,actionList);
 
 }
 
@@ -741,14 +926,14 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 //Accessed by .mxClose function on an active socket.
 //Removes the socket from active connections and notifies the notifyStatusChange element
 //In that context, "this" is the socket itself.
-const mxClose = function() {
+const mxClose = function () {
 
   //Remember who to notify 
   let notifyElement = this.notifyStatusChange;
 
   //Close socket w/ normal reason code (1000)
   this.close(1000);
-  
+
   //Remove this socket from active connections
   delete connections[this.key]
 

@@ -36,6 +36,7 @@ export class mxCommunicator extends LitElement {
   @property({ attribute: false }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
   @property() history: {}[];
+  @property() actionList: {}[];
   @property() connector;
 
   //Private properties
@@ -119,7 +120,7 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
-    mx.socket.list[this.socketKey].mxSend(message, true, this.history);
+    mx.socket.list[this.socketKey].mxSend(message, true, this.history, this.actionList);
   }
 
   //Empty The Results Area
