@@ -120,7 +120,7 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
-    mx.socket.list[this.socketKey].mxSend(message, true, this.history, this.actionList);
+    mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList);
   }
 
   //Empty The Results Area
@@ -147,10 +147,6 @@ export class mxCommunicator extends LitElement {
 
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
-
-      //Setup an empty callback for initial connect messages
-      socket.mxNotifyMessages(this, this.history);
-      //mx.socket.takeCallbacks(this.socketKey, this, this.history);
 
       //Remember we ran once
       this.hasRun = true;

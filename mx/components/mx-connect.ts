@@ -55,7 +55,7 @@ export class mxConnect extends LitElement {
 
   //Define public properties (databinding)
   @property() machines: {} = mx.machine.machines;
-  @property() connections: {} ={};
+  @property() connections: {} = {};
   @property() history: {}[] = [];
   @property() actionList: {}[] = [];
   @property() url: string = "";
@@ -93,18 +93,18 @@ export class mxConnect extends LitElement {
 
   //PORT connect link clicked
   connectPort(machineKey: string, portKey: string) {
-    mx.socket.connectPort(machineKey, portKey, this,[],this.history,this.actionList);
+    mx.socket.connectPort(machineKey, portKey, this, [], this.history, this.actionList);
     ;
   }
 
   //MACHINE connect link clicked
   connectMachine(machineKey: string) {
-    mx.socket.connectMachine(machineKey, this,[],this.history,this.actionList);
+    mx.socket.connectMachine(machineKey, this, [], this.history, this.actionList);
   }
 
   //GROUP connect link clicked
   connectGroup(groupKey: string) {
-    mx.socket.connectGroup(groupKey, this, this.history,this.actionList);
+    mx.socket.connectGroup(groupKey, this, this.history, this.actionList);
   }
 
   //Create HTML Templates

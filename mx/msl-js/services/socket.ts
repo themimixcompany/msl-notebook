@@ -45,6 +45,8 @@ let connections = {};
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?) {
 
+  console.log("setup empty callback")
+
   //Remember us as original sender
   socket.sender = socket.key;
 
@@ -101,7 +103,9 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
 //Used to handle the .onmessage event from a socket *after* a message is sent.
 const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?, actionList?) {
 
-  //Create a closure for actionIndex
+console.log("readying callback for",socket.key)
+
+  //Create a closure for actionIndex for .onmessage
   let actionIndex = actionList.length - 1;
 
   //Get history from socket
@@ -115,13 +119,14 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
   //Create onmessage callback
   socket.onmessage = function (event: Event) {
+    
 
     //Get received message from event
     const receivedMessage: string = event.data;
 
     //Debug Info
     mx.debug.echo(false);
-    mx.debug.log(`λ ${socket.notifyMessages["localName"]} ${socket.key} ${message} => ${receivedMessage}`);
+    mx.debug.log(`λ ${socket.key} ${message} => ${receivedMessage}`);
 
     //Get original sender from socket;
     let sendingSocketKey = socket.sender;
@@ -175,8 +180,15 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       }
     }
 
+    //Get who to notify from actionList
+    let notifyElement = actionList[actionIndex].notify
+
+    console.log("notify",actionIndex)
+    console.log(actionList[actionIndex].notify)
+
     //Notify the sender of the received message.
-    notify(socket.notifyMessages, "message-received", notifyMessage);
+    notify(actionList[actionIndex].notify, "message-received", notifyMessage);
+    //notify(socket.notifyMessages, "message-received", notifyMessage);
 
     //Handle temporary listeners setup by additional listen ports
     if (socket["originalNotifyMessages"]) {
@@ -203,9 +215,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Perform relay if appropriate
     if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
-      console.log("==========");
-      console.log("about to relay");
-
+  
       //Get toSocket
       let toSocket = connections[socket.relayTo];
 
@@ -215,7 +225,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       //Change listener for this additional socket to be the one that sent the message
       toSocket.mxNotifyMessages(socket.notifyMessages, actionList);
 
-      sendSingleMessage(toSocket, receivedMessage, echo, socket.key, actionList)
+      sendSingleMessage(toSocket, receivedMessage, echo, socket.key, notifyElement, actionList)
     }
 
     //If this listener received a message on a different wire than sent, re-attach original listener
@@ -237,8 +247,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
 //sendSingleMessage
 //Send a single message over a websocket with a per-message callback.
-const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, actionList?) {
-
+const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, notifyElement,actionList?) {
 
   //Get history from socket
   let history = socket.history;
@@ -263,7 +272,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     if (relay != "" && relay != "false" && socket.key != relay) {
 
        //Record this action
-       recordRelay(actionList,socket.key,relay,message,socket.notifyMessages);
+       recordRelay(actionList,socket.key,relay,message,notifyElement);
 
       historyItem = history[messageNumber - 1]
 
@@ -273,15 +282,13 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     } else {
 
         //Record this action
-        recordSend(actionList,socket.key,message,socket.notifyMessages);
+        recordSend(actionList,socket.key,message,notifyElement);
 
       //Store this outgoing message under the socketKey
       historyItem[socket.key] = [message]
 
-
       //Add new item to end of history array
       history.push(historyItem)
-
 
     }
 
@@ -321,8 +328,10 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
     }
   }
 
+
   //Send message if not blank (Blank sets up receiver w/o sending.)
   if (message != "") {
+    console.log("sending",socket.key,message)
     socket.send(message)
   }
 
@@ -877,10 +886,10 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
 //mxSend
 //Send a message. Call w/ .mxSend function on an active socket from connections.
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
-const mxSend = function (message: string, echo: boolean = false, actionList?) {
+const mxSend = function (message: string, echo: boolean = false, notifyElement, actionList?) {
 
   //Send the message w/ notification and history.
-  sendSingleMessage(this, message, echo, "false", actionList);
+  sendSingleMessage(this, message, echo, "false", notifyElement, actionList);
 
 }
 
