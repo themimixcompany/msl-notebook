@@ -85,6 +85,7 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
     //Create a copy of history for notifyElement (triggers property updates there)
     let [...historyCopy] = history;
 
+
     //Notify component of history change;
     notify(socket.notifyHistory, "history-changed", historyCopy);
 
@@ -117,10 +118,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Get received message from event
     const receivedMessage: string = event.data;
-
-    //Record this response
-    recordReceive(actionList, actionIndex, socket.key, receivedMessage)
-    //recordResponse(actionList, actionIndex, response.receive, undefined, socket.key, receivedMessage);
 
     //Debug Info
     mx.debug.echo(false);
@@ -197,20 +194,17 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     // }
 
 
-    // if (socket.relayTo && socket.sender != socket.relayTo) {
-    //   console.log("-----------");
-    //   console.log("should relay?")
-    //   console.log("socket.key:", socket.key);
-    //   console.log("receivedMessage:", receivedMessage);
-    //   console.log("socket.sender:", socket.sender);
-    //   console.log("relay parm:", relay);
-    //   console.log("relayTo:", socket.relayTo);
-    //   console.log("relayFrom:", socket.relayFrom);
-    // }
+     //Record a regular or roundtrip message was received
+     if (relay == socket.relayTo) {
+        recordRoundtrip(actionList,actionIndex,socket.key,relay,message);
+     } else {
+        recordReceive(actionList, actionIndex, socket.key, receivedMessage)
+     }
 
+    //Perform relay if appropriate
     if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
-      // console.log("==========");
-      // console.log("did relay");
+      console.log("==========");
+      console.log("about to relay");
 
       //Get toSocket
       let toSocket = connections[socket.relayTo];
@@ -267,8 +261,6 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 
     //Check if this an outgoing relay message (relay = original sender's socketKey)
     if (relay != "" && relay != "false" && socket.key != relay) {
-
-      console.log("is relay message", message)
 
        //Record this action
        recordRelay(actionList,socket.key,relay,message,socket.notifyMessages);
@@ -752,7 +744,7 @@ const recordAction = function (actionList, type, to: string = "", from: string =
 
   actionList.push(newAction);
 
-  console.log("actionList");
+  console.log("newAction");
   console.log(actionList);
 
 }
@@ -764,49 +756,46 @@ const recordConnect = function (actionList, to, notify) {
 
 //recordSend
 const recordSend = function (actionList, to, message, notify) {
-  console.log("recording send",message)
   recordAction(actionList, action.send, to, undefined, message, notify);
 }
 
 //recordRelay
 const recordRelay = function (actionList, to, from, message, notify) {
-  console.log("recording relay",message)
   recordAction(actionList, action.relay, to, from, message, notify);
 }
 
 //RESPONSE RECORDING  //////////
 
 //recordResponse
-const recordResponse = function (actionList, messageNumber, type, to, from, message) {
-
-
+const recordResponse = function (actionList, actionIndex, type, to, from, message) {
   
-  let actionItem:{} = actionList[messageNumber];
-  let responseList:{}[] = actionItem["response"];
-
+  let actionItem:{} = actionList[actionIndex];
+  
   //No action  item? Early return.
   if (!actionItem) {
-    mx.debug.log("action",messageNumber,"is missing")
+    mx.debug.log("action",actionIndex,"is missing")
     return false;
   }
 
+//Create new response item
+let newResponseItem = {
+  "type" : type,
+  "to" : to,
+  "from" : from,
+  "message" : message
+}
+
   //No response list? Create it.
-  if (!responseList) {
-    actionItem["response"] = [];
+  if (!actionItem["response"]) {
+    actionItem["response"] = [newResponseItem];
+  } else {
+    actionItem["response"].push(newResponseItem);
   }
 
-  //Create new response item
-  let newResponseItem = {
-    "type" : type,
-    "to" : to,
-    "from" : from,
-    "message" : message
-  }
 
-  //Add response to list
-  actionItem["response"].push(newResponseItem);
-
-  //Set 
+  
+  console.log("newResponse");
+  console.log(actionList);
 
 }
 
