@@ -51,46 +51,6 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
   //Remember us as original sender
   socket.sender = socket.key;
 
-  //Get history from socket
-  let history = socket.history;
-
-  //Handle history, if provided
-  if (history) {
-
-    //Find position in history or use provided
-    if (messageNumber == undefined) {
-      if (history.length == 0) {
-        messageNumber = 0;
-      } else {
-        messageNumber = history.length - 1;
-      }
-    }
-
-    //Get Message in History
-    let historyItem = history[messageNumber];
-
-    //If no history item, create empty item
-    if (!historyItem) {
-
-      historyItem = {};
-
-      //Save in history if new message
-      history.push(historyItem);
-    }
-
-    //If no entry under the socketKey, create an empty one
-    if (!historyItem[socket.key]) {
-      historyItem[socket.key] = [""];
-    }
-
-    //Create a copy of history for notifyElement (triggers property updates there)
-    let [...historyCopy] = history;
-
-    //Notify component of history change;
-    notify(actionList[actionIndex]["notify"], "history-changed", historyCopy);
-
-  }
-
   //using "" as message reflects that we did not send any message.
   setupMessageCallback(socket, "", true, "", actionList)
 
@@ -102,15 +62,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
   //Create a closure for actionIndex for .onmessage
   let actionIndex = actionList.length - 1;
-
-  //Get history from socket
-  let history = socket.history;
-
-  //Setup for messageNumber 
-  let messageNumber;
-  if (history) {
-    messageNumber = history.length - 1;
-  }
 
   //Create onmessage callback
   socket.onmessage = function (event: Event) {
@@ -124,34 +75,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Get original sender from socket;
     let sendingSocketKey = socket.sender;
-
-    //Handle history, if provided
-
-    if (history) {
-
-      //Get Message in History
-      let historyItem = history[messageNumber];
-
-      //If no array for this socketKey, add it
-      if (!historyItem[socket.key]) {
-
-        //brute force move to bottom
-        let sendingSocketItem = historyItem[sendingSocketKey];
-        delete historyItem[sendingSocketKey];
-        historyItem[sendingSocketKey] = sendingSocketItem;
-        historyItem[socket.key] = [message];
-      }
-
-      //Save receiving socket and message
-      historyItem[socket.key].push(receivedMessage);
-
-      //Create a copy of history for notifyElement (triggers property updates there)
-      let [...historyCopy] = history;
-
-      //Notify component of history change;
-      notify(actionList[actionIndex]["notify"], "history-changed", historyCopy);
-
-    }
 
     //Interpret MSL (Check for (@VER), for example)
     //var isValidMSL = mslParser.parse(receivedMessage);
@@ -175,11 +98,8 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Get who to notify from actionList
     let notifyElement = actionList[actionIndex]["notify"]
 
-
     //Notify the sender of the received message.
     notify(actionList[actionIndex]["notify"], "message-received", notifyMessage);
-
-
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     // if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
@@ -226,48 +146,19 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 //Send a single message over a websocket with a per-message callback.
 const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, notifyElement, actionList?:{}[]) {
 
-  //Get history from socket
-  let history = socket.history;
-
   //Remember us as original sender
   socket.sender = socket.key;
 
-  //Setup for messageNumber
-  let messageNumber
+  //Check if this an outgoing relay message (relay = original sender's socketKey)
+  if (relay != "" && relay != "false" && socket.key != relay) {
 
-  //Handle history
-  if (history) {
+    //Record this action
+    recordRelay(actionList, socket.key, relay, message, notifyElement);
 
-    //Remember message number
-    messageNumber = history.length;
+  } else {
 
-    //Setup for new or existing historyItem
-    let historyItem = {}
-
-
-    //Check if this an outgoing relay message (relay = original sender's socketKey)
-    if (relay != "" && relay != "false" && socket.key != relay) {
-
-      //Record this action
-      recordRelay(actionList, socket.key, relay, message, notifyElement);
-
-      historyItem = history[messageNumber - 1]
-
-      //Store this outgoing message under the socketKey
-      historyItem[socket.key] = [message]
-
-    } else {
-
-      //Record this action
-      recordSend(actionList, socket.key, message, notifyElement);
-
-      //Store this outgoing message under the socketKey
-      historyItem[socket.key] = [message]
-
-      //Add new item to end of history array
-      history.push(historyItem)
-
-    }
+    //Record this action
+    recordSend(actionList, socket.key, message, notifyElement);
 
   }
 
@@ -357,7 +248,7 @@ const addMxFunctions = (socket: WebSocket) => {
 
 //connectPort
 //Connect to a WebSocket on a machine.
-const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, history?: {}[], actionList?: {}[]) {
+const connectPort = function (machineKey: string, portKey, notifyElement: HTMLElement, relayPairs?, actionList?: {}[]) {
 
   let portKeyList = portKey;
 
@@ -431,8 +322,6 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     //Create new socket
     socket = new WebSocket(socketURL);
 
-    //Create history
-    socket.history = history;
 
     //ADD MX FUNCTIONS TO SOCKET //////////
     addMxFunctions(socket);
@@ -602,13 +491,13 @@ const handleClose = function(actionList:{}[],connections,socketKey) {
 
 //connectMachine
 //Connect to all ports on a machine.
-const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, history?: {}[], actionList?: {}[]) {
-  connectPort(machineKey, mx.machine.machines[machineKey].ports, notifyElement, relayPairs, history, actionList);
+const connectMachine = function (machineKey, notifyElement: HTMLElement, relayPairs?, actionList?: {}[]) {
+  connectPort(machineKey, mx.machine.machines[machineKey].ports, notifyElement, relayPairs, actionList);
 }
 
 //connectGroup
 //Connect to all machines and ports in a group.
-const connectGroup = function (groupKey: string, notifyElement: HTMLElement, history?: {}[], actionList?: {}[]) {
+const connectGroup = function (groupKey: string, notifyElement: HTMLElement, actionList?: {}[]) {
 
   //Get info about machines and ports in this group
   let group = mx.machine.groups[groupKey];
@@ -671,21 +560,21 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement, his
   //Connect to all sockets on each of them
   for (let machineIndex in groupMachines) {
     let machineKey = groupMachines[machineIndex]
-    connectMachine(machineKey, notifyElement, groupPorts, history, actionList);
+    connectMachine(machineKey, notifyElement, groupPorts, actionList);
   }
 
 }
 
 //connect
 //Connect to a URL
-const connect = function (socketURL, notifyElement?: HTMLElement, history?, actionList?:{}[]) {
+const connect = function (socketURL, notifyElement?: HTMLElement, actionList?:{}[]) {
 
 
   //Create machine and port entries and capture their keys
   let [machineKey, portKey] = create(socketURL, notifyElement);
 
   //Connect to the new machine and port
-  connectPort(machineKey, portKey, notifyElement, [], history, actionList);
+  connectPort(machineKey, portKey, notifyElement, [], actionList);
 
 }
 
@@ -930,24 +819,12 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
 const mxSend = function (message: string, echo: boolean = false, notifyElement, actionList?:{}[]) {
 
-  //Send the message w/ notification and history.
+  //Send the message w/ notification.
   sendSingleMessage(this, message, echo, "false", notifyElement, actionList);
 
 }
 
 
-
-
-//mxNotifyHistory
-//Accessed by .mxNotifyHistory function on an active socket.
-//Assigns a web component or HTML element to be notified when this socket changes the history.
-//In that context, "this" is the socket itself.
-const mxNotifyHistory = function (notifyElement: HTMLElement) {
-
-  //Remember who to notify of history changes for this socket.
-  this.notifyHistory = notifyElement;
-
-}
 
 //mxClose
 //Accessed by .mxClose function on an active socket.

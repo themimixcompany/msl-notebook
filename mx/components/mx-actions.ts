@@ -12,8 +12,8 @@ import * as mx from 'msl-js/service-loader'
 
 //<mx-history>
 //Displays history information collected from the socket service
-@customElement('mx-history2')
-export class mxHistory2 extends LitElement {
+@customElement('mx-actions')
+export class mxActions extends LitElement {
     static styles = css`
     textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
     ol,ul, input, h2, p, .machine, .results { font-family: Inter; font-size: 18pt }

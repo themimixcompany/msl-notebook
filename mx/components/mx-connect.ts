@@ -244,10 +244,7 @@ export class mxConnect extends LitElement {
     </div>
 
     <br>
-    <mx-history2 .actionList=${this.actionList}></mx-history2>
-    <br>
-
-    <mx-history .history=${this.history} .notifyHistory=${this}></mx-history>
+    <mx-actions .actionList=${this.actionList}></mx-actions>
     <br>
     
     ${this.templateCommunicators()}
