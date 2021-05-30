@@ -26,7 +26,7 @@ export class mxConnect extends LitElement {
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
     .grid2 {
       display: grid;
@@ -94,8 +94,6 @@ export class mxConnect extends LitElement {
   //Actions changed
   actionsChanged(receivedEvent: CustomEvent) {
     this.actionList = receivedEvent.detail;
-    console.log("new actions incoming")
-    console.log(this.actionList);
   }
 
   //PORT connect link clicked

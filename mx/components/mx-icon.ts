@@ -31,6 +31,7 @@ export class mxIcon extends LitElement {
     @property() size: number = 1;
     @property() viewBox: string;
     @property() title: string;
+    @property() class: string;
 
     //PRIVATE PROPERTIES
 
@@ -73,17 +74,17 @@ export class mxIcon extends LitElement {
     }
 
 
-    download = (content, fileName, contentType) => {
-        const a = document.createElement("a");
-        const file = new Blob([content], { type: contentType });
-        a.href = URL.createObjectURL(file);
-        a.download = fileName;
-        a.click();
-       }
+    // download = (content, fileName, contentType) => {
+    //     const a = document.createElement("a");
+    //     const file = new Blob([content], { type: contentType });
+    //     a.href = URL.createObjectURL(file);
+    //     a.download = fileName;
+    //     a.click();
+    //    }
        
-    onDownload(){
-        this.download(JSON.stringify(this.indexOfNames), "indexOfNames.json", "text/plain");
-       }
+    // onDownload(){
+    //     this.download(JSON.stringify(this.indexOfNames), "indexOfNames.json", "text/plain");
+    //    }
 
     //Show this component on screen
     render() {
@@ -104,7 +105,7 @@ export class mxIcon extends LitElement {
         }
 
         //Setup for finding font in class
-        let classAttribute = this.className
+        let classAttribute = this.class
 
         //Remove fa-
         classAttribute = classAttribute.replace("fa-", ""); //class="fas fa-alien" => class="fas alien";
@@ -130,7 +131,7 @@ export class mxIcon extends LitElement {
         if (!matchingIcon) {
             matchingIcon = fa.fas["triangle-exclamation"];
             this.color = "#ec2026";
-            this.title = `Could not find icon "${this.className}".`
+            this.title = `Could not find icon "${this.class}".`
         }
 
         //Destructure array to find SVG info
@@ -141,7 +142,7 @@ export class mxIcon extends LitElement {
 
         //Create SVG
         let svgPart = svg`
-        <svg viewBox=${viewBox} class="${classAttribute} icon" style="height:${this.size}em; width:${this.size}em;">
+        <svg viewBox=${viewBox} class="${this.class} icon" style="height:${this.size}em; width:${this.size}em;">
             <path style="fill:${this.color}" d="${dValue}"></path>
             <title>${this.title}</title>
         </svg>

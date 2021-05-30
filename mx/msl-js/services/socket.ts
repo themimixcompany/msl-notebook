@@ -544,30 +544,33 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
     setupEmptyCallback(socket, undefined, actionList);
 
     //Setup close callback
-    socket.onclose = function () {
+    // socket.onclose = function () {
 
-      mx.debug.log("closed", socketKey);
+    //   mx.debug.log("closed", socketKey);
+    //   console.log("closed")
+    //   console.log(actionList);
 
-      //Get index of actionList item
-      let actionIndex = actionList.length - 1;
+    //   //Get index of actionList item
+    //   let actionIndex = actionList.length - 1;
 
-      //Record this response
-      recordClose(actionList, actionIndex, this.key);
+    //   //Get who to notify from actionList item
+    //   let actionItem = actionList[actionIndex];
 
-      //Remove this socket from active connections
-      delete connections[this.key]
+    //   //Record this response
+    //   recordClose(actionList, actionIndex, this.key, actionItem["notify"]);
 
-      //Create a copy to force property changes
-      let { ...connectionsCopy } = connections;
+    //   //Remove this socket from active connections
+    //   delete connections[this.key]
 
-      //Get who to notify from actionList item
-      let actionItem = actionList[actionIndex];
+    //   //Create a copy to force property changes
+    //   let { ...connectionsCopy } = connections;
 
-      //Notify element of status change
-      console.log("notifying of close")
-      notify(actionItem["notify"], "status-changed", connectionsCopy);
-    }
+    //   //Notify element of status change
+    //   notify(actionItem["notify"], "status-changed", connectionsCopy);
+    // }
 
+    //Setup close callback for closures from the other side (not initiated by us).
+    socket.onclose = (e) => handleClose(actionList,connections,socket.key);
 
   }
 
@@ -575,6 +578,28 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
   return true;
 }
 
+const handleClose = function(actionList:{}[],connections,socketKey) {
+
+  mx.debug.log("closed", socketKey);
+
+      //Get index of actionList item
+      let actionIndex = actionList.length - 1;
+
+      //Get who to notify from actionList item
+      let actionItem = actionList[actionIndex];
+
+      //Record this response
+      recordClose(actionList, actionIndex, socketKey, actionItem["notify"]);
+
+      //Remove this socket from active connections
+      delete connections[socketKey]
+
+      //Create a copy to force property changes
+      let { ...connectionsCopy } = connections;
+
+      //Notify element of status change
+      notify(actionItem["notify"], "status-changed", connectionsCopy);
+}
 
 //connectMachine
 //Connect to all ports on a machine.
@@ -747,9 +772,6 @@ const connect = function (socketURL, notifyElement?: HTMLElement, history?, acti
 //Record a new action. Notify of all responses to the action.
 const recordAction = function (actionList:{}[], type, to: string = "", from: string = "", message: string = "", notifyElement?: HTMLElement) {
 
-  console.log("recordActions actions")
-  console.log(actionList);
-
   //Create a new action from the passed parameters.
   let newAction = {
     "type": type,
@@ -847,7 +869,7 @@ const recordReceive = function (actionList:{}[], messageNumber, from, message, n
 
 //recordRoundtrip
 const recordRoundtrip = function (actionList:{}[], messageNumber, from, to, message, notifyElement?: HTMLElement) {
-  recordResponse(actionList, messageNumber, response.roundtrip, from, to, message, notifyElement);
+  recordResponse(actionList, messageNumber, response.roundtrip, to, from, message, notifyElement);
 }
 
 //recordClose
@@ -938,6 +960,9 @@ const mxClose = function (notifyElement:HTMLElement, actionList?:{}[]) {
   if (actionList) {
     recordDisconnect(actionList, this.key, notifyElement);
   }
+
+  //Setup close callback for closures from the other side (not initiated by us).
+  this.onclose = (e) => handleClose(actionList,connections,this.key);
 
   //Close socket w/ normal reason code (1000)
   this.close(1000);

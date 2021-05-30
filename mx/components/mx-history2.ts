@@ -10,11 +10,6 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
 
-//PRIVATE PROPERTIES //////////
-const actionNames = ["connect", "send", "relay", "disconnect"];
-const responseNames = ["open", "receive", "roundtrip", "close"];
-
-
 //<mx-history>
 //Displays history information collected from the socket service
 @customElement('mx-history2')
@@ -86,7 +81,7 @@ export class mxHistory2 extends LitElement {
     templateListHeader() {
         return html`
             <div class="gridHeader results" style="font-weight:600">
-            <mx-icon class="fas fa-tasks"></mx-icon> actions
+            <mx-icon class="fas fa-cogs"></mx-icon> actions
 
             <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the history." size=".9" class="fas fa-eye"></mx-icon>
 
@@ -118,39 +113,56 @@ export class mxHistory2 extends LitElement {
     //Item
     templateItem(actionIndex, actionItem) {
 
+        //Action Names & Icons
+        const actionNames = ["connect", "send", "relay", "disconnect"];
+        const actionIcons = ["fas fa-plug", "fas fa-keyboard", "fas fa-chart-network", "far fa-plug"];
+
         //Create 1-based action # for display
         let actionNumber = (actionIndex * 1) + 1;
 
         let actionItemHeader = html`
             <div class="whiteHeaderText navyBk">
-            #
+            <mx-icon class="fas fa-list-ol"></mx-icon>
             </div>
             <div class="whiteHeaderText navyBk">
-            action
+            <mx-icon class="fas fa-cogs"></mx-icon> action
             </div>
             <div class="whiteHeaderText navyBk">
-            from
+            <mx-icon class="fas fa-router"></mx-icon> from
             </div>
             <div class="whiteHeaderText navyBk">
-            to
+            <mx-icon class="fas fa-router"></mx-icon> to
             </div>
             <div class="whiteHeaderText navyBk">
-            message
+            <mx-icon class="fas fa-envelope"></mx-icon> message
             </div>
             `
 
+        let fromSocketKey = mx.socket.list[actionItem.from];
+        let toSocketKey = mx.socket.list[actionItem.to];
+
+        //Setup Colors
+        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+
+
+        //Find icon for type
+        let typeIcon = actionIcons[actionItem.type]
+
         //Build single result template
         let actionItemValues = html`
-        <div class="greyBk">
+        <div class="greyBk" style="padding-left:8px;">
         ${actionNumber}
         </div>
         <div class="greyBk">
-        ${actionNames[actionItem.type]}
+        <mx-icon class="${actionIcons[actionItem.type]}"></mx-icon> ${actionNames[actionItem.type]}
         </div>
         <div class="greyBk">
+        ${actionItem.from ? html`<mx-icon class="fas fa-router" color=${fromWireColor}></mx-icon>` : ""}
         ${actionItem.from}
         </div>
         <div class="greyBk">
+        ${actionItem.to ? html`<mx-icon class="fas fa-router" color=${toWireColor}></mx-icon>` : ""}
         ${actionItem.to}
         </div>
         <div class="greyBk">
@@ -160,20 +172,12 @@ export class mxHistory2 extends LitElement {
 
         let responseItemHeader = html`
             <div class="whiteHeaderText darkGreyBk">
-            #
+            <mx-icon class="fas fa-list-ol"></mx-icon>
             </div>
-            <div class="whiteHeaderText darkGreyBk">
-            response
+            <div class="whiteHeaderText darkGreyBk" style="grid-column:2/span 4">
+            <mx-icon class="fas fa-reply-all"></mx-icon> response
             </div>
-            <div class="whiteHeaderText darkGreyBk">
-            from
-            </div>
-            <div class="whiteHeaderText darkGreyBk">
-            to
-            </div>
-            <div class="whiteHeaderText darkGreyBk">
-            message
-            </div>
+            
              `
 
         //create a container to hold all response teplate results
@@ -181,7 +185,7 @@ export class mxHistory2 extends LitElement {
 
         //accumulate all action item template results
         for (let responseIndex in actionItem.response) {
-            responseTemplates = html`${responseTemplates}${this.templateResponse(actionIndex, responseIndex, actionItem.response[responseIndex])}`;
+            responseTemplates = html`${responseTemplates}${this.templateResponse(actionIndex, actionItem, responseIndex, actionItem.response[responseIndex])}`;
         }
 
         return html`
@@ -193,26 +197,38 @@ export class mxHistory2 extends LitElement {
     }
 
     //Response
-    templateResponse(actionIndex, responseIndex, responseItem) {
+    templateResponse(actionIndex, actionItem, responseIndex, responseItem) {
+
+        
+        //Response Names & Icons
+        const responseNames = ["open", "receive", "roundtrip", "close"];
+        const responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
 
         //Create 1-based action and response # for display
         let actionNumber = (actionIndex * 1) + 1;
         let responseNumber = (responseIndex * 1) + 1;
 
+        let fromSocketKey = mx.socket.list[responseItem.from];
+        let toSocketKey = mx.socket.list[responseItem.to];
 
+          //Setup Colors
+          let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+          let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
 
         //Build single result template
         let responseItemValues = html`
-            <div class="greyBk">
+            <div class="greyBk" style="padding-left:8px;">
             ${actionNumber}.${responseNumber}
             </div>
             <div class="greyBk">
-            ${responseNames[responseItem.type]}
+            <mx-icon class=${responseItem.from == actionItem.to ? responseIcons[responseItem.type] : "fas fa-comment-alt-plus"}></mx-icon> ${responseNames[responseItem.type]}
             </div>
             <div class="greyBk">
+            ${responseItem.from ? html`<mx-icon class="fas fa-router" color=${fromWireColor}></mx-icon>` : ""}
             ${responseItem.from}
             </div>
             <div class="greyBk">
+            ${responseItem.to ? html`<mx-icon class="fas fa-router" color=${toWireColor}></mx-icon>` : ""}
             ${responseItem.to}
             </div>
             <div class="greyBk">
