@@ -89,8 +89,13 @@ export class mxConnect extends LitElement {
   //History changed
   historyChanged(receivedEvent: CustomEvent) {
     this.history = receivedEvent.detail;
-    console.log("new history incoming")
-    console.log(this.history)
+  }
+
+  //Actions changed
+  actionsChanged(receivedEvent: CustomEvent) {
+    //this.actionList = receivedEvent.detail;
+    console.log("new actions incoming")
+    console.log(receivedEvent.detail);
   }
 
   //PORT connect link clicked
@@ -213,6 +218,7 @@ export class mxConnect extends LitElement {
     this.addEventListener("machines-changed", this.machinesChanged);
     this.addEventListener("status-changed", this.statusChanged);
     this.addEventListener("history-changed", this.historyChanged);
+    this.addEventListener("actions-changed", this.actionsChanged);
 
       //Remember we ran once
       this.hasRun = true;
@@ -240,6 +246,9 @@ export class mxConnect extends LitElement {
     </div>
 
     <br>
+    <mx-history2 .history=${this.actionList} .notifyHistory=${this}></mx-history2>
+    <br>
+
     <mx-history .history=${this.history} .notifyHistory=${this}></mx-history>
     <br>
     
