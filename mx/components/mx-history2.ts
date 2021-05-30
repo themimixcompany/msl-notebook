@@ -10,6 +10,11 @@ import { customElement, property } from 'lit/decorators.js';
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
 
+//PRIVATE PROPERTIES //////////
+const actionNames = ["connect", "send", "relay", "disconnect"];
+const responseNames = ["open", "receive", "roundtrip", "close"];
+
+
 //<mx-history>
 //Displays history information collected from the socket service
 @customElement('mx-history2')
@@ -18,7 +23,9 @@ export class mxHistory2 extends LitElement {
     textarea { color: #ec2028; font-family: Inter Black; font-size: 18pt }
     ol,ul, input, h2, p, .machine, .results { font-family: Inter; font-size: 18pt }
     p {margin-top: 5px; margin-bottom: 5px;}
-    .greyBk {background-color:#ccc}
+    .greyBk {background-color:#ccc; padding:5px;}
+    .darkGreyBk {background-color:#aaa; padding:5px;}
+    .navyBk {background-color:navy; padding:5px;}
     .gridHeader {background-color:#bbb}
     a { text-decoration: underline; cursor: pointer; text-decoration:underline}
     .whiteHeaderText {color:white;font-weight:500;}
@@ -30,7 +37,7 @@ export class mxHistory2 extends LitElement {
     .grid2 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
+      gap: 3px;
     }
     .one {
       grid-column: 1;
@@ -49,13 +56,13 @@ export class mxHistory2 extends LitElement {
     
     `;
 
-    //Define public properties (databinding)
+    //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
     @property() isHidden: boolean = false;
 
     //Empty history
     emptyActionList() {
-      this.actionList = [];
+        this.actionList = [];
     }
 
     //Show or Hide History
@@ -65,14 +72,18 @@ export class mxHistory2 extends LitElement {
 
     //Send to Socket (Used for re-sending messages from history)
     sendToSocket(socketKey, message: string) {
-    mx.socket.list[socketKey].mxSend(message, true);
-  }
+        mx.socket.list[socketKey].mxSend(message, true);
+    }
 
     //Create HTML Templates
+    //templateListHeader
+    //templateList
+    //templateItem
+    //templateSubItem
 
-    
-    //Results Header
-    templateActionsHeader() {
+
+    //List Header
+    templateListHeader() {
         return html`
             <div class="gridHeader results" style="font-weight:600">
             <mx-icon class="fas fa-tasks"></mx-icon> actions
@@ -85,35 +96,142 @@ export class mxHistory2 extends LitElement {
         `
     }
 
-    //Action List
-    templateActionList() {
-    
+    //List
+    templateList() {
+
         //create a container to hold all item teplate results
-        let allItems:HTMLTemplateResult
+        let itemTemplates: HTMLTemplateResult
 
         //accumulate all action item template results
         for (let actionIndex in this.actionList) {
-            allItems = html`${allItems}${this.templateActionItem(actionIndex, this.actionList[actionIndex])}`;
-       }
+            itemTemplates = html`${itemTemplates}${this.templateItem(actionIndex, this.actionList[actionIndex])}`;
+        }
 
-       //return all results
-       return allItems;
+        //return all results   
+        return html` 
+            <div class="grid2 results">
+            ${itemTemplates}
+            </div>
+            `
     }
 
-    //Action Item
-    templateActionItem(actionIndex, actionItem) {
+    //Item
+    templateItem(actionIndex, actionItem) {
+
+        //Create 1-based action # for display
+        let actionNumber = (actionIndex * 1) + 1;
+
+        let actionItemHeader = html`
+            <div class="whiteHeaderText navyBk">
+            #
+            </div>
+            <div class="whiteHeaderText navyBk">
+            action
+            </div>
+            <div class="whiteHeaderText navyBk">
+            from
+            </div>
+            <div class="whiteHeaderText navyBk">
+            to
+            </div>
+            <div class="whiteHeaderText navyBk">
+            message
+            </div>
+            `
+
+        //Build single result template
+        let actionItemValues = html`
+        <div class="greyBk">
+        ${actionNumber}
+        </div>
+        <div class="greyBk">
+        ${actionNames[actionItem.type]}
+        </div>
+        <div class="greyBk">
+        ${actionItem.from}
+        </div>
+        <div class="greyBk">
+        ${actionItem.to}
+        </div>
+        <div class="greyBk">
+        ${actionItem.message}
+        </div>
+    `;
+
+        let responseItemHeader = html`
+            <div class="whiteHeaderText darkGreyBk">
+            #
+            </div>
+            <div class="whiteHeaderText darkGreyBk">
+            response
+            </div>
+            <div class="whiteHeaderText darkGreyBk">
+            from
+            </div>
+            <div class="whiteHeaderText darkGreyBk">
+            to
+            </div>
+            <div class="whiteHeaderText darkGreyBk">
+            message
+            </div>
+             `
+
+        //create a container to hold all response teplate results
+        let responseTemplates: HTMLTemplateResult
+
+        //accumulate all action item template results
+        for (let responseIndex in actionItem.response) {
+            responseTemplates = html`${responseTemplates}${this.templateResponse(actionIndex, responseIndex, actionItem.response[responseIndex])}`;
+        }
+
         return html`
-        <div>${actionIndex}</div>
-        <div>${actionItem}</div
+        ${actionItemHeader}
+        ${actionItemValues}
+        ${responseItemHeader}
+        ${responseTemplates}
         `
+    }
+
+    //Response
+    templateResponse(actionIndex, responseIndex, responseItem) {
+
+        //Create 1-based action and response # for display
+        let actionNumber = (actionIndex * 1) + 1;
+        let responseNumber = (responseIndex * 1) + 1;
+
+
+
+        //Build single result template
+        let responseItemValues = html`
+            <div class="greyBk">
+            ${actionNumber}.${responseNumber}
+            </div>
+            <div class="greyBk">
+            ${responseNames[responseItem.type]}
+            </div>
+            <div class="greyBk">
+            ${responseItem.from}
+            </div>
+            <div class="greyBk">
+            ${responseItem.to}
+            </div>
+            <div class="greyBk">
+            ${responseItem.message}
+            </div>
+        `;
+
+
+        return html`
+            ${responseItemValues}
+            `
     }
 
     //Show this component on screen
     render() {
 
         return html`
-            ${this.templateActionsHeader()}
-            ${this.templateActionList()}
+            ${this.templateListHeader()}
+            ${this.templateList()}
          `;
     }
 }
