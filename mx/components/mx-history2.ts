@@ -189,10 +189,12 @@ export class mxHistory2 extends LitElement {
         }
 
         return html`
+        <div style="grid-column: 1/span 5; height:5px;"></div>
         ${actionItemHeader}
         ${actionItemValues}
         ${responseItemHeader}
         ${responseTemplates}
+        
         `
     }
 

@@ -136,7 +136,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       if (!historyItem[socket.key]) {
 
         //brute force move to bottom
-
         let sendingSocketItem = historyItem[sendingSocketKey];
         delete historyItem[sendingSocketKey];
         historyItem[sendingSocketKey] = sendingSocketItem;
@@ -196,7 +195,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     }
 
     //Perform relay if appropriate
-    if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
+    if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo] && actionList[actionIndex - 1]["type"] != action.connect) {
 
       //Get toSocket
       let toSocket = connections[socket.relayTo];
