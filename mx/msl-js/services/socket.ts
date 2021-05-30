@@ -45,8 +45,6 @@ let connections = {};
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?) {
 
-  console.log("setup empty callback")
-
   //Remember us as original sender
   socket.sender = socket.key;
 
@@ -103,7 +101,6 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
 //Used to handle the .onmessage event from a socket *after* a message is sent.
 const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?, actionList?) {
 
-  console.log("readying callback for", socket.key)
 
   //Create a closure for actionIndex for .onmessage
   let actionIndex = actionList.length - 1;
@@ -156,8 +153,12 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       //Create a copy of history for notifyElement (triggers property updates there)
       let [...historyCopy] = history;
 
+      console.log("message changed history")
+      console.log(historyCopy);
+
       //Notify component of history change;
       notify(socket.notifyHistory, "history-changed", historyCopy);
+      //notify(actionList[actionIndex].notify, "history-changed", historyCopy);
 
     }
 
@@ -183,8 +184,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Get who to notify from actionList
     let notifyElement = actionList[actionIndex].notify
 
-    console.log("notify", actionIndex)
-    console.log(actionList[actionIndex].notify)
 
     //Notify the sender of the received message.
     notify(actionList[actionIndex].notify, "message-received", notifyMessage);
@@ -331,7 +330,6 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 
   //Send message if not blank (Blank sets up receiver w/o sending.)
   if (message != "") {
-    console.log("sending", socket.key, message)
     socket.send(message)
   }
 
@@ -342,10 +340,11 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 const notify = function (notifyElement, eventName: string, payload: any) {
 
   //create event
-  let notifyEvent = new CustomEvent(eventName, {"bubbles":true});
-
-  //attach payload
-  notifyEvent.payload = payload;
+  let eventOptions = {
+    "bubbles" : true,
+    "detail" : payload
+  }
+  let notifyEvent = new CustomEvent(eventName, eventOptions);
 
   //dispatch
   notifyElement.dispatchEvent(notifyEvent);
@@ -598,11 +597,10 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
 
       //Get who to notify from actionList item
       let actionItem = actionList[actionIndex];
-      let notifyElement = actionItem["notify"];
 
       //Notify element of status change
       console.log("notifying of close")
-      notify(notifyElement, "status-changed", connectionsCopy);
+      notify(actionItem["notify"], "status-changed", connectionsCopy);
     }
 
 

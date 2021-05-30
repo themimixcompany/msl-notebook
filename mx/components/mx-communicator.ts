@@ -55,10 +55,10 @@ export class mxCommunicator extends LitElement {
   }
 
   //Update results area when a message is received
-  messageReceived(event: Event) {
+  messageReceived(event: CustomEvent) {
 
     //Extract sent and received message info
-    const { sentMessage, sentSocketKey, receivedMessage, receivedSocketKey } = event.payload;
+    const { sentMessage, sentSocketKey, receivedMessage, receivedSocketKey } = event.detail;
 
     //Extract last message info for comparison
     let lastSentMessage = this.lastMessage.sentMessage;
@@ -97,7 +97,7 @@ export class mxCommunicator extends LitElement {
 `;
 
     //Remember Last Message
-    this.lastMessage = event.payload;
+    this.lastMessage = event.detail;
 
     //Add new result to results property
     this.mslResults = html`

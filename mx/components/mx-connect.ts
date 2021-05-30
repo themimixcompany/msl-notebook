@@ -75,20 +75,22 @@ export class mxConnect extends LitElement {
   }
 
   //Machines changed
-  machinesChanged(receivedEvent: Event) {
+  machinesChanged(receivedEvent: CustomEvent) {
     mx.debug.log("available machines updated");
     this.machines = mx.machine.machines;
   }
 
   //Status changed
-  statusChanged(receivedEvent: Event) {
+  statusChanged(receivedEvent: CustomEvent) {
     mx.debug.log("active connections updated");
-    this.connections = receivedEvent.payload;
+    this.connections = receivedEvent.detail;
   }
 
   //History changed
-  historyChanged(receivedEvent: Event) {
-    this.history = receivedEvent.payload;
+  historyChanged(receivedEvent: CustomEvent) {
+    this.history = receivedEvent.detail;
+    console.log("new history incoming")
+    console.log(this.history)
   }
 
   //PORT connect link clicked
