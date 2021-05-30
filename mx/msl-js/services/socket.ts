@@ -45,6 +45,9 @@ let connections = {};
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?) {
 
+  //Get actionIndex
+  let actionIndex = actionList.length - 1;
+
   //Remember us as original sender
   socket.sender = socket.key;
 
@@ -87,7 +90,8 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
 
 
     //Notify component of history change;
-    notify(socket.notifyHistory, "history-changed", historyCopy);
+    notify(actionList[actionIndex].notify,"history-changed", historyCopy);
+    //notify(socket.notifyHistory, "history-changed", historyCopy);
 
   }
 
@@ -577,6 +581,9 @@ const connectPort = function (machineKey: string, portKey, notifyElement: HTMLEl
         }
       }
     };
+
+    //Setup initial message callback
+    socket.mxNotifyMessages(notifyElement,actionList)
 
     //Setup close callback
     socket.onclose = function () {
