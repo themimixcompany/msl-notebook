@@ -148,6 +148,7 @@ export class mxCommunicator extends LitElement {
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
 
+
       //Remember we ran once
       this.hasRun = true;
 

@@ -208,16 +208,18 @@ export class mxConnect extends LitElement {
 
     if (!this.hasRun) {
 
+      
+    //Add event listeners for events targeting this component
+    this.addEventListener("machines-changed", this.machinesChanged);
+    this.addEventListener("status-changed", this.statusChanged);
+    this.addEventListener("history-changed", this.historyChanged);
+
       //Remember we ran once
       this.hasRun = true;
 
     }
 
 
-    //Add event listeners for events targeting this component
-    this.addEventListener("machines-changed", this.machinesChanged);
-    this.addEventListener("status-changed", this.statusChanged);
-    this.addEventListener("history-changed", this.historyChanged);
 
     return html`
 

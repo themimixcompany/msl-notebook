@@ -153,10 +153,6 @@ export class mxHistory extends LitElement {
         //Extract sent and received message info
         const [sentMessage, receivedMessage] = messageValues;
 
-        console.log("messageValues")
-        console.log(messageValues)
-
-
         //Setup Colors
         let sentWireColor = mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
         let ReceivedWireColor = mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'msl' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[socketKey] && mx.socket.list[socketKey].port.type == 'admin' ? mx.socket.list[socketKey] && mx.socket.list[socketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
