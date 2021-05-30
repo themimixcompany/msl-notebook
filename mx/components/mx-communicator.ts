@@ -120,6 +120,7 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
+
     mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList);
   }
 

@@ -43,12 +43,10 @@ let connections = {};
 
 //setupEmptyCallback
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
-const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?) {
+const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?:{}[]) {
 
   //Get actionIndex
   let actionIndex = actionList.length - 1;
-
-  console.log("setupEmptyCallback", socket.key, actionIndex)
 
   //Remember us as original sender
   socket.sender = socket.key;
@@ -89,7 +87,7 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
     let [...historyCopy] = history;
 
     //Notify component of history change;
-    notify(actionList[actionIndex].notify, "history-changed", historyCopy);
+    notify(actionList[actionIndex]["notify"], "history-changed", historyCopy);
 
   }
 
@@ -100,12 +98,10 @@ const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionLi
 
 //setupMessageCallback
 //Used to handle the .onmessage event from a socket *after* a message is sent.
-const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?, actionList?) {
+const setupMessageCallback = function (socket: WebSocket, message: string, echo: boolean, relay?, actionList?:{}[]) {
 
   //Create a closure for actionIndex for .onmessage
   let actionIndex = actionList.length - 1;
-
-  console.log("setupMessageCallback", socket.key, actionIndex)
 
   //Get history from socket
   let history = socket.history;
@@ -121,8 +117,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
     //Get received message from event
     const receivedMessage: string = event.data;
-
-    console.log("socket.key", socket.key, "received", receivedMessage)
 
     //Debug Info
     mx.debug.echo(false);
@@ -155,11 +149,8 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       //Create a copy of history for notifyElement (triggers property updates there)
       let [...historyCopy] = history;
 
-      console.log("message changed history")
-      console.log(historyCopy);
-
       //Notify component of history change;
-      notify(actionList[actionIndex].notify, "history-changed", historyCopy);
+      notify(actionList[actionIndex]["notify"], "history-changed", historyCopy);
 
     }
 
@@ -183,11 +174,11 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     }
 
     //Get who to notify from actionList
-    let notifyElement = actionList[actionIndex].notify
+    let notifyElement = actionList[actionIndex]["notify"]
 
 
     //Notify the sender of the received message.
-    notify(actionList[actionIndex].notify, "message-received", notifyMessage);
+    notify(actionList[actionIndex]["notify"], "message-received", notifyMessage);
 
 
 
@@ -234,7 +225,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
 //sendSingleMessage
 //Send a single message over a websocket with a per-message callback.
-const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, notifyElement, actionList?) {
+const sendSingleMessage = function (socket: WebSocket, message: string, echo: boolean, relay: string, notifyElement, actionList?:{}[]) {
 
   //Get history from socket
   let history = socket.history;
@@ -663,7 +654,7 @@ const connectGroup = function (groupKey: string, notifyElement: HTMLElement, his
 
 //connect
 //Connect to a URL
-const connect = function (socketURL, notifyElement?: HTMLElement, history?, actionList?) {
+const connect = function (socketURL, notifyElement?: HTMLElement, history?, actionList?:{}[]) {
 
 
   //Create machine and port entries and capture their keys
@@ -754,8 +745,12 @@ const connect = function (socketURL, notifyElement?: HTMLElement, history?, acti
 //recordAction
 //Action recording
 //Record a new action. Notify of all responses to the action.
-const recordAction = function (actionList, type, to: string = "", from: string = "", message: string = "", notifyElement?: HTMLElement) {
+const recordAction = function (actionList:{}[], type, to: string = "", from: string = "", message: string = "", notifyElement?: HTMLElement) {
 
+  console.log("recordActions actions")
+  console.log(actionList);
+
+  //Create a new action from the passed parameters.
   let newAction = {
     "type": type,
     "to": to,
@@ -764,36 +759,34 @@ const recordAction = function (actionList, type, to: string = "", from: string =
     "notify": notifyElement
   }
 
+  //Add new action to list.
   actionList.push(newAction);
 
-  console.log("newAction");
-  console.log(actionList);
-
-  //Notify component, if requested
+  //Notify component, if requested.
   if (notifyElement) {
-    let { ...actionsCopy } = actionList;
+    let [...actionsCopy] = actionList;
     notify(notifyElement, "actions-changed", actionsCopy)
   }
 
 }
 
 //recordConnect
-const recordConnect = function (actionList, to, notifyElement?: HTMLElement) {
+const recordConnect = function (actionList:{}[], to, notifyElement?: HTMLElement) {
   recordAction(actionList, action.connect, to, undefined, undefined, notifyElement);
 }
 
 //recordSend
-const recordSend = function (actionList, to, message, notifyElement?: HTMLElement) {
+const recordSend = function (actionList:{}[], to, message, notifyElement?: HTMLElement) {
   recordAction(actionList, action.send, to, undefined, message, notifyElement);
 }
 
 //recordRelay
-const recordRelay = function (actionList, to, from, message, notifyElement?: HTMLElement) {
+const recordRelay = function (actionList:{}[], to, from, message, notifyElement?: HTMLElement) {
   recordAction(actionList, action.relay, to, from, message, notifyElement);
 }
 
 //recordDisconnect
-const recordDisconnect = function (actionList, to, notifyElement?: HTMLElement) {
+const recordDisconnect = function (actionList:{}[], to, notifyElement?: HTMLElement) {
   recordAction(actionList, action.disconnect, to, undefined, undefined, notifyElement);
 }
 
@@ -802,7 +795,7 @@ const recordDisconnect = function (actionList, to, notifyElement?: HTMLElement) 
 //recordResponse
 //Response recording
 //Lookup an action by actionIndex, add a response. Notify the action's component. Notify notifyElement, if provided.
-const recordResponse = function (actionList, actionIndex, type, to, from, message, notifyElement?: HTMLElement) {
+const recordResponse = function (actionList:{}[], actionIndex, type, to, from, message, notifyElement?: HTMLElement) {
 
   let actionItem: {} = actionList[actionIndex];
 
@@ -827,13 +820,10 @@ const recordResponse = function (actionList, actionIndex, type, to, from, messag
     actionItem["response"].push(newResponseItem);
   }
 
-  console.log("newResponse");
-  console.log(actionList);
-
   //Notify component(s) of actionList changes
 
   //Create a copy to force property updates
-  let { ...actionsCopy } = actionList;
+  let [...actionsCopy] = actionList;
 
   //Notify action's component
   notify(actionItem["notify"],"actions-changed",actionsCopy)
@@ -846,22 +836,22 @@ const recordResponse = function (actionList, actionIndex, type, to, from, messag
 }
 
 //recordOpen
-const recordOpen = function (actionList, messageNumber, from, notifyElement?: HTMLElement) {
+const recordOpen = function (actionList:{}[], messageNumber, from, notifyElement?: HTMLElement) {
   recordResponse(actionList, messageNumber, response.open, undefined, from, undefined, notifyElement);
 }
 
 //recordReceive
-const recordReceive = function (actionList, messageNumber, from, message, notifyElement?: HTMLElement) {
+const recordReceive = function (actionList:{}[], messageNumber, from, message, notifyElement?: HTMLElement) {
   recordResponse(actionList, messageNumber, response.receive, undefined, from, message, notifyElement)
 }
 
 //recordRoundtrip
-const recordRoundtrip = function (actionList, messageNumber, from, to, message, notifyElement?: HTMLElement) {
+const recordRoundtrip = function (actionList:{}[], messageNumber, from, to, message, notifyElement?: HTMLElement) {
   recordResponse(actionList, messageNumber, response.roundtrip, from, to, message, notifyElement);
 }
 
 //recordClose
-const recordClose = function (actionList, messageNumber, from, notifyElement?: HTMLElement) {
+const recordClose = function (actionList:{}[], messageNumber, from, notifyElement?: HTMLElement) {
   recordResponse(actionList, messageNumber, response.close, undefined, from, undefined, notifyElement);
 }
 
@@ -917,7 +907,7 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
 //mxSend
 //Send a message. Call w/ .mxSend function on an active socket from connections.
 //In that context, "this" as a parm to sendSingleMessage is the socket itself.
-const mxSend = function (message: string, echo: boolean = false, notifyElement, actionList?) {
+const mxSend = function (message: string, echo: boolean = false, notifyElement, actionList?:{}[]) {
 
   //Send the message w/ notification and history.
   sendSingleMessage(this, message, echo, "false", notifyElement, actionList);
@@ -942,7 +932,7 @@ const mxNotifyHistory = function (notifyElement: HTMLElement) {
 //Accessed by .mxClose function on an active socket.
 //Removes the socket from active connections and notifies the notifyStatusChange element
 //In that context, "this" is the socket itself.
-const mxClose = function (notifyElement, actionList?) {
+const mxClose = function (notifyElement:HTMLElement, actionList?:{}[]) {
 
   //Record this action
   if (actionList) {

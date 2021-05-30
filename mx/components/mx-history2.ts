@@ -4,7 +4,7 @@
 //Displays the history of websocket communications, as returned from the MSL.js socket service.
 
 //Lit Dependencies
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, HTMLTemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
@@ -72,7 +72,7 @@ export class mxHistory2 extends LitElement {
 
     
     //Results Header
-    templateHistoryHeader() {
+    templateActionsHeader() {
         return html`
             <div class="gridHeader results" style="font-weight:600">
             <mx-icon class="fas fa-tasks"></mx-icon> actions
@@ -85,12 +85,35 @@ export class mxHistory2 extends LitElement {
         `
     }
 
+    //Action List
+    templateActionList() {
+    
+        //create a container to hold all item teplate results
+        let allItems:HTMLTemplateResult
+
+        //accumulate all action item template results
+        for (let actionIndex in this.actionList) {
+            allItems = html`${allItems}${this.templateActionItem(actionIndex, this.actionList[actionIndex])}`;
+       }
+
+       //return all results
+       return allItems;
+    }
+
+    //Action Item
+    templateActionItem(actionIndex, actionItem) {
+        return html`
+        <div>${actionIndex}</div>
+        <div>${actionItem}</div
+        `
+    }
+
     //Show this component on screen
     render() {
 
         return html`
-            ${this.templateHistoryHeader()}
-            ${this.actionList.length}
+            ${this.templateActionsHeader()}
+            ${this.templateActionList()}
          `;
     }
 }

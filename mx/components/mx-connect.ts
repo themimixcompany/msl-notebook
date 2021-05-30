@@ -93,9 +93,9 @@ export class mxConnect extends LitElement {
 
   //Actions changed
   actionsChanged(receivedEvent: CustomEvent) {
-    //this.actionList = receivedEvent.detail;
+    this.actionList = receivedEvent.detail;
     console.log("new actions incoming")
-    console.log(receivedEvent.detail);
+    console.log(this.actionList);
   }
 
   //PORT connect link clicked
@@ -246,7 +246,7 @@ export class mxConnect extends LitElement {
     </div>
 
     <br>
-    <mx-history2 .history=${this.actionList} .notifyHistory=${this}></mx-history2>
+    <mx-history2 .actionList=${this.actionList}></mx-history2>
     <br>
 
     <mx-history .history=${this.history} .notifyHistory=${this}></mx-history>
