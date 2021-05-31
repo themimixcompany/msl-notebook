@@ -1,7 +1,7 @@
 // <mx-connect>
 // by The Mimix Company
 
-//Lists ports, machines, and groups available in the config .json files and opens connections to them. Keeps a collective history for all connections it opens. Displays communicators for each socket.
+//Lists ports, machines, and groups available in the config .json files and opens connections to them. Keeps a collective list of actions for all connections it opens. Displays communicators for each socket.
 
 //Lit Dependencies
 import { html, css, LitElement } from 'lit';
@@ -56,7 +56,6 @@ export class mxConnect extends LitElement {
   //Define public properties (databinding)
   @property() machines: {} = mx.machine.machines;
   @property() connections: {} = {};
-  @property() history: {}[] = [];
   @property() actionList: {}[] = [];
   @property() url: string = "";
 
@@ -70,7 +69,7 @@ export class mxConnect extends LitElement {
       this.url = (event.target as HTMLInputElement).value;
 
       //Connect to URL, add it to connection list, and create communicator.
-      mx.socket.connect(this.url, this, this.history, this.actionList);
+      mx.socket.connect(this.url, this, this.actionList);
     }
   }
 
@@ -86,11 +85,6 @@ export class mxConnect extends LitElement {
     this.connections = receivedEvent.detail;
   }
 
-  //History changed
-  historyChanged(receivedEvent: CustomEvent) {
-    this.history = receivedEvent.detail;
-  }
-
   //Actions changed
   actionsChanged(receivedEvent: CustomEvent) {
     this.actionList = receivedEvent.detail;
@@ -98,18 +92,18 @@ export class mxConnect extends LitElement {
 
   //PORT connect link clicked
   connectPort(machineKey: string, portKey: string) {
-    mx.socket.connectPort(machineKey, portKey, this, [], this.history, this.actionList);
+    mx.socket.connectPort(machineKey, portKey, this, [], this.actionList);
     ;
   }
 
   //MACHINE connect link clicked
   connectMachine(machineKey: string) {
-    mx.socket.connectMachine(machineKey, this, [], this.history, this.actionList);
+    mx.socket.connectMachine(machineKey, this, [], this.actionList);
   }
 
   //GROUP connect link clicked
   connectGroup(groupKey: string) {
-    mx.socket.connectGroup(groupKey, this, this.history, this.actionList);
+    mx.socket.connectGroup(groupKey, this, this.actionList);
   }
 
   //Create HTML Templates
@@ -145,7 +139,7 @@ export class mxConnect extends LitElement {
 
     ${Object.keys(this.connections).map(socketKey => html`
       <div class="threeColumns">
-        <mx-communicator .socketKey=${socketKey} .history=${this.history} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
+        <mx-communicator .socketKey=${socketKey} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
       </div>
     `)}
     `
@@ -215,7 +209,6 @@ export class mxConnect extends LitElement {
     //Add event listeners for events targeting this component
     this.addEventListener("machines-changed", this.machinesChanged);
     this.addEventListener("status-changed", this.statusChanged);
-    this.addEventListener("history-changed", this.historyChanged);
     this.addEventListener("actions-changed", this.actionsChanged);
 
       //Remember we ran once
@@ -243,12 +236,13 @@ export class mxConnect extends LitElement {
       ${this.templateGroups()}
     </div>
 
-    <br>
-    <mx-actions .actionList=${this.actionList}></mx-actions>
-    <br>
+     <br>
     
     ${this.templateCommunicators()}
-   
+
+    <br>
+    <mx-actions .actionList=${this.actionList}></mx-actions>
+  
   `;
   }
 }

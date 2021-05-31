@@ -53,12 +53,8 @@ export class mxActions extends LitElement {
 
     //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
+    @property() name: string = "actions"
     @property() isHidden: boolean = false;
-
-    //Empty history
-    emptyActionList() {
-        this.actionList = [];
-    }
 
     //Show or Hide History
     showOrHide() {
@@ -81,11 +77,9 @@ export class mxActions extends LitElement {
     templateListHeader() {
         return html`
             <div class="gridHeader results" style="font-weight:600">
-            <mx-icon class="fas fa-cogs"></mx-icon> actions
+            <mx-icon class="fas fa-cogs"></mx-icon> ${this.name}
 
-            <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the history." size=".9" class="fas fa-eye"></mx-icon>
-
-            <mx-icon @click=${this.emptyActionList} style="cursor:pointer;" title="Erase the history." size=".9" class="fas fa-trash"></mx-icon>
+            <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} these results." size=".9" class="fas fa-eye"></mx-icon>
 
             </div>
         `
@@ -94,7 +88,7 @@ export class mxActions extends LitElement {
     //List
     templateList() {
 
-        //create a container to hold all item teplate results
+        //create a container to hold all item template results
         let itemTemplates: HTMLTemplateResult
 
         //accumulate all action item template results
@@ -188,14 +182,13 @@ export class mxActions extends LitElement {
             responseTemplates = html`${responseTemplates}${this.templateResponse(actionIndex, actionItem, responseIndex, actionItem.response[responseIndex])}`;
         }
 
-        return html`
+        return !this.isHidden ? html`
         <div style="grid-column: 1/span 5; height:5px;"></div>
         ${actionItemHeader}
         ${actionItemValues}
         ${responseItemHeader}
         ${responseTemplates}
-        
-        `
+        ` : ""
     }
 
     //Response
@@ -249,7 +242,7 @@ export class mxActions extends LitElement {
 
         return html`
             ${this.templateListHeader()}
-            ${this.templateList()}
+            ${this.actionList[0] ? this.templateList() : ""}
          `;
     }
 }

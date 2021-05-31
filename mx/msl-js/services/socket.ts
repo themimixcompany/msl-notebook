@@ -79,27 +79,11 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Interpret MSL (Check for (@VER), for example)
     //var isValidMSL = mslParser.parse(receivedMessage);
 
-    //Setup Notify Message
-    let notifyMessage: string | Object
-
-    //Simple reply; no message echo
-    notifyMessage = receivedMessage;
-
-    //Echo? JSON reply; original message & response
-    if (echo) {
-      notifyMessage = {
-        "sentMessage": message,
-        "sentSocketKey": sendingSocketKey,
-        "receivedMessage": receivedMessage,
-        "receivedSocketKey": socket.key
-      }
-    }
-
     //Get who to notify from actionList
     let notifyElement = actionList[actionIndex]["notify"]
 
     //Notify the sender of the received message.
-    notify(actionList[actionIndex]["notify"], "message-received", notifyMessage);
+    notify(actionList[actionIndex]["notify"], "message-received", actionList[actionIndex]);
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     // if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {

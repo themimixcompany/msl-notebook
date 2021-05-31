@@ -121,11 +121,14 @@ export class mxIcon extends LitElement {
 
         //If alternate, convert to original
         if (alternateName) {
-            name = alternateName;
+            matchingIcon = fa[set][alternateName];
+        } else {
+            matchingIcon = fa[set][name];
         }
 
         //Get icon info (array) from fa set
-        matchingIcon = fa[set][name];
+ 
+       
 
         //Handle matchingIcon not found (by name or alternate) with red triangle bang
         if (!matchingIcon) {

@@ -35,17 +35,11 @@ export class mxCommunicator extends LitElement {
   @property() mslResults: any;
   @property({ attribute: false }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
-  @property() history: {}[];
-  @property() actionList: {}[];
+  @property() actionList: {}[] = [];
+  @property() singleActionArray: {}[] = [];
   @property() connector;
+  @property() nextCommunicator;
 
-  //Private properties
-  lastMessage = {
-    sentMessage: "",
-    sentSocketKey: "",
-    receivedMessage: "",
-    receivedSocketKey: ""
-  };
 
   //Private Functions
 
@@ -56,54 +50,8 @@ export class mxCommunicator extends LitElement {
 
   //Update results area when a message is received
   messageReceived(event: CustomEvent) {
-
-    //Extract sent and received message info
-    const { sentMessage, sentSocketKey, receivedMessage, receivedSocketKey } = event.detail;
-
-    //Extract last message info for comparison
-    let lastSentMessage = this.lastMessage.sentMessage;
-    let lastSentSocketKey = this.lastMessage.sentSocketKey;
-
-
-    //Detect additional responses from same sent message
-    let isAdditionalResponse = sentMessage == lastSentMessage && sentSocketKey == lastSentSocketKey;
-
-    //Setup Colors
-    let sentWireColor = mx.socket.list[sentSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[sentSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
-    let ReceivedWireColor = mx.socket.list[receivedSocketKey].port.type == 'msl' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? '#ec2028' : 'navy' : mx.socket.list[receivedSocketKey].port.type == 'admin' ? mx.socket.list[sentSocketKey].machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
-
-    //Setup Icons
-    let sentMessageIcon = sentSocketKey == this.socketKey ? 'fas fa-keyboard' : 'fas fa-project-diagram';
-
-    //Build single result template
-    let singleResult = html`
-    <div class="grid results greyBk">
-    <div>
-      ${sentMessage && !isAdditionalResponse ? html`<mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(sentMessage)} title="Resend this message to ${this.socketKey}." class=${sentMessageIcon} color="${sentWireColor}"></mx-icon> ${sentMessage}` : ""}
-    </div>
-    <div>
-    ${sentMessage && !isAdditionalResponse ? html`<mx-icon class="fas fa-router" color="${sentWireColor}"></mx-icon> ${sentSocketKey}` : ""}
-    </div>
-    <div>
-    ${sentMessage && !isAdditionalResponse ? html`==>` : ""}
-    </div>
-    <div>
-      <mx-icon class="fas fa-router" color="${ReceivedWireColor}"></mx-icon> ${receivedSocketKey}
-    </div>
-    <div>
-      <mx-icon style="cursor:pointer;" @click=${() => this.sendMessage(receivedMessage)} title="Send this received message to ${this.socketKey}." class="fas fa-comment" color="${ReceivedWireColor}"></mx-icon>  ${receivedMessage}
-    </div>
-    </div>
-`;
-
-    //Remember Last Message
-    this.lastMessage = event.detail;
-
-    //Add new result to results property
-    this.mslResults = html`
-    ${this.mslResults}
-    ${singleResult}
-    `;
+    this.singleActionArray = [event.detail];
+    event.cancelBubble = true;  
   }
 
   //Check for message input box Enter key pressed to send message
@@ -120,19 +68,12 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
-
     mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList);
+    this.nextCommunicator = html`
+    <mx-communicator .socketKey=${this.socketKey} .actionList=${this.actionList} .connector=${this}></mx-communicator>
+    `
   }
 
-  //Empty The Results Area
-  emptyResults(receivedEvent: Event) {
-    this.mslResults = "";
-  }
-
-  //Show or Hide Results
-  showOrHideResults() {
-    this.isHidden = !this.isHidden
-  }
 
   //Show this component on screen
   render() {
@@ -147,8 +88,7 @@ export class mxCommunicator extends LitElement {
     if (!this.hasRun) {
 
       //Add event listeners for events targeting this component
-      this.addEventListener("message-received", this.messageReceived); //listen for "message-received" and call this.messageReceived w/ the triggering event.
-
+      this.addEventListener("message-received", this.messageReceived); 
 
       //Remember we ran once
       this.hasRun = true;
@@ -163,49 +103,18 @@ export class mxCommunicator extends LitElement {
         <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
       </div>
     `
-
-    //Results Header
-    let headerPart = html`
-      <div class="gridHeader results" style="font-weight:600">
-        <mx-icon class="fas fa-keyboard"></mx-icon> ${this.socketKey}
-
-        <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} these messages." size=".9" class="fas fa-eye"></mx-icon>
-
-        <mx-icon @click=${this.emptyResults} style="cursor:pointer;" title="Erase these messages." size=".9" class="fas fa-trash"></mx-icon>
-
-        <mx-icon @click=${this.closeConnection} style="cursor:pointer;"} title="Close this connection." size=".9" class="fas fa-rectangle-xmark"></mx-icon>
-
-      </div>
-    `;
-
-    //Results Div
-    let resultsPart = html`
-      <div class="grid results greyBk" style="color:white;font-weight:500;">
-        <div>
-        sent message
-        </div>
-        <div>
-        to socket
-        </div>
-        <div>
-      
-        </div>
-        <div>
-        from socket
-        </div>
-        <div>
-        received message
-        </div>
-      </div>
-      ${this.mslResults}
-    `;
-
-    //RENDER TEMPLATE
     
+    //Make a copy of the singleActionArray for the communicator's action component
+    let [...arrayCopy] = this.singleActionArray;
+
+    
+    //RENDER TEMPLATE
+  
     return html`
-      ${inputPart}
-      ${headerPart}
-      ${this.isHidden ? "" : resultsPart}
-    `;
+    ${inputPart}
+    <mx-actions .actionList=${arrayCopy} .name=${this.socketKey}></mx-actions>
+    <br>
+    ${this.nextCommunicator}
+    ` 
   }
 }
