@@ -52,13 +52,42 @@ export class mxActions extends LitElement {
     
     `;
 
+    downloadData = [];
+
+
     //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
     @property() fullActions: {}[] = this.actionList;
     @property() name: string;
     @property() isHidden: boolean = false;
 
-    
+
+    //downloadFile
+    //Download a file of arbitrary type
+    downloadFile = (content, fileName, contentType) => {
+        const a = document.createElement("a");
+        const file = new Blob([content], { type: contentType });
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+    }
+
+    //downloadJSON
+    //Download a JSON object or array
+    downloadJSON = (content:{}|[], fileName) => {
+        this.downloadFile(JSON.stringify(content), fileName, "text/json" )
+    }
+
+    //downloadActionList
+    //Download the action list w/o the notify component
+    downloadActionList(name: string) {
+        //Create an actionList w/o notify property because it is a circular reference in JSON
+        let [...actionListCopy] = this.actionList
+        for (let oneActionIndex in actionListCopy) {
+            delete actionListCopy[oneActionIndex]["notify"];
+        }
+        this.downloadJSON(actionListCopy, `${name ? name : "actionList"}.json`);
+    }
 
     //Show or Hide History
     showOrHide() {
@@ -72,7 +101,7 @@ export class mxActions extends LitElement {
 
     //Close socket
     closeSocket(socketKey) {
-        mx.socket.list[socketKey].mxClose(this,this.actionList);
+        mx.socket.list[socketKey].mxClose(this, this.actionList);
     }
 
     //Create HTML Templates
@@ -84,15 +113,27 @@ export class mxActions extends LitElement {
 
     //List Header
     templateListHeader() {
+
+        let toSocketKey = mx.socket.list[this.name];
+
+        //Setup Colors
+        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+
         return html`
             <div class="gridHeader results" style="font-weight:600">
-            <mx-icon class="fas fa-cogs"></mx-icon> ${this.name ? this.name : "actions"}
+
+            <mx-icon class=${this.name ? "fas fa-keyboard" : "fas fa-cogs"} color=${toWireColor}></mx-icon> ${this.name ? this.name : "actions"}
 
             <mx-icon @click=${() => this.showOrHide()} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} these results." size=".9" class="fas fa-eye"></mx-icon>
+
+            ${this.actionList.length > 0 ? html`
+            <mx-icon title="Download these actions as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionList(this.name)}></mx-icon>
+            ` : ""}
 
             ${this.name ? html`
             <mx-icon @click=${() => this.closeSocket(this.name)} style="cursor:pointer;" title="Close the connection to ${this.name}." size=".9" class="fas fa-times-square"></mx-icon>
             ` : ""}
+
             </div>
         `
     }
@@ -173,7 +214,7 @@ export class mxActions extends LitElement {
         </div>
         <div class="greyBk">
         ${actionItem.message ? html`
-            <a @click=${() => this.sendToSocket(actionItem.to,actionItem.message,actionItem.notify)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
+            <a @click=${() => this.sendToSocket(actionItem.to, actionItem.message, actionItem.notify)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
             ` : ""}
         </div>
     `;
@@ -208,7 +249,7 @@ export class mxActions extends LitElement {
     //Response
     templateResponse(actionIndex, actionItem, responseIndex, responseItem) {
 
-        
+
         //Response Names & Icons
         const responseNames = ["open", "receive", "roundtrip", "close"];
         const responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
@@ -220,9 +261,9 @@ export class mxActions extends LitElement {
         let fromSocketKey = mx.socket.list[responseItem.from];
         let toSocketKey = mx.socket.list[responseItem.to];
 
-          //Setup Colors
-          let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
-          let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+        //Setup Colors
+        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
 
         //Build single result template
         let responseItemValues = html`
@@ -242,7 +283,7 @@ export class mxActions extends LitElement {
             </div>
             <div class="greyBk">
             ${responseItem.message ? html`
-            <a @click=${() => this.sendToSocket(actionItem.to,responseItem.message,actionItem.notify)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
+            <a @click=${() => this.sendToSocket(actionItem.to, responseItem.message, actionItem.notify)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
             ` : ""}
             </div>
         `;
