@@ -98,8 +98,9 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       recordReceive(actionList, actionIndex, socket.key, receivedMessage)
     }
 
+
     //Perform relay if appropriate
-    if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo] && actionList[actionIndex - 1]["type"] != action.connect) {
+    if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
 
       //Get toSocket
       let toSocket = connections[socket.relayTo];
