@@ -35,6 +35,7 @@ export class mxCommunicator extends LitElement {
   @property() mslResults: any;
   @property({ attribute: false }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
+  @property() isDisabled: boolean = false;
   @property() actionList: {}[] = [];
   @property() messageActionList: {}[] = [];
   @property() connector;
@@ -61,7 +62,7 @@ export class mxCommunicator extends LitElement {
     if (event.keyCode == 13) {
       //Send message
       this.sendMessage(message);
-      //eventTarget.value = '';
+      this.isDisabled = true;
     }
   }
 
@@ -100,7 +101,7 @@ export class mxCommunicator extends LitElement {
     //Input Box
     let inputPart = html`
       <div class="greyBk" style="padding-right:6px;">
-        <input style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
+        <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
       </div>
     `
     
