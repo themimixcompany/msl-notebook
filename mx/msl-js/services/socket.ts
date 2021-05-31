@@ -63,6 +63,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
   //Create a closure for actionIndex for .onmessage
   let actionIndex = actionList.length - 1;
 
+
   //Create onmessage callback
   socket.onmessage = function (event: Event) {
 
@@ -82,8 +83,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Get who to notify from actionList
     let notifyElement = actionList[actionIndex]["notify"]
 
-    //Notify the sender of the received message.
-    notify(actionList[actionIndex]["notify"], "message-received", actionList[actionIndex]);
 
     //Relay if relay is set, not looping back to original machine, and active in connections
     // if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
@@ -98,6 +97,18 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       recordReceive(actionList, actionIndex, socket.key, receivedMessage)
     }
 
+    //Create an actionList for message notifications (communicators)
+    let messageActionList:{}[] = [];
+
+    //For relay actions, include the original send
+    if (actionList[actionIndex]["type"] == action.relay) {
+      messageActionList = [actionList[actionIndex - 1], actionList[actionIndex]];
+    } else {
+      messageActionList = [actionList[actionIndex]];
+    }
+
+    //Notify the sender of the received message.
+    notify(actionList[actionIndex]["notify"], "message-received", messageActionList);
 
     //Perform relay if appropriate
     if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {

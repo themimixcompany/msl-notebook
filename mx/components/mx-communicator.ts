@@ -36,7 +36,7 @@ export class mxCommunicator extends LitElement {
   @property({ attribute: false }) socketKey: string; // => let socketKey = attribute named 'socket'
   @property() isHidden: boolean = false;
   @property() actionList: {}[] = [];
-  @property() singleActionArray: {}[] = [];
+  @property() messageActionList: {}[] = [];
   @property() connector;
   @property() nextCommunicator;
 
@@ -50,7 +50,7 @@ export class mxCommunicator extends LitElement {
 
   //Update results area when a message is received
   messageReceived(event: CustomEvent) {
-    this.singleActionArray = [event.detail];
+    this.messageActionList = event.detail;
     event.cancelBubble = true;  
   }
 
@@ -105,7 +105,7 @@ export class mxCommunicator extends LitElement {
     `
     
     //Make a copy of the singleActionArray for the communicator's action component
-    let [...arrayCopy] = this.singleActionArray;
+    let [...arrayCopy] = this.messageActionList;
 
     
     //RENDER TEMPLATE
