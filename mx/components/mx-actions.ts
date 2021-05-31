@@ -53,7 +53,8 @@ export class mxActions extends LitElement {
 
     //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
-    @property() name: string = "actions"
+    @property() fullActions: {}[] = this.actionList;
+    @property() name: string;
     @property() isHidden: boolean = false;
 
     //Show or Hide History
@@ -62,8 +63,14 @@ export class mxActions extends LitElement {
     }
 
     //Send to Socket (Used for re-sending messages from history)
-    sendToSocket(socketKey, message: string) {
-        mx.socket.list[socketKey].mxSend(message, true);
+    sendToSocket(socketKey, message: string, notifyElement) {
+        console.log("sending",socketKey,message)
+        mx.socket.list[socketKey].mxSend(message, true, this, this.actionList, this.fullActions);
+    }
+
+    //Close socket
+    closeSocket(socketKey) {
+        mx.socket.list[socketKey].mxClose(this,this.actionList);
     }
 
     //Create HTML Templates
@@ -77,10 +84,13 @@ export class mxActions extends LitElement {
     templateListHeader() {
         return html`
             <div class="gridHeader results" style="font-weight:600">
-            <mx-icon class="fas fa-cogs"></mx-icon> ${this.name}
+            <mx-icon class="fas fa-cogs"></mx-icon> ${this.name ? this.name : "actions"}
 
-            <mx-icon @click=${this.showOrHide} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} these results." size=".9" class="fas fa-eye"></mx-icon>
+            <mx-icon @click=${() => this.showOrHide()} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} these results." size=".9" class="fas fa-eye"></mx-icon>
 
+            ${this.name ? html`
+            <mx-icon @click=${() => this.closeSocket(this.name)} style="cursor:pointer;" title="Close the connection to ${this.name}." size=".9" class="fas fa-times-square"></mx-icon>
+            ` : ""}
             </div>
         `
     }
@@ -227,7 +237,9 @@ export class mxActions extends LitElement {
             ${responseItem.to}
             </div>
             <div class="greyBk">
-            ${responseItem.message}
+            ${responseItem.message ? html`
+            <a @click=${() => this.sendToSocket(actionItem.to,responseItem.message,actionItem.notify)}>${responseItem.message}</a>
+            ` : ""}
             </div>
         `;
 

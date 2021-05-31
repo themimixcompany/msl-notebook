@@ -37,7 +37,7 @@ export class mxCommunicator extends LitElement {
   @property() isHidden: boolean = false;
   @property() isDisabled: boolean = false;
   @property() actionList: {}[] = [];
-  @property() messageActionList: {}[] = [];
+  @property() privateActionList: {}[] = [];
   @property() connector;
   @property() nextCommunicator;
 
@@ -51,7 +51,7 @@ export class mxCommunicator extends LitElement {
 
   //Update results area when a message is received
   messageReceived(event: CustomEvent) {
-    this.messageActionList = event.detail;
+    this.privateActionList = event.detail;
     event.cancelBubble = true;  
   }
 
@@ -69,9 +69,9 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
-    mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList);
+    mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
     this.nextCommunicator = html`
-    <mx-communicator .socketKey=${this.socketKey} .actionList=${this.actionList} .connector=${this}></mx-communicator>
+    <mx-communicator .socketKey=${this.socketKey} .actionList=${this.actionList}  .connector=${this}></mx-communicator>
     `
   }
 
@@ -105,15 +105,16 @@ export class mxCommunicator extends LitElement {
       </div>
     `
     
-    //Make a copy of the singleActionArray for the communicator's action component
-    let [...arrayCopy] = this.messageActionList;
+    //Make a copy of both action lists for the communicator's action component
+    let [...privateActionListCopy] = this.privateActionList;
+    let [...actionListCopy] = this.actionList;
 
     
     //RENDER TEMPLATE
   
     return html`
     ${inputPart}
-    <mx-actions .actionList=${arrayCopy} .name=${this.socketKey}></mx-actions>
+    <mx-actions .actionList=${privateActionListCopy} .fullActions=${actionListCopy} .name=${this.socketKey}></mx-actions>
     <br>
     ${this.nextCommunicator}
     ` 

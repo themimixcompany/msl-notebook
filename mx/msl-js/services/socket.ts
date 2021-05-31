@@ -113,7 +113,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Detect messages from opening
     let isOpeningMessage = false;
     if (actionIndex > 0 ) { 
-       if (actionList[actionIndex].type == action.connect) {
+       if (actionList[actionIndex]["type"] == action.connect) {
          isOpeningMessage = true;
        }
     }
@@ -123,7 +123,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
 
       //Get toSocket
       let toSocket = connections[socket.relayTo];
-console.log(isOpeningMessage)
       //Sent outgoing relay message
       if (!isOpeningMessage) {
       sendSingleMessage(toSocket, receivedMessage, echo, socket.key, notifyElement, actionList)
@@ -240,11 +239,20 @@ const socketPortKey = (socketKey: string) => connections[socketKey].portKey;
 //Add all .mx functions to a socket.
 const addMxFunctions = (socket: WebSocket) => {
 
+  //Create an interface for custom properties.
+  interface mxSocket extends WebSocket {
+    mxSend: {},
+    mxClose: {}
+  }
+  
+  //Access the socket through the custom interface.
+  let thisSocket = socket as mxSocket;
+
   //mxSend. Send a message on the socket. 
-  socket["mxSend"] = mxSend;
+  thisSocket.mxSend = mxSend;
 
   //mxClose. Close socket and notify of status change.
-  socket["mxClose"] = mxClose;
+  thisSocket.mxClose = mxClose;
 
 }
 
