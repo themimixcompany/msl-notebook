@@ -22,7 +22,8 @@ export class mxActions extends LitElement {
     .darkGreyBk {background-color:#aaa; padding:5px;}
     .navyBk {background-color:navy; padding:5px;}
     .gridHeader {background-color:#bbb}
-    a { text-decoration: underline; cursor: pointer; text-decoration:underline}
+    a { text-decoration: none; cursor: pointer;}
+    a:hover {text-decoration: underline}
     .whiteHeaderText {color:white;font-weight:500;}
     .grid {
       display: grid;
@@ -57,6 +58,8 @@ export class mxActions extends LitElement {
     @property() name: string;
     @property() isHidden: boolean = false;
 
+    
+
     //Show or Hide History
     showOrHide() {
         this.isHidden = !this.isHidden
@@ -64,8 +67,7 @@ export class mxActions extends LitElement {
 
     //Send to Socket (Used for re-sending messages from history)
     sendToSocket(socketKey, message: string, notifyElement) {
-        console.log("sending",socketKey,message)
-        mx.socket.list[socketKey].mxSend(message, true, this, this.actionList, this.fullActions);
+        mx.socket.list[socketKey].mxSend(message, true, notifyElement, this.fullActions);
     }
 
     //Close socket
@@ -170,7 +172,9 @@ export class mxActions extends LitElement {
         ${actionItem.to}
         </div>
         <div class="greyBk">
-        ${actionItem.message}
+        ${actionItem.message ? html`
+            <a @click=${() => this.sendToSocket(actionItem.to,actionItem.message,actionItem.notify)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
+            ` : ""}
         </div>
     `;
 
@@ -238,7 +242,7 @@ export class mxActions extends LitElement {
             </div>
             <div class="greyBk">
             ${responseItem.message ? html`
-            <a @click=${() => this.sendToSocket(actionItem.to,responseItem.message,actionItem.notify)}>${responseItem.message}</a>
+            <a @click=${() => this.sendToSocket(actionItem.to,responseItem.message,actionItem.notify)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
             ` : ""}
             </div>
         `;

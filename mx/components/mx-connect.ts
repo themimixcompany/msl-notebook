@@ -241,7 +241,7 @@ export class mxConnect extends LitElement {
     ${this.templateCommunicators()}
 
     <br>
-    <mx-actions .actionList=${this.actionList}></mx-actions>
+    <mx-actions .isHidden=${true} .actionList=${this.actionList}></mx-actions>
   
   `;
   }

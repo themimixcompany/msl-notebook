@@ -71,7 +71,7 @@ export class mxCommunicator extends LitElement {
   sendMessage(message: string) {
     mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
     this.nextCommunicator = html`
-    <mx-communicator .socketKey=${this.socketKey} .actionList=${this.actionList}  .connector=${this}></mx-communicator>
+    <mx-communicator .socketKey=${this.socketKey} .actionList=${[...this.actionList]}  .connector=${this.connector}></mx-communicator>
     `
   }
 
@@ -104,17 +104,12 @@ export class mxCommunicator extends LitElement {
         <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
       </div>
     `
-    
-    //Make a copy of both action lists for the communicator's action component
-    let [...privateActionListCopy] = this.privateActionList;
-    let [...actionListCopy] = this.actionList;
 
-    
     //RENDER TEMPLATE
   
     return html`
     ${inputPart}
-    <mx-actions .actionList=${privateActionListCopy} .fullActions=${actionListCopy} .name=${this.socketKey}></mx-actions>
+    <mx-actions .actionList=${[...this.privateActionList]} .fullActions=${this.actionList} .name=${this.socketKey}></mx-actions>
     <br>
     ${this.nextCommunicator}
     ` 

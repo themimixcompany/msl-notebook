@@ -100,15 +100,27 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     //Create an actionList for message notifications (communicators)
     let messageActionList: {}[] = [];
 
-    //For relay actions, include the original send
-    if (actionList[actionIndex]["type"] == action.relay) {
-      messageActionList = [actionList[actionIndex - 1], actionList[actionIndex]];
-    } else {
-      messageActionList = [actionList[actionIndex]];
+    //Get all actions which were initiated by this same component
+    for (let oneActionIndex in actionList) {
+      if (actionList[oneActionIndex]["notify"] == actionList[actionIndex]["notify"]) {
+        messageActionList.push(actionList[oneActionIndex]);
+      } 
     }
 
-    //Notify the sender of the received message.
-    notify(actionList[actionIndex]["notify"], "message-received", messageActionList);
+    // //For relay actions, include the original send
+    // if (actionList[actionIndex]["type"] == action.relay) {
+    //   messageActionList = [actionList[actionIndex - 1], actionList[actionIndex]];
+    // } else {
+    //   messageActionList = [actionList[actionIndex]];
+    // }
+
+    //Notify the requested component of the received message.
+    if (notifyElement) {
+      notify(notifyElement, "message-received", messageActionList);
+    } else {
+      notify(actionList[actionIndex]["notify"], "message-received", messageActionList);
+    }
+    
 
     //Detect messages from opening
     let isOpeningMessage = false;
