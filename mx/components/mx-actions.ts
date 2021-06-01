@@ -51,8 +51,6 @@ export class mxActions extends LitElement {
     
     `;
 
-    downloadData = [];
-
     //PRIVATE PROPERTIES
 
     //Action Names & Icons
@@ -65,7 +63,7 @@ export class mxActions extends LitElement {
 
     //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
-    @property() fullActions: {}[] = this.actionList;
+    @property() fullActions: {}[];
     @property() name: string;
     @property() isHidden: boolean = false;
 
@@ -113,12 +111,18 @@ export class mxActions extends LitElement {
 
     //Send to Socket (Used for re-sending messages from history)
     sendToSocket(socketKey, message: string, notifyElement) {
-        mx.socket.list[socketKey].mxSend(message, true, notifyElement, this.fullActions);
+        let allActions;
+        if (this.fullActions) {
+            allActions = this.fullActions
+        } else {
+            allActions = this.actionList
+        }
+        mx.socket.list[socketKey].mxSend(message, true, notifyElement, allActions);
     }
 
     //Close socket
     closeSocket(socketKey) {
-        mx.socket.list[socketKey].mxClose(this, this.actionList);
+        mx.socket.list[socketKey].mxClose(this, this.fullActions);
     }
 
     //Create HTML Templates
@@ -180,8 +184,6 @@ export class mxActions extends LitElement {
     //Item
     templateItem(actionIndex, actionItem) {
 
-        //Create 1-based action # for display
-        let actionNumber = (actionIndex * 1) + 1;
 
         let actionItemHeader = html`
             <div class="whiteHeaderText navyBk">
@@ -230,7 +232,7 @@ export class mxActions extends LitElement {
         //Build single action item template
         let actionItemValues = html`
         <div class="greyBk" style="padding-left:8px;">
-        ${actionNumber}
+        ${actionItem.number}
         </div>
         <div class="greyBk">
         <mx-icon color=${toWireColor} title=${actionIconTitle} class="${this.actionIcons[actionItem.type]}"></mx-icon> ${this.actionNames[actionItem.type]}
@@ -280,8 +282,7 @@ export class mxActions extends LitElement {
     //Response
     templateResponse(actionIndex, actionItem, responseIndex, responseItem) {
 
-        //Create 1-based action and response # for display
-        let actionNumber = (actionIndex * 1) + 1;
+        //Create 1-based response # for display
         let responseNumber = (responseIndex * 1) + 1;
 
         let fromSocketKey = mx.socket.list[responseItem.from];
@@ -312,7 +313,7 @@ export class mxActions extends LitElement {
 
         let responseItemValues = html`
             <div class="greyBk" style="padding-left:8px;">
-            ${actionNumber}.${responseNumber}
+            ${actionItem.number}.${responseNumber}
             </div>
             <div class="greyBk">
             <mx-icon color=${fromWireColor} title=${responseIconTitle} class=${responseItem.from == actionItem.to ? this.responseIcons[responseItem.type] : "fas fa-comment-alt-plus"}></mx-icon> ${this.responseNames[responseItem.type]}

@@ -686,8 +686,15 @@ const connect = function (socketURL, notifyElement?: HTMLElement, actionList?: {
 //Record a new action. Notify of all responses to the action.
 const recordAction = function (actionList: {}[], type, to: string = "", from: string = "", message: string = "", notifyElement?: HTMLElement) {
 
+  console.log("actionList before recording",type,to,from,message);
+  console.log(actionList);
+
+  //Assign an action number (for display/download)
+  let actionNumber = actionList.length + 1
+
   //Create a new action from the passed parameters.
   let newAction = {
+    "number": actionNumber,
     "type": type,
     "to": to,
     "from": from,

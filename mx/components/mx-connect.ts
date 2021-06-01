@@ -221,9 +221,9 @@ export class mxConnect extends LitElement {
     return html`
 
     <ol>
-    <li>Click a <mx-icon class="fas fa-server"></mx-icon> server, <mx-icon class="fas fa-router"></mx-icon> port, or <mx-icon class="fas fa-network-wired"></mx-icon> group icon to connect.</li>
-    <li>Use <mx-icon class="fas fa-keyboard"></mx-icon> communicators to send messages.
-    <li>Click a <mx-icon class="fas fa-keyboard"></mx-icon> sent message, <mx-icon class="fas fa-chart-network"></mx-icon> relay, <mx-icon class="fas fa-comment"></mx-icon> reply, or <mx-icon class="fas fa-comment-check"></mx-icon> additional reply icon to resend.</li>
+      <li>Click a <mx-icon class="fas fa-server"></mx-icon> server, <mx-icon class="fas fa-router"></mx-icon> port, or <mx-icon class="fas fa-network-wired"></mx-icon> group to connect.</li>
+      <li>When connected, use <mx-icon class="fas fa-keyboard"></mx-icon> communicators to send messages.
+      <li>Click a sent message or reply icon to resend it.</li>
     </ol>
 
 

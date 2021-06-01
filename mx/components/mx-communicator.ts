@@ -52,6 +52,7 @@ export class mxCommunicator extends LitElement {
   //Update results area when a message is received
   messageReceived(event: CustomEvent) {
     this.privateActionList = event.detail;
+
     event.cancelBubble = true;  
   }
 
@@ -71,7 +72,7 @@ export class mxCommunicator extends LitElement {
   sendMessage(message: string) {
     mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
     this.nextCommunicator = html`
-    <mx-communicator .socketKey=${this.socketKey} .actionList=${[...this.actionList]}  .connector=${this.connector}></mx-communicator>
+    <mx-communicator .socketKey=${this.socketKey} .actionList=${this.actionList}  .connector=${this.connector}></mx-communicator>
     `
   }
 
@@ -109,7 +110,7 @@ export class mxCommunicator extends LitElement {
   
     return html`
     ${inputPart}
-    <mx-actions .actionList=${[...this.privateActionList]} .fullActions=${this.actionList} .name=${this.socketKey}></mx-actions>
+    <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey}></mx-actions>
     <br>
     ${this.nextCommunicator}
     ` 
