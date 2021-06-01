@@ -16,7 +16,7 @@ export class mxCommunicator extends LitElement {
 
   static styles = css`
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
-    input, .results { font-family: Inter; font-size: 18pt; }
+    input, .results { font-family: Inter; font-size: 20pt; }
     .greyBk {background-color:#ccc}
     .lightGrey {color:#ddd;}
     .gridHeader {background-color:#bbb; font-family: Inter; font-size: 20pt }
