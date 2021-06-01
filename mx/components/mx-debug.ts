@@ -12,7 +12,7 @@ export class mxDebug extends LitElement {
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
     input, .results { font-family: Inter; font-size: 18pt; }
     .greyBk {background-color:#ccc}
-    .gridHeader {background-color:#bbb}
+    .gridHeader {background-color:#bbb; font-family: Inter; font-size: 20pt }
     .blue {
       color: navy;
   }
@@ -57,7 +57,7 @@ export class mxDebug extends LitElement {
 
     //Debugging Header
     let headerPart = html`
-    <div class="gridHeader results" style="font-weight:600">
+    <div class="gridHeader">
       <mx-icon class="fas fa-bug"></mx-icon> debugging
 
       <mx-icon @click=${this.showOrHideResults} style="cursor:pointer;" color=${this.isHidden ? "white" : "currentColor"} title="${this.isHidden ? "Show" : "Hide"} the debugging information." size=".9" class="fas fa-eye"></mx-icon>

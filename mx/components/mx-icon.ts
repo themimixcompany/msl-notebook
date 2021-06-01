@@ -19,8 +19,8 @@ export class mxIcon extends LitElement {
 
     static styles = css`
     .icon {
-        padding-left: 0.2em;
-        padding-right: 0.2em;
+        padding-left: 0.1em;
+        padding-right: 0.1em;
         vertical-align: -0.125em;
       }
    
@@ -73,26 +73,12 @@ export class mxIcon extends LitElement {
         }
     }
 
-
-    // download = (content, fileName, contentType) => {
-    //     const a = document.createElement("a");
-    //     const file = new Blob([content], { type: contentType });
-    //     a.href = URL.createObjectURL(file);
-    //     a.download = fileName;
-    //     a.click();
-    //    }
-       
-    // onDownload(){
-    //     this.download(JSON.stringify(this.indexOfNames), "indexOfNames.json", "text/plain");
-    //    }
-
     //Show this component on screen
     render() {
 
         //BEFORE TEMPLATE
 
         //Run Once
-
 
         if (!this.hasRun) {
 
@@ -127,8 +113,6 @@ export class mxIcon extends LitElement {
         }
 
         //Get icon info (array) from fa set
- 
-       
 
         //Handle matchingIcon not found (by name or alternate) with red triangle bang
         if (!matchingIcon) {
@@ -154,16 +138,7 @@ export class mxIcon extends LitElement {
         //Return SVG
         return html`
         ${svgPart}
-        <!--<button @click=${this.onDownload}>Download</button>-->
         `
-
     }
 
 }
-
-
-
-
-
-
-

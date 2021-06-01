@@ -36,7 +36,7 @@ export class communicatorView extends LitElement {
 
     <br>
 
-    <img src="${logo}" style="width:40px;margin-bottom:20px;margin-top:10px;"> 
+    <a href="https://mimix.io" title="MSL Notebook is a product of The Mimix Company. Enjoy!"><img src="${logo}" style="width:40px;margin-bottom:20px;margin-top:10px;"></a> 
     `
   }
 }
