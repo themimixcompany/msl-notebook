@@ -134,15 +134,15 @@ export class mxConnect extends LitElement {
 
   //Communicators template. Draws one communicator for each socket in active connections
   templateCommunicators() {
-    return html`
-    <i class="fas fa-server"></i>
 
-    ${Object.keys(this.connections).map(socketKey => html`
-      <div class="threeColumns">
-        <mx-communicator .socketKey=${socketKey} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
+    if (Object.keys(this.connections).length > 0) {
+      return html`
+    <i class="fas fa-server"></i
+    <div class="threeColumns">
+        <mx-communicator .connections=${this.connections} .socketKey=${Object.keys(this.connections)[0]} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
       </div>
-    `)}
     `
+    }
   }
 
   //Groups template. Draws one panel for each group.
@@ -205,11 +205,11 @@ export class mxConnect extends LitElement {
 
     if (!this.hasRun) {
 
-      
-    //Add event listeners for events targeting this component
-    this.addEventListener("machines-changed", this.machinesChanged);
-    this.addEventListener("status-changed", this.statusChanged);
-    this.addEventListener("actions-changed", this.actionsChanged);
+
+      //Add event listeners for events targeting this component
+      this.addEventListener("machines-changed", this.machinesChanged);
+      this.addEventListener("status-changed", this.statusChanged);
+      this.addEventListener("actions-changed", this.actionsChanged);
 
       //Remember we ran once
       this.hasRun = true;

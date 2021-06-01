@@ -4,7 +4,7 @@
 //Provides two-way communication between the browser and a single websocket using MSL.js. Also collects all other messages triggered by the sent message, such as admin replies and relays.
 
 //Lit Dependencies
-import { html, css, LitElement, CSSResult } from 'lit';
+import { html, css, LitElement, CSSResult, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
@@ -18,13 +18,20 @@ export class mxCommunicator extends LitElement {
     p, textarea { color: #ec2028; font-family: Inter Black; font-size: 24pt }
     input, .results { font-family: Inter; font-size: 18pt; }
     .greyBk {background-color:#ccc}
-    .gridHeader {background-color:#bbb}
-    a {cursor: pointer; text-decoration:underline}
+    .lightGrey {color:#ddd;}
+    .gridHeader {background-color:#bbb; font-family: Inter; font-size: 20pt }
+    a { text-decoration: none; cursor: pointer;}
+    a:hover {text-decoration: underline}
     .grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 10px;
       grid-auto-rows: minmax(100px, auto);
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
     }
     `;
 
@@ -37,6 +44,7 @@ export class mxCommunicator extends LitElement {
   @property() isHidden: boolean = false;
   @property() isDisabled: boolean = false;
   @property() actionList: {}[] = [];
+  @property() connections: {} = {};
   @property() privateActionList: {}[] = [];
   @property() connector;
   @property() nextCommunicator;
@@ -44,9 +52,10 @@ export class mxCommunicator extends LitElement {
 
   //Private Functions
 
-  //Close Connection
-  closeConnection() {
-    mx.socket.connections[this.socketKey].mxClose(this,this.actionList);
+  //Close Socket
+  closeSocket() {
+    let socket = mx.socket.connections[this.socketKey]
+    socket.mxClose(this,this.actionList);
   }
 
   //Update results area when a message is received
@@ -72,10 +81,53 @@ export class mxCommunicator extends LitElement {
   sendMessage(message: string) {
     mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
     this.nextCommunicator = html`
-    <mx-communicator .socketKey=${this.socketKey} .actionList=${this.actionList}  .connector=${this.connector}></mx-communicator>
+    <mx-communicator .connections=${this.connections} .socketKey=${this.socketKey} .actionList=${this.actionList}  .connector=${this.connector}></mx-communicator>
     `
   }
 
+
+  //Communicator Header
+  templateListHeader() {
+
+    //Early return. Don't draw connection choices if communicator has been used.
+    if (this.isDisabled) {
+      return;
+    }
+    
+    let connectionList: TemplateResult
+
+    for (let socketKey in this.connections) {
+
+      //Setup Colors
+      let toSocket = mx.socket.list[socketKey];
+      let toWireColor = toSocket.port.type == 'msl' ? toSocket.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocket.port.type == 'admin' ? toSocket.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+
+      //Test if socket is currently selected
+      let isSelectedSocket = socketKey == this.socketKey ? true : false;
+
+      //Setup opacity
+      let opacity = isSelectedSocket ? 1 : .5;
+
+      //Create the icon and socketKey for each available connection
+      connectionList = html`${connectionList}
+      <mx-icon style="cursor:pointer;opacity:${opacity}" @click=${() => this.socketKey = socketKey} title=${this.socketKey ? `Direct your message to ${socketKey}` : ""} class="fas fa-keyboard" color=${toWireColor}></mx-icon><a style="opacity:${opacity}"  title=${`Direct your message to ${socketKey}`} @click=${() => this.socketKey = socketKey}>${socketKey}</a>
+      `
+    }
+
+    return html`
+        <div class="grid2" style="grid-gap:0px;">
+
+            <div class="gridHeader" style="grid-column: 1/5; padding-left:3px;">
+                ${connectionList}
+            </div>
+
+            <div class="gridHeader" style="text-align:right;padding-right:3px;">
+                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;" title="Close the connection to ${this.socketKey}." class="fas fa-times-square"></mx-icon>
+            </div>
+
+        </div>
+        `
+}
 
   //Show this component on screen
   render() {
@@ -110,9 +162,11 @@ export class mxCommunicator extends LitElement {
   
     return html`
     ${inputPart}
+    ${this.templateListHeader()}
+    ${this.privateActionList.length > 0 ? html`
     <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey}></mx-actions>
     <br>
-    ${this.nextCommunicator}
+    ${this.nextCommunicator}` : ""}
     ` 
   }
 }

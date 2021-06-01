@@ -34,21 +34,6 @@ export class mxActions extends LitElement {
       grid-template-columns: repeat(5, 1fr);
       gap: 3px;
     }
-    .one {
-      grid-column: 1;
-      grid-row: 1;
-    }
-    .threeColumns {
-      grid-column: 1 / 4;
-    },
-    .fiveColumns {
-      grid-column: 1 / 6;
-    }
-    .threeRows {
-      grid-column: 1;
-      grid-row: 1 / 5;
-    }
-    
     `;
 
     //PRIVATE PROPERTIES
@@ -87,6 +72,7 @@ export class mxActions extends LitElement {
     //downloadActionList
     //Download the action list w/o the notify component
     downloadActionList(name: string) {
+
         //Create an actionList w/o notify property because it is a circular reference in JSON
         let [...actionListCopy] = this.actionList
         for (let oneActionIndex in actionListCopy) {
@@ -98,6 +84,7 @@ export class mxActions extends LitElement {
     //downloadActionItem
     //Download the action item w/o the notify component
     downloadActionItem(actionItem:{}, name?: string) {
+
         //Create an actionItem w/o notify property because it is a circular reference in JSON
         let {...actionItemCopy} = actionItem;
         delete actionItemCopy["notify"];
@@ -111,6 +98,7 @@ export class mxActions extends LitElement {
 
     //Send to Socket (Used for re-sending messages from history)
     sendToSocket(socketKey, message: string, notifyElement) {
+
         let allActions;
         if (this.fullActions) {
             allActions = this.fullActions
@@ -143,7 +131,7 @@ export class mxActions extends LitElement {
         return html`
             <div class="grid2" style="grid-gap:0px;">
                 <div class="gridHeader" style="grid-column: 1/5; padding-left:3px;">
-                    <mx-icon title=${this.name ? `Type a message in the box above and press Enter to send it to ${this.name}` : ""} class=${this.name ? "fas fa-keyboard" : "fas fa-cogs"} color=${toWireColor}></mx-icon> ${this.name ? this.name : "actions"}
+                    <mx-icon title=${this.name ? `Actions you take in this panel are recorded here.` : "All actions you take are recorded here."} class=${this.name ? "fas fa-keyboard" : "fas fa-cogs"} color=${toWireColor}></mx-icon> ${this.name ? this.name : "actions"}
                 </div>
 
             <div class="gridHeader" style="text-align:right;padding-right:3px;">
@@ -154,9 +142,6 @@ export class mxActions extends LitElement {
                     <mx-icon title="Download these actions as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionList(this.name)}></mx-icon>
                 ` : ""}
 
-                ${this.name ? html`
-                <mx-icon @click=${() => this.closeSocket(this.name)} style="cursor:pointer;" title="Close the connection to ${this.name}." class="fas fa-times-square"></mx-icon>
-                ` : ""}
             </div>
         </div>
         `
@@ -187,7 +172,7 @@ export class mxActions extends LitElement {
 
         let actionItemHeader = html`
             <div class="whiteHeaderText navyBk">
-             <mx-icon title="The original order of each action. See the actions panel for the full list." class="fas fa-list-ol"></mx-icon>
+             <mx-icon title=${this.name ? "The original order of each action. See the actions panel for the full list." : "The original order of each action."} class="fas fa-list-ol"></mx-icon>
             </div>
             <div class="whiteHeaderText navyBk">
                 <div>
@@ -260,7 +245,7 @@ export class mxActions extends LitElement {
 
         let responseItemHeader = html`
             <div class="whiteHeaderText darkGreyBk">
-            <mx-icon title="The number of each response." class="fas fa-list-ol"></mx-icon>
+            <mx-icon title="The order of each response." class="fas fa-list-ol"></mx-icon>
             </div>
             <div class="whiteHeaderText darkGreyBk" style="grid-column:2/span 4">
             <mx-icon title="All of the responses to this action, in order." class="fas fa-reply-all"></mx-icon> response
