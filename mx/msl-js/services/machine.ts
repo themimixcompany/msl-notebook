@@ -95,6 +95,27 @@ const hasType = function(machineKey:string,portType:string) {
   return hasPort.includes(true);
 }
 
+//index
+const index = function() {
+
+  //Construct a socketKey index
+  let socketKeyIndex = {}
+
+  //Loop through all machines and keys, indexing each item
+  for (let machineKey in machines) {
+    for (let portKey in ports) {
+      let socketKey = `${machineKey}-${portKey}`
+      socketKeyIndex[socketKey] = {
+        "machineKey" : machineKey,
+        "portKey" : portKey,
+        "type": ports[portKey].type
+      }
+    }
+  }
+  
+  return socketKeyIndex;
+
+}
 
 //Service Definition
 
@@ -140,6 +161,7 @@ export const machine = {
   machines,
   ports,
   hasType,
+  index: index(),
   list: machines,
   find: findByType,
   findInMachine: findTypeInMachine,

@@ -684,23 +684,34 @@ const connect = function (socketURL, notifyElement?: HTMLElement, actionList?: {
 //recordAction
 //Action recording
 //Record a new action. Notify of all responses to the action.
-const recordAction = function (actionList: {}[], type, to: string = "", from: string = "", message: string = "", notifyElement?: HTMLElement) {
-
-  console.log("actionList before recording",type,to,from,message);
-  console.log(actionList);
+const recordAction = function (actionList: {}[], type, to?: string, from?: string, message: string = "", notifyElement?: HTMLElement) {
 
   //Assign an action number (for display/download)
   let actionNumber = actionList.length + 1
+
+  //Find two and from port types
+  let toPortType = to ? mx.machine.index[to].type : undefined;
+  let fromPortType = from ? mx.machine.index[from].type : undefined;
 
   //Create a new action from the passed parameters.
   let newAction = {
     "number": actionNumber,
     "type": type,
     "to": to,
+    "toPortType": toPortType,
     "from": from,
+    "fromPortType": fromPortType,
     "message": message,
     "notify": notifyElement
   }
+
+  // //Add port type information for ports used in the response
+  // if (to) {
+  //   newAction["toPortType"] = mx.machine.index[to].type
+  // }
+  // if (from) {
+  //   newAction["formPortType"] = mx.machine.index[from].type
+  // }
 
   //Add new action to list.
   actionList.push(newAction);
@@ -748,19 +759,26 @@ const recordResponse = function (actionList: {}[], actionIndex, type, to, from, 
     return false;
   }
 
+    //Find two and from port types
+    let toPortType = to ? mx.machine.index[to].type : undefined;
+    let fromPortType = from ? mx.machine.index[from].type : undefined;
+  
+
   //Create new response item
-  let newResponseItem = {
+  let newResponse = {
     "type": type,
     "to": to,
+    "toPortType": toPortType,
     "from": from,
+    "fromPortType": fromPortType,
     "message": message
   }
 
   //No response list? Create it.
   if (!actionItem["response"]) {
-    actionItem["response"] = [newResponseItem];
+    actionItem["response"] = [newResponse];
   } else {
-    actionItem["response"].push(newResponseItem);
+    actionItem["response"].push(newResponse);
   }
 
   //Notify component(s) of actionList changes

@@ -187,10 +187,16 @@ export class mxActions extends LitElement {
 
         let actionItemHeader = html`
             <div class="whiteHeaderText navyBk">
-            <mx-icon title="Download this ${this.actionNames[actionItem.type]} action as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionItem(actionItem)}></mx-icon>
+             <mx-icon title="The original order of each action. See the actions panel for the full list." class="fas fa-list-ol"></mx-icon>
             </div>
             <div class="whiteHeaderText navyBk">
-            <mx-icon title="Actions you took." class="fas fa-cogs"></mx-icon> action
+                <div>
+                    <mx-icon title="Actions you took." class="fas fa-cogs"></mx-icon> action
+                    <mx-icon title="Download this ${this.actionNames[actionItem.type]} action and all its responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionItem(actionItem)}></mx-icon>
+                </div
+                <div>
+                    
+                </div>
             </div>
             <div class="whiteHeaderText navyBk">
             <mx-icon title="The socket a response was received from." class="fas fa-router"></mx-icon> from
