@@ -335,7 +335,7 @@ export class mxActions extends LitElement {
             </div>
             <div class="greyBk">
             ${responseItem.message ? html`
-            <a @click=${() => this.sendToSocket(actionItem.to, responseItem.message, actionItem.notify)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
+            <a @click=${() => this.requestCommunicator("setup",responseItem.from,responseItem.message)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
             ` : ""}
             </div>
         `;

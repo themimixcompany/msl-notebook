@@ -4,7 +4,7 @@
 //Lists ports, machines, and groups available in the config .json files and opens connections to them. Keeps a collective list of actions for all connections it opens. Displays communicators for each socket.
 
 //Lit Dependencies
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
@@ -57,6 +57,7 @@ export class mxConnect extends LitElement {
   @property() machines: {} = mx.machine.machines;
   @property() connections: {} = {};
   @property() actionList: {}[] = [];
+  @property() communicators: TemplateResult[];
   @property() url: string = "";
 
   //Key pressed in URL input box? Check for Enter.
@@ -132,18 +133,41 @@ export class mxConnect extends LitElement {
     `
   }
 
-  //Communicators template. Draws one communicator for each socket in active connections
+  //Template all communicators. Draws one communicator for each action item + one empty.
   templateCommunicators() {
 
-    if (Object.keys(this.connections).length > 0) {
-      return html`
-    <i class="fas fa-server"></i
-    <div class="threeColumns">
-        <mx-communicator .connections=${this.connections} .socketKey=${Object.keys(this.connections)[0]} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
-      </div>
-    `
+    //Setup array to hold all communicator templates.
+    let allCommunicators: TemplateResult[] = [];
+
+    //For each send action, add a communicator.
+    for (let actionIndex in this.actionList) {
+
+      //Get the action item itself.
+      let actionItem = this.actionList[actionIndex];
+
+      //All a communicator for it.
+      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"]));
+
     }
+
+    //If there are live connections, add a communicator to the first one 
+    if (Object.keys(this.connections).length > 0) {
+      console.log(Object.keys(this.connections))
+      allCommunicators.push(this.templateSingleCommunicator(Object.keys(this.connections)[0]));
+    }
+
+    return allCommunicators;
   }
+
+  //Template one communicator.
+  templateSingleCommunicator(socketKey) {
+    return html`
+      <div class="threeColumns">
+      <mx-communicator .connections=${this.connections} .socketKey=${socketKey} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
+    </div>
+  `
+  }
+
 
   //Groups template. Draws one panel for each group.
   templateGroups() {

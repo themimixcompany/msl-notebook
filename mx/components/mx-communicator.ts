@@ -39,15 +39,14 @@ export class mxCommunicator extends LitElement {
   hasRun = false;
 
   //Define public properties (databinding)
-  @property() mslResults: any;
   @property() socketKey: string = "";
-  @property() nextCommunicatorKey: string = this.socketKey;
+  @property() message: string = "";
+  @property() nextCommunicatorKey;
   @property() isHidden: boolean = false;
   @property() isDisabled: boolean = false;
   @property() actionList: {}[] = [];
   @property() connections: {} = {};
   @property() privateActionList: {}[] = [];
-  @property() nextCommunicator: {};
   @property() connector
 
 
@@ -65,12 +64,23 @@ export class mxCommunicator extends LitElement {
     event.cancelBubble = true;
   }
 
-  //Setup the nextCommunicator with values
+  //Setup this communicator with values
   setupReceived(event: CustomEvent) {
     let { socketKey, message } = event.detail;
-    this.nextCommunicatorKey = socketKey;
-    console.log(this.socketKey,this.nextCommunicatorKey)
-    //event.cancelBubble = true;
+    this.socketKey = socketKey;
+    this.message = message;
+    event.cancelBubble = true;
+  }
+
+  //Setup next communicator with values
+  setupNextReceived(event: CustomEvent) {
+    let { socketKey, message } = event.detail;
+    let payload = {
+      "socketKey": socketKey,
+      "message": message
+    }
+    mx.socket.notify(this.connector, "setup", payload)
+
   }
 
   //Check for message input box Enter key pressed to send message
@@ -88,17 +98,9 @@ export class mxCommunicator extends LitElement {
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
 
-  mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
-  
-  this.nextCommunicatorKey = this.socketKey;
-  console.log(this.nextCommunicatorKey)
+    mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
 
-  this.nextCommunicator = html`
-    <mx-communicator .connections=${this.connections} .socketKey=${this.nextCommunicatorKey} .actionList=${this.actionList}  .connector=${this.connector}></mx-communicator>
-    `
-
-  this.requestUpdate;
-
+    
   }
 
 
@@ -185,7 +187,6 @@ export class mxCommunicator extends LitElement {
     ${this.templateListHeader()}
     <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this}></mx-actions>
     <br>
-    ${this.nextCommunicator}
     `
   }
 }
