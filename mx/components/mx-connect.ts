@@ -4,7 +4,7 @@
 //Lists ports, machines, and groups available in the config .json files and opens connections to them. Keeps a collective list of actions for all connections it opens. Displays communicators for each socket.
 
 //Lit Dependencies
-import { html, css, LitElement, TemplateResult } from 'lit';
+import { html, css, LitElement, TemplateResult, Template } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
@@ -57,7 +57,8 @@ export class mxConnect extends LitElement {
   @property() machines: {} = mx.machine.machines;
   @property() connections: {} = {};
   @property() actionList: {}[] = [];
-  @property() communicators: TemplateResult[];
+  @property() communicators;
+  @property() emptyCommunicator;
   @property() url: string = "";
 
   //Key pressed in URL input box? Check for Enter.
@@ -89,6 +90,32 @@ export class mxConnect extends LitElement {
   //Actions changed
   actionsChanged(receivedEvent: CustomEvent) {
     this.actionList = receivedEvent.detail;
+
+    //Update communicators
+    this.communicators = this.templateCommunicators();
+
+     //Display an empty communicator
+     this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
+  }
+
+  //Setup last (empty, current) communicator with values
+  communicatorChanged(event: CustomEvent) {
+
+    console.log("communicator changed")
+
+    let { socketKey, message } = event.detail;
+    let payload = {
+      "socketKey": socketKey,
+      "message": message
+    }
+
+     //If the requested socket is live...
+     if (this.connections[socketKey]) {
+
+      //Retemplate it with new values
+      this.emptyCommunicator = this.templateSingleCommunicator(socketKey);
+    }
+
   }
 
   //PORT connect link clicked
@@ -133,7 +160,7 @@ export class mxConnect extends LitElement {
     `
   }
 
-  //Template all communicators. Draws one communicator for each action item + one empty.
+  //Template all communicators. Draws one communicator for each action item.
   templateCommunicators() {
 
     //Setup array to hold all communicator templates.
@@ -145,29 +172,32 @@ export class mxConnect extends LitElement {
       //Get the action item itself.
       let actionItem = this.actionList[actionIndex];
 
-      if (true) {
+      //Hide type 0 (connect) communicators by default.
+      let isHidden = false;
+      if (actionItem["type"] == 0) {
+        isHidden = true;
+      }
 
       //Add a disabled communicator w/ its action information.
-      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"],[actionItem],true));
+      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"], [actionItem], true, isHidden));
 
-    }
-
-  }
-
-    //If there are live connections, add a communicator to the first one 
-    if (Object.keys(this.connections).length > 0) {
-      allCommunicators.push(this.templateSingleCommunicator(Object.keys(this.connections)[0]));
     }
 
     return allCommunicators;
   }
 
   //Template one communicator.
-  templateSingleCommunicator(socketKey, privateActionList:{}[] = [], isDisabled:boolean = false) {
+  templateSingleCommunicator(socketKey, privateActionList: {}[] = [], isDisabled = false, isHidden = false) {
     return html`
-      <div class="threeColumns">
-      <mx-communicator .isDisabled=${isDisabled} .connections=${this.connections} .socketKey=${socketKey} .actionList=${this.actionList} .privateActionList=${privateActionList} .connector=${this}></mx-communicator> 
-    </div>
+      <mx-communicator 
+        .isDisabled=${isDisabled} 
+        .isHidden=${isHidden}
+        .connections=${this.connections} 
+        .socketKey=${socketKey} 
+        .actionList=${this.actionList} 
+        .privateActionList=${privateActionList} 
+        .connector=${this}>
+      </mx-communicator> 
   `
   }
 
@@ -237,6 +267,8 @@ export class mxConnect extends LitElement {
       this.addEventListener("machines-changed", this.machinesChanged);
       this.addEventListener("status-changed", this.statusChanged);
       this.addEventListener("actions-changed", this.actionsChanged);
+      this.addEventListener("communicator-changed", this.communicatorChanged);
+
 
       //Remember we ran once
       this.hasRun = true;
@@ -265,7 +297,8 @@ export class mxConnect extends LitElement {
 
      <br>
     
-    ${this.templateCommunicators()}
+    ${this.communicators}
+    ${this.emptyCommunicator}
 
     <br>
     <mx-actions .isHidden=${true} .actionList=${this.actionList}></mx-actions>

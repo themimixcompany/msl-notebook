@@ -109,15 +109,15 @@ export class mxActions extends LitElement {
         mx.socket.list[socketKey].mxSend(message, true, notifyElement, allActions);
     }
 
-     //requestCommunicator (Used for re-sending messages from history)
-     requestCommunicator(eventName,socketKey,message) {
+     //changeCommunicator (Used for re-sending messages from history)
+     changeCommunicator(eventName,socketKey,message) {
 
         let payload = {
             "socketKey": socketKey,
             "message": message
         }
 
-        mx.socket.notify(this.connector,"setup",payload)
+        mx.socket.notify(this.connector,"communicator-changed",payload)
         
     }
 
@@ -252,7 +252,7 @@ export class mxActions extends LitElement {
         </div>
         <div class="greyBk">
         ${actionItem.message ? html`
-            <a @click=${() => this.requestCommunicator("setup",actionItem.to,actionItem.message)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
+            <a @click=${() => this.changeCommunicator("setup",actionItem.to,actionItem.message)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
             ` : ""}
         </div>
     `;
@@ -333,7 +333,7 @@ export class mxActions extends LitElement {
             </div>
             <div class="greyBk">
             ${responseItem.message ? html`
-            <a @click=${() => this.requestCommunicator("setup",responseItem.from,responseItem.message)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
+            <a @click=${() => this.changeCommunicator("setup",responseItem.from,responseItem.message)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
             ` : ""}
             </div>
         `;
@@ -346,6 +346,8 @@ export class mxActions extends LitElement {
 
     //Show this component on screen
     render() {
+
+        console.log(this.name,this.isHidden)
         if (this.actionList[0]) {
         return html`
             ${this.templateListHeader()}

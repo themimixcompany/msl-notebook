@@ -38,21 +38,12 @@ export class mxCommunicator extends LitElement {
 
   //PRIVATE PROPERTIES
 
-  //Action Names & Icons
-  actionNames = ["connect", "send", "relay", "disconnect"];
-  actionIcons = ["fas fa-plug", "fas fa-keyboard", "fas fa-chart-network", "far fa-plug"];
-
-  //Response Names & Icons
-  responseNames = ["open", "receive", "roundtrip", "close"];
-  responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
-
   //Setup for Run Once
   hasRun = false;
 
   //Define public properties (databinding)
   @property() socketKey: string = "";
   @property() message: string = "";
-  @property() nextCommunicatorKey;
   @property() isHidden: boolean = false;
   @property() isDisabled: boolean = false;
   @property() actionList: {}[] = [];
@@ -75,24 +66,6 @@ export class mxCommunicator extends LitElement {
     event.cancelBubble = true;
   }
 
-  //Setup this communicator with values
-  setupReceived(event: CustomEvent) {
-    let { socketKey, message } = event.detail;
-    this.socketKey = socketKey;
-    this.message = message;
-    event.cancelBubble = true;
-  }
-
-  //Setup next communicator with values
-  setupNextReceived(event: CustomEvent) {
-    let { socketKey, message } = event.detail;
-    let payload = {
-      "socketKey": socketKey,
-      "message": message
-    }
-    mx.socket.notify(this.connector, "setup", payload)
-
-  }
 
   //Check for message input box Enter key pressed to send message
   mslBoxKeyDown(event: Event) {
@@ -101,7 +74,7 @@ export class mxCommunicator extends LitElement {
     if (event.keyCode == 13) {
       //Send message
       this.sendMessage(message);
-      this.isDisabled = true;
+      //this.isDisabled = true;
     }
   }
 
@@ -120,14 +93,11 @@ export class mxCommunicator extends LitElement {
   //Communicator Header
   templateListHeader() {
 
-    //Early return. Don't draw connection choices if communicator has been used.
-    if (this.isDisabled) {
-      return;
-    }
-
     let connectionList: TemplateResult
 
     for (let socketKey in this.connections) {
+
+    
 
       //Setup Colors
       let toSocket = mx.socket.list[socketKey];
@@ -175,7 +145,7 @@ export class mxCommunicator extends LitElement {
 
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived);
-      this.addEventListener("setup", this.setupReceived);
+
 
       //Remember we ran once
       this.hasRun = true;
@@ -195,8 +165,8 @@ export class mxCommunicator extends LitElement {
 
     return html`
     ${!this.isDisabled ? inputPart : ""}
-    ${this.templateListHeader()}
-    <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this}></mx-actions>
+    ${!this.isDisabled ? this.templateListHeader() : ""}
+    <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this}></mx-actions>
     <br>
     `
   }
