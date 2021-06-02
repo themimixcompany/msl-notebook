@@ -145,10 +145,10 @@ export class mxConnect extends LitElement {
       //Get the action item itself.
       let actionItem = this.actionList[actionIndex];
 
-      if (actionItem["type"] == 1) {
+      if (true) {
 
-      //Add a communicator for it.
-      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"]));
+      //Add a disabled communicator w/ its action information.
+      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"],[actionItem],true));
 
     }
 
@@ -163,10 +163,10 @@ export class mxConnect extends LitElement {
   }
 
   //Template one communicator.
-  templateSingleCommunicator(socketKey) {
+  templateSingleCommunicator(socketKey, privateActionList:{}[] = [], isDisabled:boolean = false) {
     return html`
       <div class="threeColumns">
-      <mx-communicator .connections=${this.connections} .socketKey=${socketKey} .actionList=${this.actionList} .connector=${this}></mx-communicator> 
+      <mx-communicator .isDisabled=${isDisabled} .connections=${this.connections} .socketKey=${socketKey} .actionList=${this.actionList} .privateActionList=${privateActionList} .connector=${this}></mx-communicator> 
     </div>
   `
   }

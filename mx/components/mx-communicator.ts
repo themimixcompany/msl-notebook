@@ -35,6 +35,17 @@ export class mxCommunicator extends LitElement {
     }
     `;
 
+
+  //PRIVATE PROPERTIES
+
+  //Action Names & Icons
+  actionNames = ["connect", "send", "relay", "disconnect"];
+  actionIcons = ["fas fa-plug", "fas fa-keyboard", "fas fa-chart-network", "far fa-plug"];
+
+  //Response Names & Icons
+  responseNames = ["open", "receive", "roundtrip", "close"];
+  responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
+
   //Setup for Run Once
   hasRun = false;
 
@@ -100,7 +111,7 @@ export class mxCommunicator extends LitElement {
 
     mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
 
-    
+
   }
 
 
@@ -183,7 +194,7 @@ export class mxCommunicator extends LitElement {
     //RENDER TEMPLATE
 
     return html`
-    ${inputPart}
+    ${!this.isDisabled ? inputPart : ""}
     ${this.templateListHeader()}
     <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this}></mx-actions>
     <br>

@@ -112,8 +112,6 @@ export class mxActions extends LitElement {
      //requestCommunicator (Used for re-sending messages from history)
      requestCommunicator(eventName,socketKey,message) {
 
-        console.log(eventName,socketKey,message)
-
         let payload = {
             "socketKey": socketKey,
             "message": message
@@ -146,7 +144,7 @@ export class mxActions extends LitElement {
         return html`
             <div class="grid2" style="grid-gap:0px;">
                 <div class="gridHeader" style="grid-column: 1/5; padding-left:3px;">
-                    <mx-icon title=${this.name ? `Actions you take in this panel are recorded here.` : "All actions you take are recorded here."} class=${this.name ? "fas fa-keyboard" : "fas fa-cogs"} color=${toWireColor}></mx-icon> ${this.name ? this.name : "actions"}
+                    <mx-icon title=${this.name ? `Actions you take in this panel are recorded here.` : "All actions you take are recorded here."} class=${this.name ? this.actionIcons[this.actionList[0]["type"]] : "fas fa-cogs"} color=${toWireColor}></mx-icon> ${this.name ? this.name : "actions"}
                 </div>
 
             <div class="gridHeader" style="text-align:right;padding-right:3px;">
