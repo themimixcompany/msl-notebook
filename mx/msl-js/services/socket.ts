@@ -221,7 +221,7 @@ const sendSingleMessage = function (socket: WebSocket, message: string, echo: bo
 
 //notify
 //Send an event to a web component or HTML element
-const notify = function (notifyElement, eventName: string, payload: any) {
+const notify = (notifyElement, eventName: string, payload: any) => {
 
   //create event
   let eventOptions = {
@@ -924,6 +924,7 @@ export const socket = {
   connectPort,
   connectMachine,
   connectGroup,
+  notify,
   connections,
   list: connections
 };

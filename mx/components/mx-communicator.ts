@@ -40,14 +40,15 @@ export class mxCommunicator extends LitElement {
 
   //Define public properties (databinding)
   @property() mslResults: any;
-  @property({ attribute: false }) socketKey: string; // => let socketKey = attribute named 'socket'
+  @property() socketKey: string = "";
+  @property() nextCommunicatorKey: string = this.socketKey;
   @property() isHidden: boolean = false;
   @property() isDisabled: boolean = false;
   @property() actionList: {}[] = [];
   @property() connections: {} = {};
   @property() privateActionList: {}[] = [];
-  @property() connector;
-  @property() nextCommunicator;
+  @property() nextCommunicator: {};
+  @property() connector
 
 
   //Private Functions
@@ -55,14 +56,21 @@ export class mxCommunicator extends LitElement {
   //Close Socket
   closeSocket() {
     let socket = mx.socket.connections[this.socketKey]
-    socket.mxClose(this,this.actionList);
+    socket.mxClose(this, this.actionList);
   }
 
   //Update results area when a message is received
   messageReceived(event: CustomEvent) {
     this.privateActionList = event.detail;
+    event.cancelBubble = true;
+  }
 
-    event.cancelBubble = true;  
+  //Setup the nextCommunicator with values
+  setupReceived(event: CustomEvent) {
+    let { socketKey, message } = event.detail;
+    this.nextCommunicatorKey = socketKey;
+    console.log(this.socketKey,this.nextCommunicatorKey)
+    //event.cancelBubble = true;
   }
 
   //Check for message input box Enter key pressed to send message
@@ -79,11 +87,21 @@ export class mxCommunicator extends LitElement {
   //Send Message
   //Call mxSend w/ notifyElement=this to notify this component; echo=true to echo original message (not just response)
   sendMessage(message: string) {
-    mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
-    this.nextCommunicator = html`
-    <mx-communicator .connections=${this.connections} .socketKey=${this.socketKey} .actionList=${this.actionList}  .connector=${this.connector}></mx-communicator>
+
+  mx.socket.list[this.socketKey].mxSend(message, true, this, this.actionList, this.privateActionList);
+  
+  this.nextCommunicatorKey = this.socketKey;
+  console.log(this.nextCommunicatorKey)
+
+  this.nextCommunicator = html`
+    <mx-communicator .connections=${this.connections} .socketKey=${this.nextCommunicatorKey} .actionList=${this.actionList}  .connector=${this.connector}></mx-communicator>
     `
+
+  this.requestUpdate;
+
   }
+
+
 
 
   //Communicator Header
@@ -93,7 +111,7 @@ export class mxCommunicator extends LitElement {
     if (this.isDisabled) {
       return;
     }
-    
+
     let connectionList: TemplateResult
 
     for (let socketKey in this.connections) {
@@ -107,6 +125,7 @@ export class mxCommunicator extends LitElement {
 
       //Setup opacity
       let opacity = isSelectedSocket ? 1 : .5;
+
 
       //Create the icon and socketKey for each available connection
       connectionList = html`${connectionList}
@@ -127,7 +146,7 @@ export class mxCommunicator extends LitElement {
 
         </div>
         `
-}
+  }
 
   //Show this component on screen
   render() {
@@ -142,7 +161,8 @@ export class mxCommunicator extends LitElement {
     if (!this.hasRun) {
 
       //Add event listeners for events targeting this component
-      this.addEventListener("message-received", this.messageReceived); 
+      this.addEventListener("message-received", this.messageReceived);
+      this.addEventListener("setup", this.setupReceived);
 
       //Remember we ran once
       this.hasRun = true;
@@ -154,19 +174,18 @@ export class mxCommunicator extends LitElement {
     //Input Box
     let inputPart = html`
       <div class="greyBk" style="padding-right:6px;">
-        <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket.port.type}"></input>
+        <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket?.port.type}"></input>
       </div>
     `
 
     //RENDER TEMPLATE
-  
+
     return html`
     ${inputPart}
     ${this.templateListHeader()}
-    ${this.privateActionList.length > 0 ? html`
-    <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey}></mx-actions>
+    <mx-actions .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this}></mx-actions>
     <br>
-    ${this.nextCommunicator}` : ""}
-    ` 
+    ${this.nextCommunicator}
+    `
   }
 }

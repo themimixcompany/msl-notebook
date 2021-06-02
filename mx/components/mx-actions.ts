@@ -49,6 +49,7 @@ export class mxActions extends LitElement {
     //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
     @property() fullActions: {}[];
+    @property() connector: {};
     @property() name: string;
     @property() isHidden: boolean = false;
 
@@ -106,6 +107,20 @@ export class mxActions extends LitElement {
             allActions = this.actionList
         }
         mx.socket.list[socketKey].mxSend(message, true, notifyElement, allActions);
+    }
+
+     //requestCommunicator (Used for re-sending messages from history)
+     requestCommunicator(eventName,socketKey,message) {
+
+        console.log(eventName,socketKey,message)
+
+        let payload = {
+            "socketKey": socketKey,
+            "message": message
+        }
+
+        mx.socket.notify(this.connector,"setup",payload)
+        
     }
 
     //Close socket
@@ -239,7 +254,7 @@ export class mxActions extends LitElement {
         </div>
         <div class="greyBk">
         ${actionItem.message ? html`
-            <a @click=${() => this.sendToSocket(actionItem.to, actionItem.message, actionItem.notify)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
+            <a @click=${() => this.requestCommunicator("setup",actionItem.to,actionItem.message)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
             ` : ""}
         </div>
     `;
@@ -333,10 +348,11 @@ export class mxActions extends LitElement {
 
     //Show this component on screen
     render() {
-
+        if (this.actionList[0]) {
         return html`
             ${this.templateListHeader()}
             ${this.actionList[0] ? this.templateList() : ""}
          `;
+        }
     }
 }
