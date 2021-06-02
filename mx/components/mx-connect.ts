@@ -145,14 +145,17 @@ export class mxConnect extends LitElement {
       //Get the action item itself.
       let actionItem = this.actionList[actionIndex];
 
-      //All a communicator for it.
+      if (actionItem["type"] !=1) {
+        break;
+      }
+
+      //Add a communicator for it.
       allCommunicators.push(this.templateSingleCommunicator(actionItem["to"]));
 
     }
 
     //If there are live connections, add a communicator to the first one 
     if (Object.keys(this.connections).length > 0) {
-      console.log(Object.keys(this.connections))
       allCommunicators.push(this.templateSingleCommunicator(Object.keys(this.connections)[0]));
     }
 
