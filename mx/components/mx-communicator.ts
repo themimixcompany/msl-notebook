@@ -33,22 +33,30 @@ export class mxCommunicator extends LitElement {
   }
   .grid-fixed-rows {
     display: grid;
-    grid-template-columns: 100px 175px 1fr 250px 300px;
+    grid-template-columns: 100px 175px 1fr 250px 250px 80px;
     grid-auto-rows: 26pt;
     gap: 3px;
   }
   .grid2 {
       display: grid;
-      grid-template-columns: 100px 175px 1fr 250px 300px;
+      grid-template-columns: 100px 175px 1fr 250px 250px 80px;
       gap: 3px;
     }
   `;
 
 
-  //PRIVATE PROPERTIES
+  //PRIVATE PROPERTIES //////////
 
   //Setup for Run Once
   hasRun = false;
+
+   //Type Colors
+   localMslColor = "#F65314";
+   localAdminColor = "#FFBB00";
+   remoteMslColor = "#00A1F1";
+   remoteAdminColor = "#7CBB00";
+
+  // PUBLIC PROPERTIES //////////
 
   //Define public properties (databinding)
   @property() socketKey: string;
@@ -105,40 +113,33 @@ templateInputBox() {
    let socket = mx.socket.list[this.socketKey];
 
     //Setup Colors
-     let toWireColor = socket.port.type == 'msl' ? socket.machine.ip == 'localhost' ? '#ec2028' : 'navy' : socket.port.type == 'admin' ? socket.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+     let toWireColor = socket.port.type == 'msl' ? socket.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : socket.port.type == 'admin' ? socket.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
 
    
   return html`
-<div class="grid-fixed-rows">
-
-  <div class="whiteHeaderText elide ${this.isHidden ? "navyBk" : "activeBk"}" style="padding-left:10px;font-weight:900">
-  ${this.actionList.length * 1 + 1}.
-  </div>
-
-  <div class="whiteHeaderText navyBk elide ${this.isHidden ? "navyBk" : "activeBk"}">
-  <mx-icon style="cursor:pointer" title=${`Send a message to ${this.socketKey}`} class="fas fa-keyboard" color=${toWireColor}></mx-icon> send
-  </div>
-
-  <div style="grid-column:3/span 2;padding-left:0px;padding-top:0px;padding-bottom:0px;padding-right:6px;">
-    <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket?.port.type}"></input>
-  </div>
-
-  <div style="display: grid;grid-template-columns: 1fr 80px;gap: 3px;align:right;">
-
-    <div class="activeBk whiteHeaderText">
-    <mx-icon style="cursor:pointer" title=${`Send a message to ${this.socketKey}`} class="fas fa-keyboard" color=${toWireColor}></mx-icon>${this.socketKey}
+    <div class="whiteHeaderText elide ${this.isHidden ? "navyBk" : "activeBk"}" style="padding-left:10px;font-weight:900;grid-row:1/span 2">
+      <mx-icon class="fas fa-arrow-alt-right">
+      </mx-icon>
+      ${this.actionList.length * 1 + 1}.
     </div>
 
-    <div class="activeBk whiteHeaderText" style="text-align:right">
-                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;margin-right:3px;" title="Close the connection to ${this.socketKey}." class="fas fa-times-square"></mx-icon>
+    <div class="whiteHeaderText navyBk elide ${this.isHidden ? "navyBk" : "activeBk"}" style="grid-row:1/span 2">
+      <mx-icon style="cursor:pointer" title=${`Send a message to ${this.socketKey}`} class="fas fa-keyboard" color=${toWireColor}>
+      </mx-icon> 
+      send
     </div>
 
-  </div>
+    <div style="grid-column:3/span 4;padding-left:0px;padding-right:6px;">
+      <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket?.port.type}"></input>
+    </div>
+
+  
+
 `
 }
 
-  //Communicator Header
-  templateListHeader() {
+  //Connections Chooser
+  templateConnections() {
 
     let connectionList: TemplateResult
 
@@ -147,7 +148,7 @@ templateInputBox() {
   
       //Setup Colors
       let toSocket = mx.socket.list[socketKey];
-      let toWireColor = toSocket.port.type == 'msl' ? toSocket.machine.ip == 'localhost' ? '#ec2028' : 'navy' : toSocket.port.type == 'admin' ? toSocket.machine.ip == 'localhost' ? 'darkOrange' : 'purple' : ''
+      let toWireColor = toSocket.port.type == 'msl' ? toSocket.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : toSocket.port.type == 'admin' ? toSocket.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
 
       //Test if socket is currently selected
       let isSelectedSocket = socketKey == this.socketKey ? true : false;
@@ -158,23 +159,23 @@ templateInputBox() {
 
       //Create the icon and socketKey for each available connection
       connectionList = html`${connectionList}
-      <mx-icon style="cursor:pointer;opacity:${opacity}" @click=${() => this.socketKey = socketKey} title=${this.socketKey ? `Direct your message to ${socketKey}` : ""} class="fas fa-keyboard" color=${toWireColor}></mx-icon><a style="opacity:${opacity}"  title=${`Direct your message to ${socketKey}`} @click=${() => this.socketKey = socketKey}>${socketKey}</a>
+      <div class="activeBk whiteHeaderText">
+        <mx-icon style="cursor:pointer;opacity:${opacity}" @click=${() => this.socketKey = socketKey} title=${this.socketKey ? `Direct your message to ${socketKey}` : ""} class="fas fa-router" color=${toWireColor}></mx-icon><a style="opacity:${opacity}" title=${`Direct your message to ${socketKey}`} @click=${() => this.socketKey = socketKey}>${socketKey}</a>
+      </div>
       `
     }
 
     return html`
-        <div class="grid-fixed-rows" style="grid-gap:3px;margin-top:3px">
 
-          <div class="activeBk whiteHeaderText" style="font-weight:900">
-          <mx-icon class="fas fa-router"></mx-icon>
+          <div style="grid-column: 3/span 3; padding-left:3px; display: grid; gap: 3px; grid-auto-rows: 26pt; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
+          ${connectionList}
           </div>
 
-            <div class="gridHeader" style="grid-column: 2/span 4; padding-left:3px;">
-                ${connectionList}
-            </div>
-
-            
-        </div>
+          <div class="activeBk whiteHeaderText" style="padding-left:3px;text-align:right;">
+                <mx-icon class="fas fa-plus-square"></mx-icon>
+                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;margin-right:3px;" title="Close the connection to ${this.socketKey}." class="fas fa-times-square">
+      </mx-icon>
+          </div>
         `
   }
 
@@ -200,8 +201,10 @@ templateInputBox() {
     //RENDER TEMPLATE
 
     return html`
-    ${!this.isDisabled && this.connections[this.socketKey] ? this.templateInputBox() : ""}
-    ${!this.isDisabled ? this.templateListHeader() : ""}
+    <div class="grid-fixed-rows">
+      ${!this.isDisabled && this.connections[this.socketKey] ? this.templateInputBox() : ""}
+      ${!this.isDisabled ? this.templateConnections() : ""}
+    </div>
     <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this.connector}></mx-actions>
     `
   }

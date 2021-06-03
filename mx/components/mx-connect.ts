@@ -84,12 +84,18 @@ export class mxConnect extends LitElement {
   machinesChanged(receivedEvent: CustomEvent) {
     mx.debug.log("available machines updated");
     this.machines = mx.machine.machines;
+
+     //Display an empty communicator
+     this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
   }
 
   //Status changed
   statusChanged(receivedEvent: CustomEvent) {
     mx.debug.log("active connections updated");
     this.connections = receivedEvent.detail;
+
+      //Display an empty communicator
+      this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
   }
 
   //Actions changed
