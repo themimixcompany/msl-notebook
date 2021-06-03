@@ -5,7 +5,7 @@
 
 //Lit Dependencies
 import { html, css, LitElement, TemplateResult, Template } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
@@ -53,14 +53,19 @@ export class mxConnect extends LitElement {
   //Setup for Run Once
   hasRun = false;
 
-  //Define public properties (databinding)
+  // PRIVATE PROPERTIES //////////
+
+  @state() isActionsHidden: boolean = true;
+  @state() emptyCommunicator;
+  @state() url: string = "";
+  @state() communicators;
+
+  // PUBLIC PROPERTIES /////////
+
   @property() machines: {} = mx.machine.machines;
   @property() connections: {} = {};
   @property() actionList: {}[] = [];
-  @property() communicators;
-  @property() emptyCommunicator;
-  @property() url: string = "";
-
+ 
   //Key pressed in URL input box? Check for Enter.
   urlKeyDown(event: Event) {
 
@@ -96,6 +101,14 @@ export class mxConnect extends LitElement {
 
      //Display an empty communicator
      this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
+  }
+
+  //Show or hide actions
+  actionsHiddenChanged(receivedEvent: CustomEvent) {
+    this.isActionsHidden = !this.isActionsHidden;
+    //Update communicators
+    this.communicators = this.templateCommunicators();
+
   }
 
   //Setup last (empty, current) communicator with values
@@ -173,13 +186,13 @@ export class mxConnect extends LitElement {
       let actionItem = this.actionList[actionIndex];
 
       //Hide type 0 connect communicators by default.
-      let isHidden = false;
+      let isHidden = this.isActionsHidden;
       if (actionItem["type"] == 0) {
         isHidden = true;
       }
 
       //Add a disabled communicator w/ its action information.
-      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"], [actionItem], true, isHidden));
+      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"], [actionItem], true, this.isActionsHidden));
 
     }
 
@@ -189,6 +202,7 @@ export class mxConnect extends LitElement {
   //Template one communicator.
   templateSingleCommunicator(socketKey, privateActionList: {}[] = [], isDisabled = false, isHidden = false) {
     return html`
+      <div style="height:3px;">&nbsp;</div>
       <mx-communicator 
         .isDisabled=${isDisabled} 
         .isHidden=${isHidden}
@@ -268,6 +282,7 @@ export class mxConnect extends LitElement {
       this.addEventListener("status-changed", this.statusChanged);
       this.addEventListener("actions-changed", this.actionsChanged);
       this.addEventListener("communicator-changed", this.communicatorChanged);
+      this.addEventListener("actions-hidden", this.actionsHiddenChanged)
 
 
       //Remember we ran once
@@ -296,7 +311,6 @@ export class mxConnect extends LitElement {
     </div>
 
      <br>
-     <mx-actions .isHidden=${true} .actionList=${this.actionList}></mx-actions>
     ${this.communicators}
     ${this.emptyCommunicator}
 

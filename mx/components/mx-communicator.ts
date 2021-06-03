@@ -109,7 +109,7 @@ templateInputBox() {
 
    
   return html`
-<div class="grid-fixed-rows" style="margin-top:15px">
+<div class="grid-fixed-rows">
 
   <div class="whiteHeaderText elide ${this.isHidden ? "navyBk" : "activeBk"}" style="padding-left:10px;font-weight:900">
   ${this.actionList.length * 1 + 1}.
@@ -202,7 +202,7 @@ templateInputBox() {
     return html`
     ${!this.isDisabled && this.connections[this.socketKey] ? this.templateInputBox() : ""}
     ${!this.isDisabled ? this.templateListHeader() : ""}
-    <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this}></mx-actions>
+    <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this.connector}></mx-actions>
     `
   }
 }

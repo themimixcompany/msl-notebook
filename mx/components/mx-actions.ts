@@ -5,7 +5,7 @@
 
 //Lit Dependencies
 import { html, css, LitElement, HTMLTemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
@@ -53,6 +53,8 @@ export class mxActions extends LitElement {
     responseNames = ["open", "receive", "roundtrip", "close"];
     responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
 
+    //PRIVATE PROPERTIES
+
     //PUBLIC PROPERTIES (databinding) //////////
     @property() actionList: {}[] = [];
     @property() fullActions: {}[];
@@ -73,8 +75,8 @@ export class mxActions extends LitElement {
 
     //downloadJSON
     //Download a JSON object or array
-    downloadJSON = (content:{}|[], fileName) => {
-        this.downloadFile(JSON.stringify(content), fileName, "text/json" )
+    downloadJSON = (content: {} | [], fileName) => {
+        this.downloadFile(JSON.stringify(content), fileName, "text/json")
     }
 
     //downloadActionList
@@ -91,17 +93,18 @@ export class mxActions extends LitElement {
 
     //downloadActionItem
     //Download the action item w/o the notify component
-    downloadActionItem(actionItem:{}, name?: string) {
+    downloadActionItem(actionItem: {}, name?: string) {
 
         //Create an actionItem w/o notify property because it is a circular reference in JSON
-        let {...actionItemCopy} = actionItem;
+        let { ...actionItemCopy } = actionItem;
         delete actionItemCopy["notify"];
         this.downloadJSON(actionItemCopy, `${name ? name : `${this.actionNames[actionItem["type"]]}-${actionItem["to"]}`}.json`);
     }
 
-    //Show or Hide History
+    //Show or Hide Actions
     showOrHide() {
-        this.isHidden = !this.isHidden
+        let payload = "";
+        mx.socket.notify(this.connector, "actions-hidden", payload)
     }
 
     //Send to Socket (Used for re-sending messages from history)
@@ -116,16 +119,16 @@ export class mxActions extends LitElement {
         mx.socket.list[socketKey].mxSend(message, true, notifyElement, allActions);
     }
 
-     //changeCommunicator (Used for re-sending messages from history)
-     changeCommunicator(eventName,socketKey,message) {
+    //changeCommunicator (Used for re-sending messages from history)
+    changeCommunicator(eventName, socketKey, message) {
 
         let payload = {
             "socketKey": socketKey,
             "message": message
         }
 
-        mx.socket.notify(this.connector,"communicator-changed",payload)
-        
+        mx.socket.notify(this.connector, "communicator-changed", payload)
+
     }
 
     //Close socket
@@ -154,42 +157,18 @@ export class mxActions extends LitElement {
         }
 
         //Build column headers
-        let actionListHeader = html`
-        <div class="whiteHeaderText darkGreyBk">
-        
-         <mx-icon title="The order of actions and responses." class="fas fa-list-ol"></mx-icon>
-        </div>
-        
-        <div class="whiteHeaderText darkGreyBk" style="grid-column: 2 / span 4">
-       
-        
-        <div style="display: grid;grid-template-columns: 1fr 100px;gap: 3px;align:right;">
-                <div>
-                <mx-icon title=${this.name ? "All of the actions and responses." : "All actions and responses received."} class="fas fa-cogs"></mx-icon> actions
-                </div>
-            <div style="text-align:right">
-            
-                 <mx-icon @click=${() => this.showOrHide()} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} the actions."  class="fas fa-eye"></mx-icon>
+        //Build column headers
 
-                <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionList("actionList")}></mx-icon>
-            </div>
-
-
-                
-      
-        </div>
-        `
 
         //return all results   
         return html` 
             <div class=${this.isHidden ? "grid-fixed-rows" : "grid2"}>
-            ${!this.name ? actionListHeader : ""}
             ${itemTemplates}
             </div>
             `
     }
 
-    
+
 
     //Item
     templateItem(actionIndex, actionItem) {
@@ -223,71 +202,46 @@ export class mxActions extends LitElement {
 
         //Build summary action line
         let actionItemLine = html`
-        <div class="whiteHeaderText navyBk elide" style="padding-left:10px;font-weight:900">
-         ${actionItem.number}.
-        </div>
+            <div class="whiteHeaderText navyBk elide" style="padding-left:10px;font-weight:900">
+                ${actionItem.number}.
+            </div>
 
-        <div class="whiteHeaderText navyBk elide">
-             <mx-icon color=${toWireColor} title=${actionIconTitle} class="${this.actionIcons[actionItem.type]}"></mx-icon> ${this.actionNames[actionItem.type]}
-        </div>
+            <div class="whiteHeaderText navyBk elide">
+                <mx-icon color=${toWireColor} title=${actionIconTitle} class="${this.actionIcons[actionItem.type]}">
+                </mx-icon> 
+                ${this.actionNames[actionItem.type]}
+            </div>
 
-        <div class="whiteHeaderText navyBk elide">
-        ${actionItem.message ? html`
-        <mx-icon color=${toWireColor} title="The message itself." class="fas fa-envelope"></mx-icon> ${actionItem.message}` : ""}
-        </div>
+            <div class="whiteHeaderText navyBk elide">
+                ${actionItem.message ? html`
+                <mx-icon color=${toWireColor} title="The sent message." class="fas fa-envelope">
+                </mx-icon> 
+                ${actionItem.message}` : ""}
+            </div>
         
-
-        <div class="whiteHeaderText navyBk elide">
-        ${actionItem.message ? html`
-        <mx-icon color=${fromWireColor} title="The message itself." class="fas fa-envelope"></mx-icon> ${actionItem.response ? actionItem.response[0]["message"] : ""}` : ""}
-        </div>
-
+            <div class="whiteHeaderText navyBk elide">
+                ${actionItem.message ? html`
+                <mx-icon color=${fromWireColor} title="The received message." class="fas fa-envelope">
+                </mx-icon>
+                ${actionItem.response ? actionItem.response[0]["message"] : ""}` : ""}
+            </div>
      
-        <div>
             <div style="display: grid;grid-template-columns: 1fr 80px;gap: 3px;">
 
                 <div class="whiteHeaderText navyBk elide">
-                    <mx-icon color=${toWireColor} title="The socket an action took place on." class="fas fa-router"></mx-icon> ${actionItem.to}
+                    <mx-icon color=${toWireColor} title="The socket an action took place on." class="fas fa-router">
+                    </mx-icon>
+                    ${actionItem.to}
                 </div>
-            
+        
                 <div class="whiteHeaderText navyBk elide" style="text-align:right;">
-    
-                    <mx-icon @click=${() => this.showOrHide()} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} the details."  class="fas fa-eye"></mx-icon>
-
+                ${this.name ? html`
+                    <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} the details for this action."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+                    ` : ""}
                     <mx-icon title="Download this ${this.actionNames[actionItem.type]} action and all its responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionItem(actionItem)}></mx-icon>
                 </div>
             </div>
-        </div>
-        `
-        //Build column headers
-        let actionItemHeader = html`
-        <div class="whiteHeaderText darkGreyBk" style="margin-top:15px">
-         <mx-icon title="The order of responses." class="fas fa-list-ol"></mx-icon>
-        </div>
-
-        <div class="whiteHeaderText darkGreyBk" style="margin-top:15px">
-            <div>
-                <mx-icon title="Responses to this action." class="fas fa-cogs"></mx-icon> actions
-            </div
-            <div>
-                
-            </div>
-        </div>
-
-        <div class="whiteHeaderText darkGreyBk" style="margin-top:15px">
-        <mx-icon title="The message itself." class="fas fa-envelope"></mx-icon> message
-        </div>
-
-        
-        <div class="whiteHeaderText darkGreyBk" style="margin-top:15px">
-        <mx-icon title="The socket a response was received from." class="fas fa-router"></mx-icon> from
-        </div>
-
-        <div class="whiteHeaderText darkGreyBk" style="margin-top:15px">
-        <mx-icon title="The socket an action or message was sent to." class="fas fa-router"></mx-icon> to
-        </div>
-
-    
+ 
         `
 
         //Build single action item template
@@ -306,7 +260,7 @@ export class mxActions extends LitElement {
 
         <div class="greyBk">
         ${actionItem.message ? html`
-            <a @click=${() => this.changeCommunicator("setup",actionItem.to,actionItem.message)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
+            <a @click=${() => this.changeCommunicator("setup", actionItem.to, actionItem.message)} title="Resend this message to ${actionItem.to}.">${actionItem.message}</a>
             ` : ""}
         </div>
 
@@ -327,7 +281,6 @@ export class mxActions extends LitElement {
         }
 
         return html`
-        ${!this.isHidden && actionIndex == 0 ? actionItemHeader : ""}
         ${!this.isHidden || this.name ? actionItemLine : ""}
         ${!this.isHidden ? responseTemplates : ""}
         `
@@ -354,9 +307,8 @@ export class mxActions extends LitElement {
         }
         if (responseItem.type == 1) {
             if (responseItem.from == actionItem.to) {
-            responseIconTitle = "The socket sent you a message."
-            } else
-            {responseIconTitle = "An additional socket sent you a message."}
+                responseIconTitle = "The socket sent you a message."
+            } else { responseIconTitle = "An additional socket sent you a message." }
         }
         if (responseItem.type == 2) {
             responseIconTitle = "The socket roundtripped a message that you relayed."
@@ -376,7 +328,7 @@ export class mxActions extends LitElement {
 
             <div class="greyBk">
             ${responseItem.message ? html`
-            <a @click=${() => this.changeCommunicator("setup",responseItem.from,responseItem.message)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
+            <a @click=${() => this.changeCommunicator("setup", responseItem.from, responseItem.message)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
             ` : ""}
             </div>
 
@@ -399,10 +351,57 @@ export class mxActions extends LitElement {
 
     //Show this component on screen
     render() {
-        if (this.actionList[0]) {
+
+        //BEFORE RENDER
+
+        let actionListHeader = html`
+        <div class="whiteHeaderText darkGreyBk">
+         <mx-icon title="The order of responses." class="fas fa-list-ol"></mx-icon>
+        </div>
+
+        <div class="whiteHeaderText darkGreyBk">
+            <div>
+                <mx-icon title="Responses to this action." class="fas fa-cogs"></mx-icon> actions
+            </div
+            <div>
+                
+            </div>
+        </div>
+
+        <div class="whiteHeaderText darkGreyBk">
+        <mx-icon title="The message itself." class="fas fa-envelope"></mx-icon> message
+        </div>
+
+        
+        <div class="whiteHeaderText darkGreyBk">
+        <mx-icon title="The socket a response was received from." class="fas fa-router"></mx-icon> from
+        </div>
+
+        <div style="display: grid;grid-template-columns: 1fr 80px;gap: 3px;">
+
+                <div class="whiteHeaderText darkGreyBk elide">
+                    <mx-icon title="The socket an action took place on." class="fas fa-router">
+                    </mx-icon>
+                    to
+                </div>
+        
+                <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
+                ${true ? html`
+                    <mx-icon @click=${() => this.showOrHide() } style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} all actions."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+                    ` : ""}
+                    <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionList("actionList.json")}></mx-icon>
+                </div>
+            </div>
+        `
+
         return html`
-            ${this.templateList()}
+        
+            ${this.actionList[0] && this.actionList[0]["number"] == 1 ? html`
+            <div class="grid-fixed-rows" style="margin-bottom:3px">
+                ${actionListHeader}
+            </div>
+            ` : ""}
+            ${this.actionList[0] ? this.templateList() : ""}
          `;
-        }
     }
 }
