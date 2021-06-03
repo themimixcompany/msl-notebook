@@ -172,7 +172,7 @@ export class mxConnect extends LitElement {
       //Get the action item itself.
       let actionItem = this.actionList[actionIndex];
 
-      //Hide type 0 (connect) communicators by default.
+      //Hide type 0 connect communicators by default.
       let isHidden = false;
       if (actionItem["type"] == 0) {
         isHidden = true;
@@ -296,12 +296,12 @@ export class mxConnect extends LitElement {
     </div>
 
      <br>
-    
+     <mx-actions .isHidden=${true} .actionList=${this.actionList}></mx-actions>
     ${this.communicators}
     ${this.emptyCommunicator}
 
     <br>
-    <mx-actions .isHidden=${true} .actionList=${this.actionList}></mx-actions>
+   
   
   `;
   }
