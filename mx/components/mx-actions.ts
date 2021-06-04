@@ -173,16 +173,16 @@ export class mxActions extends LitElement {
         //Setup icon title text
         let actionIconTitle = "";
         if (actionItem.type == 0) {
-            actionIconTitle = "You connected to a socket."
+            actionIconTitle = `You connected to ${actionItem.to}.`
         }
         if (actionItem.type == 1) {
-            actionIconTitle = "You sent a message."
+            actionIconTitle = `You sent a message to ${actionItem.to}.`
         }
         if (actionItem.type == 2) {
-            actionIconTitle = "A message you sent was relayed to another socket."
+            actionIconTitle = `A message you sent on ${actionItem.from} was relayed to ${actionItem.to}.`
         }
         if (actionItem.type == 3) {
-            actionIconTitle = "You disconnected from a socket."
+            actionIconTitle = `You disconnected from ${actionItem.to}.`
         }
 
 
@@ -190,7 +190,7 @@ export class mxActions extends LitElement {
         let fromSocketKey = mx.socket.list[actionItem.from];
         let toSocketKey = mx.socket.list[actionItem.to];
       
-        //Setup for summary line 2nd message (in "from" column)
+        //Setup for summary 2nd message (in "from" column)
         let secondMessage: string;
 
         //Look for first "receive" response
@@ -232,13 +232,13 @@ export class mxActions extends LitElement {
                 ${actionItem.message ? html`
                 <mx-icon color=${toWireColor} title="The sent message." class="fas fa-envelope">
                 </mx-icon> 
-                ${actionItem.message}` : ""}
+                <a title="Resend this message to ${actionItem.to}" @click=${() => this.sendToSocket(actionItem.to,actionItem.message,this.connector)}>${actionItem.message}` : ""}</a>
                 
             </div>
         
             <div class="whiteHeaderText veryDarkGreyBk elide">
                 ${secondMessage ? html`
-                <mx-icon color=${fromWireColor} title="The message received from the action." class=${this.responseIcons[1]}>
+                <mx-icon color=${fromWireColor} title="The message received from the ${this.actionNames[actionItem.type]}." class=${this.responseIcons[1]}>
                 </mx-icon>
                 ${secondMessage}` : ""}
             </div>
@@ -317,18 +317,18 @@ export class mxActions extends LitElement {
 
         let responseIconTitle = "";
         if (responseItem.type == 0) {
-            responseIconTitle = "The socket responded that the connection is open."
+            responseIconTitle = `${responseItem.from} responded that the connection is open.`
         }
         if (responseItem.type == 1) {
             if (responseItem.from == actionItem.to) {
-                responseIconTitle = "The socket sent you a message."
-            } else { responseIconTitle = "An additional socket sent you a message." }
+                responseIconTitle = `${responseItem.from} sent you a message in response.`
+            } else { responseIconTitle = `${responseItem.from} sent you a message separately from ${actionItem.to}.` }
         }
         if (responseItem.type == 2) {
-            responseIconTitle = "The socket roundtripped a message that you relayed."
+            responseIconTitle = `The ${responseItem.from} socket responded to the message that you relayed from ${responseItem.to}.`
         }
         if (responseItem.type == 3) {
-            responseIconTitle = "The socket responded that the connection is closed."
+            responseIconTitle = `${responseItem.from} responded that the connection is closed.`
         }
 
         let responseItemValues = html`
@@ -342,7 +342,7 @@ export class mxActions extends LitElement {
 
             <div class="greyBk">
             ${responseItem.message ? html`
-            <a @click=${() => this.changeCommunicator("setup", responseItem.from, responseItem.message)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
+            <a @click=${() => this.sendToSocket(responseItem.from,responseItem.message,this.connector)} title="Resend this message to ${responseItem.from}.">${responseItem.message}</a>
             ` : ""}
             </div>
 
