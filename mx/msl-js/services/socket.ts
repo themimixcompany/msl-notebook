@@ -104,7 +104,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     for (let oneActionIndex in actionList) {
       if (actionList[oneActionIndex]["notify"] == actionList[actionIndex]["notify"]) {
         messageActionList.push(actionList[oneActionIndex]);
-      } 
+      }
     }
 
     // //For relay actions, include the original send
@@ -120,14 +120,14 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     } else {
       notify(actionList[actionIndex]["notify"], "message-received", messageActionList);
     }
-    
+
 
     //Detect messages from opening
     let isOpeningMessage = false;
-    if (actionIndex > 0 ) { 
-       if (actionList[actionIndex]["type"] == action.connect) {
-         isOpeningMessage = true;
-       }
+    if (actionIndex > 0) {
+      if (actionList[actionIndex]["type"] == action.connect) {
+        isOpeningMessage = true;
+      }
     }
 
     //Perform relay if appropriate
@@ -137,7 +137,7 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       let toSocket = connections[socket.relayTo];
       //Sent outgoing relay message
       if (!isOpeningMessage) {
-      sendSingleMessage(toSocket, receivedMessage, echo, socket.key, notifyElement, actionList)
+        sendSingleMessage(toSocket, receivedMessage, echo, socket.key, notifyElement, actionList)
       }
     }
 
@@ -256,7 +256,7 @@ const addMxFunctions = (socket: WebSocket) => {
     mxSend: {},
     mxClose: {}
   }
-  
+
   //Access the socket through the custom interface.
   let thisSocket = socket as mxSocket;
 
@@ -684,24 +684,31 @@ const connect = function (socketURL, notifyElement?: HTMLElement, actionList?: {
 //recordAction
 //Action recording
 //Record a new action. Notify of all responses to the action.
-const recordAction = function (actionList: {}[], type, to?: string, from?: string, message: string = "", notifyElement?: HTMLElement) {
+const recordAction = function (actionList: {}[], type, to?: string, from?: string, message?, notifyElement?: HTMLElement) {
 
   //Assign an action number (for display/download)
-  let actionNumber = actionList.length + 1
+  let number = actionList.length + 1
 
   //Find types for to and from ports if provided and indexed (not added later)
-  let toPortType = to && mx.machine.index[to] ? mx.machine.index[to].type : "text";
-  let fromPortType = from && mx.machine.index[from] ? mx.machine.index[from].type : "text";
+  let toPortType = to && mx.machine.index[to] ? mx.machine.index[to].type : undefined;
+  let fromPortType = from && mx.machine.index[from] ? mx.machine.index[from].type : undefined;
+
+  //Create plain-English summary
+  //Begin with capital letter
+  let [firstLetter, ...restOfWord] = [...actionNames[type]]
+  let summary = `${firstLetter.toUpperCase()}${restOfWord.join("")}${message ? " " + message : ""} to ${to}.`
 
   //Create a new action from the passed parameters.
   let newAction = {
-    "number": actionNumber,
-    "type": type,
-    "to": to,
-    "toPortType": toPortType,
-    "from": from,
-    "fromPortType": fromPortType,
-    "message": message,
+    number,
+    "name": actionNames[type],
+    summary,
+    type,
+    to,
+    toPortType,
+    from,
+    fromPortType,
+    message,
     "notify": notifyElement
   }
 
@@ -759,19 +766,29 @@ const recordResponse = function (actionList: {}[], actionIndex, type, to, from, 
     return false;
   }
 
-    //Find two and from port types
-    let toPortType = to && mx.machine.index[to] ? mx.machine.index[to].type : undefined;
-    let fromPortType = from && mx.machine.index[from] ? mx.machine.index[from].type : undefined;
-  
+  //Assign response number (for display/download)
+  let number = actionItem["response"] ? actionItem["response"].length + 1 : 1
+
+  //Find two and from port types
+  let toPortType = to && mx.machine.index[to] ? mx.machine.index[to].type : undefined;
+  let fromPortType = from && mx.machine.index[from] ? mx.machine.index[from].type : undefined;
+
+  //Create plain-English summary
+  //Begin with capital letter
+  let [firstLetter, ...restOfWord] = [...responseNames[type]]
+  let summary = `${firstLetter.toUpperCase()}${restOfWord.join("")}${message ? " " + message : ""} from ${from}.`
 
   //Create new response item
   let newResponse = {
-    "type": type,
-    "to": to,
-    "toPortType": toPortType,
-    "from": from,
-    "fromPortType": fromPortType,
-    "message": message
+    number,
+    "name": responseNames[type],
+    summary,
+    type,
+    to,
+    toPortType,
+    from,
+    fromPortType,
+    message
   }
 
   //No response list? Create it.

@@ -45,19 +45,7 @@ export class mxActions extends LitElement {
 
     //PRIVATE PROPERTIES
 
-    //Action Names & Icons
-    actionNames = ["connect", "send", "relay", "disconnect"];
-    actionIcons = ["fas fa-plug", "fas fa-keyboard", "fas fa-chart-network", "far fa-plug"];
-
-    //Response Names & Icons
-    responseNames = ["open", "receive", "roundtrip", "close"];
-    responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
-
-    //Type Colors
-    localMslColor = "#F65314";
-    localAdminColor = "#FFBB00";
-    remoteMslColor = "#00A1F1";
-    remoteAdminColor = "#7CBB00";
+  
 
     //PRIVATE PROPERTIES
 
@@ -68,33 +56,16 @@ export class mxActions extends LitElement {
     @property() name: string;
     @property() isHidden: boolean = false;
 
-
-    //downloadFile
-    //Download a file of arbitrary type
-    downloadFile = (content, fileName, contentType) => {
-        const a = document.createElement("a");
-        const file = new Blob([content], { type: contentType });
-        a.href = URL.createObjectURL(file);
-        a.download = fileName;
-        a.click();
-    }
-
-    //downloadJSON
-    //Download a JSON object or array
-    downloadJSON = (content: {} | [], fileName) => {
-        this.downloadFile(JSON.stringify(content), fileName, "text/json")
-    }
-
     //downloadActionList
     //Download the action list w/o the notify component
-    downloadActionList(name: string) {
+    downloadActionList(actionList, name:string = "actionList") {
 
         //Create an actionList w/o notify property because it is a circular reference in JSON
-        let [...actionListCopy] = this.actionList
+        let [...actionListCopy] = actionList
         for (let oneActionIndex in actionListCopy) {
             delete actionListCopy[oneActionIndex]["notify"];
         }
-        this.downloadJSON(actionListCopy, `${name ? name : "actionList"}.json`);
+        downloadJSON(actionListCopy, `${name}.json`);
     }
 
     //downloadActionItem
@@ -104,7 +75,7 @@ export class mxActions extends LitElement {
         //Create an actionItem w/o notify property because it is a circular reference in JSON
         let { ...actionItemCopy } = actionItem;
         delete actionItemCopy["notify"];
-        this.downloadJSON(actionItemCopy, `${name ? name : `${this.actionNames[actionItem["type"]]}-${actionItem["to"]}`}.json`);
+        downloadJSON(actionItemCopy, `${name ? name : `${actionNames[actionItem["type"]]}-${actionItem["to"]}`}.json`);
     }
 
     //Show or Hide Actions
@@ -168,7 +139,7 @@ export class mxActions extends LitElement {
     templateItem(actionIndex, actionItem) {
 
         //Find icon for type
-        let typeIcon = this.actionIcons[actionItem.type]
+        let typeIcon = actionIcons[actionItem.type]
 
         //Setup icon title text
         let actionIconTitle = "";
@@ -212,8 +183,8 @@ export class mxActions extends LitElement {
 
   
         //Setup Colors
-        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
-        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
+        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
 
 
         //Build summary action line
@@ -223,9 +194,9 @@ export class mxActions extends LitElement {
             </div>
 
             <div class="whiteHeaderText veryDarkGreyBk elide">
-                <mx-icon color=${toWireColor} title=${actionIconTitle} class="${this.actionIcons[actionItem.type]}">
+                <mx-icon color=${toWireColor} title=${actionIconTitle} class="${actionIcons[actionItem.type]}">
                 </mx-icon> 
-                ${this.actionNames[actionItem.type]}
+                ${actionNames[actionItem.type]}
             </div>
 
             <div class="whiteHeaderText veryDarkGreyBk elide">
@@ -238,7 +209,7 @@ export class mxActions extends LitElement {
         
             <div class="whiteHeaderText veryDarkGreyBk elide">
                 ${secondMessage ? html`
-                <mx-icon color=${fromWireColor} title="The message received from the ${this.actionNames[actionItem.type]}." class=${this.responseIcons[1]}>
+                <mx-icon color=${fromWireColor} title="The message received from the ${actionNames[actionItem.type]}." class=${responseIcons[1]}>
                 </mx-icon>
                 ${secondMessage}` : ""}
             </div>
@@ -251,9 +222,9 @@ export class mxActions extends LitElement {
     
             <div class="whiteHeaderText veryDarkGreyBk elide" style="text-align:right;">
             ${this.name ? html`
-                <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} action ${actionItem.number}: ${this.actionNames[actionItem.type]}, and its responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+                <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} action ${actionItem.number}: ${actionNames[actionItem.type]}, and its responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
                 ` : ""}
-                <mx-icon title="Download action ${actionItem.number}: ${this.actionNames[actionItem.type]}, and its responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionItem(actionItem)}></mx-icon>
+                <mx-icon title="Download action ${actionItem.number}: ${actionNames[actionItem.type]}, and its responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionItem(actionItem)}></mx-icon>
             </div>
  
         `
@@ -264,7 +235,7 @@ export class mxActions extends LitElement {
         ${actionItem.number}
         </div>
         <div class="greyBk">
-        <mx-icon color=${toWireColor} title=${actionIconTitle} class="${this.actionIcons[actionItem.type]}"></mx-icon> ${this.actionNames[actionItem.type]}
+        <mx-icon color=${toWireColor} title=${actionIconTitle} class="${actionIcons[actionItem.type]}"></mx-icon> ${actionNames[actionItem.type]}
         </div>
        
         <div class="greyBk">
@@ -310,8 +281,8 @@ export class mxActions extends LitElement {
         let toSocketKey = mx.socket.list[responseItem.to];
 
         //Setup Colors
-        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
-        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
+        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
 
         //Build single response template
 
@@ -336,7 +307,7 @@ export class mxActions extends LitElement {
             ${actionItem.number}.${responseNumber}
             </div>
             <div class="greyBk">
-            <mx-icon color=${fromWireColor} title=${responseIconTitle} class=${responseItem.from == actionItem.to ? this.responseIcons[responseItem.type] : "fas fa-comment-alt-plus"}></mx-icon> ${this.responseNames[responseItem.type]}
+            <mx-icon color=${fromWireColor} title=${responseIconTitle} class=${responseItem.from == actionItem.to ? responseIcons[responseItem.type] : "fas fa-comment-alt-plus"}></mx-icon> ${responseNames[responseItem.type]}
             </div>
        
 
@@ -404,7 +375,7 @@ export class mxActions extends LitElement {
             ${true ? html`
                 <mx-icon @click=${() => this.showOrHide() } style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
                 ` : ""}
-                <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionList("actionList.json")}></mx-icon>
+                <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => this.downloadActionList(this.fullActions)}></mx-icon>
             </div>
 
         `

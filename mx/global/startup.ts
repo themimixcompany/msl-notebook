@@ -28,12 +28,54 @@
 // No Liability
 // As far as the law allows, this software comes as is, without any warranty or condition, and no contributor will be liable to anyone for any damages related to this software or this license, under any kind of legal claim.
 
-//GLOBAL CONSTANTS
+// GLOBAL CONSTANTS //////////
 // Everything in this file is global to the entire application.
 
 const mslNotebook = {
-    version: "1.15.1"
+    version: "1.15.2"
 };
+
+// GLOBAL FUNCTIONS //////////
+// These functions are available to all components.
+
+// GLOBAL ICONS 
+
+//Action Names & Icons
+const actionNames = ["connect", "send", "relay", "disconnect"];
+const actionIcons = ["fas fa-plug", "fas fa-keyboard", "fas fa-chart-network", "far fa-plug"];
+
+//Response Names & Icons
+const responseNames = ["open", "receive", "roundtrip", "close"];
+const responseIcons = ["fas fa-door-open", "fas fa-comment-alt-check", "fas fa-comment-alt-dots", "fas fa-door-closed"];
+
+// GLOBAL COLORS
+
+//Type Colors
+const localMslColor = "#F65314";
+const localAdminColor = "#FFBB00";
+const remoteMslColor = "#00A1F1";
+const remoteAdminColor = "#7CBB00";
+
+// FILE DOWNLOADING //////////
+// Opens a browser file download dialog box for any content.
+
+//downloadFile
+//Download a file of arbitrary type
+const downloadFile = (content, fileName, contentType) => {
+    const a = document.createElement("a");
+    const file = new Blob([content], { type: contentType });
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+}
+
+//downloadJSON
+//Download a JSON object or array
+const downloadJSON = (content: {} | [], fileName) => {
+    downloadFile(JSON.stringify(content), fileName, "text/json")
+}
+
+// START APPLICATION //////////
 
 //Clear console
 console.clear();

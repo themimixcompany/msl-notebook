@@ -54,18 +54,12 @@ export class mxConnect extends LitElement {
   @state() isGroupsHidden = false;
   @state() isMachinesHidden = false;
 
-  //Type Colors
-  localMslColor = "#F65314";
-  localAdminColor = "#FFBB00";
-  remoteMslColor = "#00A1F1";
-  remoteAdminColor = "#7CBB00";
-
   // PUBLIC PROPERTIES /////////
 
   @property() machines: {} = mx.machine.machines;
   @property() connections: {} = {};
   @property() actionList: {}[] = [];
- 
+
   //Key pressed in URL input box? Check for Enter.
   urlKeyDown(event: Event) {
 
@@ -85,8 +79,8 @@ export class mxConnect extends LitElement {
     mx.debug.log("available machines updated");
     this.machines = mx.machine.machines;
 
-     //Display an empty communicator
-     this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
+    //Display an empty communicator
+    this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0], [])
   }
 
   //Status changed
@@ -94,8 +88,8 @@ export class mxConnect extends LitElement {
     mx.debug.log("active connections updated");
     this.connections = receivedEvent.detail;
 
-      //Display an empty communicator
-      this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
+    //Display an empty communicator
+    this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0], [])
   }
 
   //Actions changed
@@ -106,7 +100,7 @@ export class mxConnect extends LitElement {
     this.communicators = this.templateCommunicators();
 
     //Display an empty communicator
-    this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
+    this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0], [])
   }
 
   //Show or hide actions
@@ -128,8 +122,8 @@ export class mxConnect extends LitElement {
       "message": message
     }
 
-     //If the requested socket is live...
-     if (this.connections[socketKey]) {
+    //If the requested socket is live...
+    if (this.connections[socketKey]) {
 
       //Retemplate it with new values
       this.emptyCommunicator = this.templateSingleCommunicator(socketKey);
@@ -155,19 +149,19 @@ export class mxConnect extends LitElement {
 
   //Create HTML Templates
 
-  //Machine grid. Shows all machines.
-  templateMachineGrid() {
+  //Shows all machines.
+  templateMachines() {
     return html`
     ${Object.keys(this.machines).map(machineKey => {
 
       return html`
 
       <div class="greyBk" style="font-weight:900">
-      <mx-icon class="fas fa-plug" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? this.localMslColor : this.remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
+      <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-plug" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
       </div>
 
       <div class="greyBk elide">
-        <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? this.localMslColor : this.remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
+        <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
         <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span style="font-weight:600">${machineKey}</span></a>
       </div>
 
@@ -175,7 +169,7 @@ export class mxConnect extends LitElement {
 
         ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
         <div class="greyBk">
-          <mx-icon @click=${() => this.connectPort(machineKey, portKey)}  title="Connect to ${portKey} on ${machineKey}." class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? this.localMslColor : this.remoteMslColor : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''} style="cursor:pointer;"></mx-icon>
+          <mx-icon @click=${() => this.connectPort(machineKey, portKey)}  title="Connect to ${portKey} on ${machineKey}." class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? localAdminColor : remoteAdminColor : ''} style="cursor:pointer;"></mx-icon>
           <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to ${portKey} on ${machineKey}." class=${this.connections[`${machineKey}-${portKey}`] ? "active" : ""} >${portKey}</a>
         </div>
         `)}
@@ -186,6 +180,45 @@ export class mxConnect extends LitElement {
     `})}
     `
   }
+
+    //Groups template. Draws one panel for each group.
+    templateGroups() {
+
+      return html`
+      ${mx.machine.groupKeys.map(groupKey => {
+  
+        //Setup group icon
+        let groupIcon = mx.machine.groups[groupKey].ports ? "fas fa-project-diagram" : mx.machine.groups[groupKey].type ? "fas fa-network-wired" : "fas fa-object-ungroup"
+  
+        //Setup group tooltip
+        let groupTooltip = mx.machine.groups[groupKey].ports ? `Connect to the ${groupKey} group with the specific relay pairs defined there.` : mx.machine.groups[groupKey].type ? `Connect to the ${groupKey} group which defines relays between ${mx.machine.groups[groupKey].type} ports.` : `Connect to the ${groupKey} group which has no relays.`
+  
+        return html`
+        <div class="machine greyBk">
+        <mx-icon @click=${() => this.connectGroup(groupKey)} title=${groupTooltip} class="fas fa-plug" style="cursor:pointer;"></mx-icon>
+        </div>
+  
+        <div class="machine greyBk elide">
+          <mx-icon @click=${() => this.connectGroup(groupKey)} title=${groupTooltip} class=${groupIcon} style="cursor:pointer;"></mx-icon>
+          <a @click=${() => this.connectGroup(groupKey)} title=${groupTooltip}>
+          <span style="font-weight:600">${groupKey}</span></a>
+        </div>
+  
+        <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); grid-auto-rows: 28pt;">
+          ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
+          <div class="machine greyBk">
+            <mx-icon title="Use the group link to connect to all ports on these machines." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : localAdminColor : ''}></mx-icon>
+            ${machineKey}
+          </div>
+          `)}
+        </div>
+  
+        <div class="machine greyBk">
+         
+        </div>
+      `})}
+      `
+    }
 
   //Template all communicators. Draws one communicator for each action item.
   templateCommunicators() {
@@ -230,7 +263,7 @@ export class mxConnect extends LitElement {
         if (actionItem["type"] == 1 && this.actionList[lastActionIndex]["type"] == 2) {
           isCommunicatorHidden = false;
         }
-      
+
       }
 
       //Add a disabled communicator w/ its action information.
@@ -258,39 +291,6 @@ export class mxConnect extends LitElement {
   }
 
 
-  //Groups template. Draws one panel for each group.
-  templateGroups() {
-
-    return html`
-    ${mx.machine.groupKeys.map(groupKey => {
-
-      return html`
-      <div class="machine greyBk">
-      <mx-icon class="fas ${mx.machine.groups[groupKey].ports ? "fa-project-diagram" : mx.machine.groups[groupKey].relay ? "fa-network-wired" : "fa-object-ungroup"}" style="cursor:pointer;"></mx-icon>
-      </div>
-
-      <div class="machine greyBk elide">
-        <mx-icon @click=${() => this.connectGroup(groupKey)} title="Connect to all machines in the ${groupKey} group." class="fas ${mx.machine.groups[groupKey].ports ? "fa-project-diagram" : mx.machine.groups[groupKey].relay ? "fa-network-wired" : "fa-object-ungroup"}" style="cursor:pointer;"></mx-icon>
-        <a @click=${() => this.connectGroup(groupKey)} title="Connect to all machines in the ${groupKey} group.">
-        <span style="font-weight:600">${groupKey}</span></a>
-      </div>
-
-      <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); grid-auto-rows: 28pt;">
-        ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
-        <div class="machine greyBk">
-          <mx-icon class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? this.localMslColor : this.localAdminColor : ''}></mx-icon>
-          ${machineKey}
-        </div>
-        `)}
-      </div>
-
-      <div class="machine greyBk">
-       
-      </div>
-    `})}
-    `
-  }
-
   //Visual key template. Explains icons and colors.
   templateVisualKey() {
     return html`
@@ -315,8 +315,8 @@ export class mxConnect extends LitElement {
   templateConnectURL() {
     return html`
     <div class="greyBk" style="font-weight:900">
-      <mx-icon class="fas fa-arrow-alt-right"></mx-icon>
-      <mx-icon class="fas fa-server"></mx-icon>
+      <mx-icon title="Add a new machine." class="fas fa-arrow-alt-right"></mx-icon>
+      <mx-icon title="Type the URL in the box and press Enter to connect." class="fas fa-server"></mx-icon>
     </div>
 
     <div class="greyBk"  style="grid-column: 2/ span 5;padding-left:0px;padding-top:0px;padding-right:6px;">
@@ -351,7 +351,7 @@ export class mxConnect extends LitElement {
 
     let machineListHeader = html`
     <div class="whiteHeaderText darkGreyBk">
-     <mx-icon class="fas fa-list-ul"></mx-icon>
+     <mx-icon title="Machines are shown in the order defined." class="fas fa-list-ul"></mx-icon>
     </div>
 
     <div class="whiteHeaderText darkGreyBk">
@@ -364,13 +364,13 @@ export class mxConnect extends LitElement {
     </div>
 
     <div class="whiteHeaderText darkGreyBk" style="grid-column: 3/span 3">
-    <mx-icon title="Ports available on the machine." class="fas fa-router"></mx-icon> ports
+    <mx-icon title="Machines which are part of the group." class="fas fa-router"></mx-icon> ports
     </div>
 
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
         ${true ? html`
-            <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden } style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+            <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden} style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
             ` : ""}
             <mx-icon class="fas fa-plus-square" style="cursor:pointer;opacity:0"></mx-icon>
         </div>
@@ -379,12 +379,12 @@ export class mxConnect extends LitElement {
 
     let groupListHeader = html`
     <div class="whiteHeaderText darkGreyBk">
-     <mx-icon class="fas fa-list-ul"></mx-icon>
+     <mx-icon title="Groups are shown in the order defined." class="fas fa-list-ul"></mx-icon>
     </div>
 
     <div class="whiteHeaderText darkGreyBk">
         <div>
-            <mx-icon title="Available groups." class="fas fa-server"></mx-icon> groups
+            <mx-icon title="Available groups." class="fas fa-network-wired"></mx-icon> groups
         </div
         <div>
             
@@ -398,7 +398,7 @@ export class mxConnect extends LitElement {
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
         ${true ? html`
-            <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden } style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} groups."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+            <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden} style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} groups."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
             ` : ""}
             <mx-icon class="fas fa-plus-square" style="cursor:pointer;opacity:0"></mx-icon>
         </div>
@@ -414,7 +414,7 @@ export class mxConnect extends LitElement {
 
     <div class="grid-fixed-rows" style="margin-top:3px;">
       ${machineListHeader}
-      ${!this.isMachinesHidden ? this.templateMachineGrid() : ""}
+      ${!this.isMachinesHidden ? this.templateMachines() : ""}
       ${this.templateConnectURL()}
     </div>
 

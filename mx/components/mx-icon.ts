@@ -99,6 +99,12 @@ export class mxIcon extends LitElement {
         //Destructure class to find icon set and name
         let [set, name] = classAttribute.split(" ");
 
+        //Default to "fas" set if not specified
+        if (name == undefined) {
+            name = set;
+            set = "fas";
+        }
+
         //Retrieve icon from set by regular or alternate name
         let matchingIcon: any[];
 
