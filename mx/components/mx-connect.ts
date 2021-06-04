@@ -47,12 +47,12 @@ export class mxConnect extends LitElement {
 
   // PRIVATE PROPERTIES //////////
 
-  
-
   @state() isActionsHidden: boolean = true;
   @state() emptyCommunicator;
   @state() url: string = "";
   @state() communicators;
+  @state() isGroupsHidden = false;
+  @state() isMachinesHidden = false;
 
   //Type Colors
   localMslColor = "#F65314";
@@ -316,14 +316,10 @@ export class mxConnect extends LitElement {
     return html`
     <div class="greyBk" style="font-weight:900">
       <mx-icon class="fas fa-arrow-alt-right"></mx-icon>
-      <mx-icon class="fas fa-plug"></mx-icon>
+      <mx-icon class="fas fa-server"></mx-icon>
     </div>
-    
-    <div class="greyBk" style="font-weight:600">
-    <mx-icon class="fas fa-lightbulb"></mx-icon> new
-    </div> 
 
-    <div class="greyBk"  style="grid-column: 3/ span 4;padding-left:0px;padding-top:0px;padding-right:6px;">
+    <div class="greyBk"  style="grid-column: 2/ span 5;padding-left:0px;padding-top:0px;padding-right:6px;">
     <input @keydown=${this.urlKeyDown} placeholder="echo.websocket.org" style="width:100%">
     </div>
 
@@ -374,7 +370,7 @@ export class mxConnect extends LitElement {
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
         ${true ? html`
-            <mx-icon @click=${() => this.showOrHide() } style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+            <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden } style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
             ` : ""}
             <mx-icon class="fas fa-plus-square" style="cursor:pointer;opacity:0"></mx-icon>
         </div>
@@ -402,7 +398,7 @@ export class mxConnect extends LitElement {
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
         ${true ? html`
-            <mx-icon @click=${() => this.showOrHide() } style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+            <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden } style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} groups."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
             ` : ""}
             <mx-icon class="fas fa-plus-square" style="cursor:pointer;opacity:0"></mx-icon>
         </div>
@@ -413,19 +409,18 @@ export class mxConnect extends LitElement {
 
     <div class="grid-fixed-rows">
       ${groupListHeader}
-      ${this.templateGroups()}
+      ${!this.isGroupsHidden ? this.templateGroups() : ""}
     </div>
 
     <div class="grid-fixed-rows" style="margin-top:3px;">
-    ${machineListHeader}
-    ${this.templateMachineGrid()}
-    ${this.templateConnectURL()}
+      ${machineListHeader}
+      ${!this.isMachinesHidden ? this.templateMachineGrid() : ""}
+      ${this.templateConnectURL()}
     </div>
 
     <br>
     ${this.communicators}
     ${this.emptyCommunicator}
-
     <br>
    
   

@@ -826,7 +826,7 @@ const create = function (socketURL, notifyElement?: HTMLElement) {
   let [machineKey, portNumber] = socketURLParts;
 
   //Add "port" to portKey (allows for blank default/80)
-  const portKey = `port${portNumber ? portNumber : 80}`;
+  const portKey = `port-${portNumber ? portNumber : 80}`;
 
   //Create new machine entry
   let newMachine = {
