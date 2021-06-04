@@ -255,7 +255,7 @@ const msl = (actionList:{}[]) => {
 
     //Test if this is an MSL send
     if (actionItem["type"] == 1 && actionItem["toPortType"] == "msl") {
-      
+
       //Remember the outgoing message
       mslMessage = actionItem["message"];
 
@@ -275,10 +275,13 @@ const msl = (actionList:{}[]) => {
           adminResponse = responseItem.message;
         }
       }
-    }
 
-    //Add messages to MSL text
-    mslText = `${mslText}${mslMessage} => ${mslResponse} => ${adminResponse}\n`
+      //Add messages to MSL text
+      mslText = `${mslText ? mslText : ""}${mslMessage} => ${mslResponse} => ${adminResponse}`
+      
+    }
+    
+    
   }
 
   //Return final MSL text

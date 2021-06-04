@@ -174,10 +174,19 @@ export class mxActions extends mxElement {
             </div>
     
             <div class="whiteHeaderText veryDarkGreyBk elide" style="text-align:right;">
-            ${this.name ? html`
+            
+
+                ${(actionItem.type == 1 || actionItem.type == 2) && actionItem.toPortType == "msl" ? html`
+                <a title="Download this action's MSL text." @click=${() => this.downloadMSL([actionItem])}><img src="mx/svg/M Trademark White.svg" height="18"></a>
+                 ` : ""}
+            
                 <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} action ${actionItem.number}: ${actionNames[actionItem.type]}, and its responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
-                ` : ""}
+
                 <mx-icon title="Download action ${actionItem.number}: ${actionNames[actionItem.type]}, and its responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadActionItem(actionItem)}></mx-icon>
+
+               
+
+                
             </div>
  
         `
@@ -298,9 +307,11 @@ export class mxActions extends mxElement {
             </div>
     
             <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
-            ${true ? html`
+
+                <a title="Download this action's MSL text." @click=${() => this.downloadMSL(this.fullActions)}><img src="mx/svg/M Trademark White.svg" height="18"></a>
+            
                 <mx-icon @click=${() => this.showOrHide()} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
-                ` : ""}
+                
                 <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadActionList(this.fullActions)}></mx-icon>
             </div>
 

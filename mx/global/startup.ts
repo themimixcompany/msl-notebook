@@ -32,7 +32,6 @@
 // Everything in this file is global to the entire application.
 
 // VERSION //////////
-
 const mslNotebook = {
     version: "1.15.4"
 };
@@ -64,9 +63,13 @@ const remoteAdminColor = "#7CBB00";
 
 //downloadFile
 //Download a file of arbitrary type
-const downloadFile = (content, fileName, contentType) => {
+const downloadFile = (content, fileName, mimeType) => {
     const a = document.createElement("a");
-    const file = new Blob([content], { type: contentType });
+    const fileOptions:BlobPropertyBag = {
+        "type": mimeType,
+        "endings": "native"
+    }
+    const file = new Blob([content],fileOptions);
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();
@@ -80,7 +83,7 @@ const downloadJSON = (content: {} | [], fileName:string = "jsonObject") => {
 
 //downloadText
 //Download a text file
-const downloadText = (content: string, fileName) => {
+const downloadText = (content, fileName) => {
     downloadFile(content, fileName, "text/plain")
 }
 
