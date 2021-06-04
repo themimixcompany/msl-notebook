@@ -4,43 +4,27 @@
 //Lists ports, machines, and groups available in the config .json files and opens connections to them. Keeps a collective list of actions for all connections it opens. Displays communicators for each socket.
 
 //Lit Dependencies
+import { mxElement } from 'global/mx-styles';
 import { html, css, LitElement, TemplateResult, Template } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
+import { machine } from 'msl-js/service-loader';
 
 //<mx-connect>
 @customElement('mx-connect')
-export class mxConnect extends LitElement {
-  static styles = css`
-    ol,ul, input, h2, p, .machine, div { font-family: Inter; font-size: 18pt }
-    p {margin-top: 5px; margin-bottom: 5px;}
-    .elide {text-overflow: ellipsis; overflow: hidden; white-space: nowrap}
-    .greyBk {background-color:#ccc; padding:5px;}
-    .darkGreyBk {background-color:#aaa; padding:5px;}
-    .veryDarkGreyBk {background-color:#606060; padding:5px;}
-    .gridHeader {background-color:#bbb; font-family: Inter; font-size: 20pt }
-    a { text-decoration: none; cursor: pointer;}
-    a:hover {text-decoration: underline}
-    .whiteHeaderText {color:white;font-weight:500;}
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+export class mxConnect extends mxElement {
+  
+  //CSS PROPERTIES //////////
+
+    //Use shared styles
+    static get styles() {
+      return [
+        super.styles,
+        css``
+      ];
     }
-    .grid-fixed-rows {
-      display: grid;
-      grid-template-columns: 100px 175px 1fr 250px 250px 80px;
-      grid-auto-rows: 28pt;
-      gap: 3px;
-    }
-    .grid2 {
-        display: grid;
-        grid-template-columns: 100px 175px 1fr 250px 250px 80px;
-        gap: 3px;
-      }
-    `;
 
   //Setup for Run Once
   hasRun = false;
@@ -156,13 +140,13 @@ export class mxConnect extends LitElement {
 
       return html`
 
-      <div class="greyBk" style="font-weight:900">
+      <div class="greyBk">
       <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-plug" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
       </div>
 
       <div class="greyBk elide">
         <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
-        <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span style="font-weight:600">${machineKey}</span></a>
+        <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span>${machineKey}</span></a>
       </div>
 
       <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.list[machineKey].ports.length},1fr); grid-auto-rows: 28pt;">
@@ -175,8 +159,11 @@ export class mxConnect extends LitElement {
         `)}
       </div>
 
-      <div class="greyBk" style="text-align:right">
+      <div class="greyBk whiteHeaderText" style="text-align:right">
+      ${machineKey == Object.keys(machine.list)[0] ? html`
+      <mx-icon title="Download the port list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.ports,"ports")}></mx-icon>
       </div>
+      ` : ""}
     `})}
     `
   }
@@ -201,12 +188,12 @@ export class mxConnect extends LitElement {
         <div class="machine greyBk elide">
           <mx-icon @click=${() => this.connectGroup(groupKey)} title=${groupTooltip} class=${groupIcon} style="cursor:pointer;"></mx-icon>
           <a @click=${() => this.connectGroup(groupKey)} title=${groupTooltip}>
-          <span style="font-weight:600">${groupKey}</span></a>
+          <span>${groupKey}</span></a>
         </div>
   
         <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); grid-auto-rows: 28pt;">
           ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
-          <div class="machine greyBk">
+          <div class="machine greyBk" style="font-weight:200">
             <mx-icon title="Use the group link to connect to all ports on these machines." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : localAdminColor : ''}></mx-icon>
             ${machineKey}
           </div>
@@ -314,9 +301,9 @@ export class mxConnect extends LitElement {
   //Connect to URL template. Creates a connection from URL typed in the box.
   templateConnectURL() {
     return html`
-    <div class="greyBk" style="font-weight:900">
+    <div class="greyBk">
       <mx-icon title="Add a new machine." class="fas fa-arrow-alt-right"></mx-icon>
-      <mx-icon title="Type the URL in the box and press Enter to connect." class="fas fa-server"></mx-icon>
+      <mx-icon title="Type a URL in the box and press Enter to connect to a machine that's not on thie list." class="fas fa-server"></mx-icon>
     </div>
 
     <div class="greyBk"  style="grid-column: 2/ span 5;padding-left:0px;padding-top:0px;padding-right:6px;">
@@ -369,10 +356,10 @@ export class mxConnect extends LitElement {
 
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
-        ${true ? html`
-            <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden} style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
-            ` : ""}
-            <mx-icon class="fas fa-plus-square" style="cursor:pointer;opacity:0"></mx-icon>
+        
+            <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden} style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} the machine list."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+
+            <mx-icon title="Download the machine list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.machines,"machines")}></mx-icon>
         </div>
 
     `
@@ -396,12 +383,11 @@ export class mxConnect extends LitElement {
     </div>
 
 
-        <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
-        ${true ? html`
-            <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden} style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} groups."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
-            ` : ""}
-            <mx-icon class="fas fa-plus-square" style="cursor:pointer;opacity:0"></mx-icon>
-        </div>
+    <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
+        <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden} style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} the group list."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+
+        <mx-icon title="Download the group list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.groups,"groups")}></mx-icon>
+    </div>
 
     `
 

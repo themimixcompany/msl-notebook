@@ -27,9 +27,9 @@ export class communicatorView extends LitElement {
     return html`
 
     <ol>
-      <li>Click a <mx-icon class="fas fa-server"></mx-icon> server, <mx-icon class="fas fa-router"></mx-icon> port, or <mx-icon class="fas fa-network-wired"></mx-icon> group to connect.</li>
-      <li>When connected, use the <mx-icon class="fas fa-keyboard"></mx-icon> communicator to send messages.
-      <li>Click a sent message or reply icon to resend it.</li>
+      <li>Click a <mx-icon class="fas fa-network-wired"></mx-icon> group, <mx-icon class="fas fa-server"></mx-icon> machine, or <mx-icon class="fas fa-router"></mx-icon> port to connect.</li>
+      <li>Use the <mx-icon class="fas fa-keyboard"></mx-icon> communicator to send messages.
+      <li>Click a sent message or a response to resend it.</li>
     </ol>
 
     <mx-connect></mx-connect>

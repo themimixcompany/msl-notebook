@@ -31,9 +31,12 @@
 // GLOBAL CONSTANTS //////////
 // Everything in this file is global to the entire application.
 
+// VERSION //////////
+
 const mslNotebook = {
-    version: "1.15.2"
+    version: "1.15.4"
 };
+
 
 // GLOBAL FUNCTIONS //////////
 // These functions are available to all components.
@@ -71,9 +74,40 @@ const downloadFile = (content, fileName, contentType) => {
 
 //downloadJSON
 //Download a JSON object or array
-const downloadJSON = (content: {} | [], fileName) => {
+const downloadJSON = (content: {} | [], fileName:string = "jsonObject") => {
     downloadFile(JSON.stringify(content), fileName, "text/json")
 }
+
+//downloadText
+//Download a text file
+const downloadText = (content: string, fileName) => {
+    downloadFile(content, fileName, "text/plain")
+}
+
+
+//downloadActionList
+//Download the action list w/o the notify component
+const downloadActionList = (actionList, name: string = "actionList") => {
+
+    //Create an actionList w/o notify property because it is a circular reference in JSON
+    let [...actionListCopy] = actionList
+    for (let oneActionIndex in actionListCopy) {
+        delete actionListCopy[oneActionIndex]["notify"];
+    }
+    downloadJSON(actionListCopy, `${name}.json`);
+}
+
+//downloadActionItem
+//Download the action item w/o the notify component
+const downloadActionItem = (actionItem: {}, name ?: string) => {
+
+    //Create an actionItem w/o notify property because it is a circular reference in JSON
+    let { ...actionItemCopy } = actionItem;
+    delete actionItemCopy["notify"];
+    downloadJSON(actionItemCopy, `${name ? name : `${actionNames[actionItem["type"]]}-${actionItem["to"]}`}.json`);
+}
+
+
 
 // START APPLICATION //////////
 

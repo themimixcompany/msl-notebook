@@ -235,6 +235,56 @@ const notify = (notifyElement, eventName: string, payload: any) => {
   notifyElement.dispatchEvent(notifyEvent);
 };
 
+//msl
+//Convert an action item and responses to MSL.
+const msl = (actionList:{}[]) => {
+
+  //Keep a final list of MSL
+  let mslText: string
+
+  //Loop through each actionList item
+  for (let actionIndex in actionList) {
+
+    //Setup for the MSL message & responses
+    let mslMessage: string
+    let mslResponse: string
+    let adminResponse: string
+
+    //Remember the action item
+    let actionItem = actionList[actionIndex];
+
+    //Test if this is an MSL send
+    if (actionItem["type"] == 1 && actionItem["toPortType"] == "msl") {
+      
+      //Remember the outgoing message
+      mslMessage = actionItem["message"];
+
+      //Loop through the responses
+      for (let responseIndex in actionItem["response"]) {
+
+        //Remember the response item
+        let responseItem = actionItem["response"][responseIndex];
+
+        //Look for an MSL response and take the first one
+        if (!mslResponse && responseItem.fromPortType == "msl") {
+          mslResponse = responseItem.message;
+        }
+
+        //Look for an admin response and take the first one
+        if (!adminResponse && responseItem.fromPortType == "admin") {
+          adminResponse = responseItem.message;
+        }
+      }
+    }
+
+    //Add messages to MSL text
+    mslText = `${mslText}${mslMessage} => ${mslResponse} => ${adminResponse}\n`
+  }
+
+  //Return final MSL text
+  return mslText;
+}
+
 //UTILITY FUNCTIONS FOR DETERMINING MACHINES & SOCKETS //////////
 
 //socketMachineKey
@@ -942,6 +992,7 @@ export const socket = {
   connectMachine,
   connectGroup,
   notify,
+  msl,
   connections,
   list: connections
 };
