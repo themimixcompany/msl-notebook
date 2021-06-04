@@ -238,13 +238,13 @@ export class mxActions extends LitElement {
         
             <div class="whiteHeaderText veryDarkGreyBk elide">
                 ${secondMessage ? html`
-                <mx-icon color=${fromWireColor} title="The received message." class=${this.responseIcons[1]}>
+                <mx-icon color=${fromWireColor} title="The message received from the action." class=${this.responseIcons[1]}>
                 </mx-icon>
                 ${secondMessage}` : ""}
             </div>
      
             <div class="whiteHeaderText veryDarkGreyBk elide">
-                <mx-icon color=${toWireColor} title="The socket an action took place on." class="fas fa-router">
+                <mx-icon color=${toWireColor} title="The socket the action was sent to." class="fas fa-router">
                 </mx-icon>
                 ${actionItem.to}
             </div>
@@ -347,7 +347,7 @@ export class mxActions extends LitElement {
             </div>
 
             <div class="greyBk">
-            ${responseItem.from ? html`<mx-icon class="fas fa-router" color=${fromWireColor}></mx-icon>` : ""}
+            ${responseItem.from ? html`<mx-icon title="The socket the response came from." class="fas fa-router" color=${fromWireColor}></mx-icon>` : ""}
             ${responseItem.from}
             </div>
 
@@ -389,13 +389,13 @@ export class mxActions extends LitElement {
         </div>
 
             <div class="whiteHeaderText darkGreyBk">
-                <mx-icon title="The socket a response was received from." class="fas fa-router">
+                <mx-icon title="The socket a response came from." class="fas fa-router">
                 </mx-icon>
                 from
             </div>
 
             <div class="whiteHeaderText darkGreyBk elide">
-                <mx-icon title="The socket an action took place on." class="fas fa-router">
+                <mx-icon title="The socket an action was sent to." class="fas fa-router">
                 </mx-icon>
                 to
             </div>

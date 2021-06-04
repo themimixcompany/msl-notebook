@@ -105,8 +105,8 @@ export class mxConnect extends LitElement {
     //Update communicators
     this.communicators = this.templateCommunicators();
 
-     //Display an empty communicator
-     this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
+    //Display an empty communicator
+    this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0],[])
   }
 
   //Show or hide actions
@@ -205,8 +205,36 @@ export class mxConnect extends LitElement {
         isHidden = true;
       }
 
+      //Decide if communicator is hidden. Unhide last item by default.
+      let isCommunicatorHidden = this.isActionsHidden
+
+      //Turn actionIndex into a number for math
+      let actionIndexNumber: number = parseInt(actionIndex);
+
+      //Find the index of the last item for comparison
+      let lastActionIndex = this.actionList.length - 1;
+
+      //If this is the last item
+      if (actionIndexNumber == lastActionIndex) {
+
+        //If send or relay action, show by default
+        if (actionItem["type"] == 1 || actionItem["type"] == 2) {
+          isCommunicatorHidden = false;
+        }
+      }
+
+      //If this is the second to last item
+      if (actionIndexNumber == lastActionIndex - 1) {
+
+        //If send and next item is relay, show by default
+        if (actionItem["type"] == 1 && this.actionList[lastActionIndex]["type"] == 2) {
+          isCommunicatorHidden = false;
+        }
+      
+      }
+
       //Add a disabled communicator w/ its action information.
-      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"], [actionItem], true, this.isActionsHidden));
+      allCommunicators.push(this.templateSingleCommunicator(actionItem["to"], [actionItem], true, isCommunicatorHidden));
 
     }
 
@@ -382,16 +410,6 @@ export class mxConnect extends LitElement {
     `
 
     return html`
-
-    <ol>
-      <li>Click a <mx-icon class="fas fa-server"></mx-icon> server, <mx-icon class="fas fa-router"></mx-icon> port, or <mx-icon class="fas fa-network-wired"></mx-icon> group to connect.</li>
-      <li>When connected, use the <mx-icon class="fas fa-keyboard"></mx-icon> communicator to send messages.
-      <li>Click a sent message or reply icon to resend it.</li>
-    </ol>
-
-
-
-    
 
     <div class="grid-fixed-rows">
       ${groupListHeader}

@@ -8,12 +8,12 @@
 //Export Individual Components
 export * from "components/mx-communicator";
 export * from "components/mx-connect";
-export * from "components/mx-history";
 export * from "components/mx-actions";
 export * from "components/mx-debug";
 export * from "components/mx-greeting";
 export * from "components/mx-icon";
 export * from "components/mx-logo";
+export * from "components/mx-footer";
 
 //Export Views
 export * from "views/communicator-view";
