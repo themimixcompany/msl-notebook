@@ -9,7 +9,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 //Static Assets
-import logo from 'svg/M Trademark Isolated.svg'
+import logo from 'svg/Mimix Trademark.svg'
 
 // <communicator-view>
 @customElement('communicator-view')
@@ -30,13 +30,9 @@ export class communicatorView extends LitElement {
     <mx-greeting></mx-greeting>
     <mx-connect></mx-connect>
 
-    <br>
+    <!-- <mx-debug></mx-debug> -->
 
-    <mx-debug></mx-debug>
-
-    <br>
-
-    <a href="https://mimix.io" title="MSL Notebook is a product of The Mimix Company. Enjoy!"><img src="${logo}" style="width:40px;margin-bottom:20px;margin-top:10px;"></a> 
+    <a href="https://mimix.io" title="MSL Notebook is a product of The Mimix Company. Enjoy!"><img src="${logo}" style="height:30px;margin-bottom:20px;margin-top:10px;"></a> 
     `
   }
 }

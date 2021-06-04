@@ -167,13 +167,13 @@ templateInputBox() {
 
     return html`
 
-          <div style="grid-column: 3/span 3; padding-left:3px; display: grid; gap: 3px; grid-auto-rows: 26pt; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
+          <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-auto-rows: 26pt; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
           ${connectionList}
           </div>
 
           <div class="activeBk whiteHeaderText" style="padding-left:3px;text-align:right;">
                 <mx-icon class="fas fa-plus-square"></mx-icon>
-                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;margin-right:3px;" title="Close the connection to ${this.socketKey}." class="fas fa-times-square">
+                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;margin-right:3px;" title="Close the connection to ${this.socketKey}." class="fas fa-minus-square">
       </mx-icon>
           </div>
         `

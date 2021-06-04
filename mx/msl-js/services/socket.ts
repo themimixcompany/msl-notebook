@@ -689,9 +689,9 @@ const recordAction = function (actionList: {}[], type, to?: string, from?: strin
   //Assign an action number (for display/download)
   let actionNumber = actionList.length + 1
 
-  //Find two and from port types
-  let toPortType = to ? mx.machine.index[to].type : undefined;
-  let fromPortType = from ? mx.machine.index[from].type : undefined;
+  //Find types for to and from ports if provided and indexed (not added later)
+  let toPortType = to && mx.machine.index[to] ? mx.machine.index[to].type : "text";
+  let fromPortType = from && mx.machine.index[from] ? mx.machine.index[from].type : "text";
 
   //Create a new action from the passed parameters.
   let newAction = {
@@ -760,8 +760,8 @@ const recordResponse = function (actionList: {}[], actionIndex, type, to, from, 
   }
 
     //Find two and from port types
-    let toPortType = to ? mx.machine.index[to].type : undefined;
-    let fromPortType = from ? mx.machine.index[from].type : undefined;
+    let toPortType = to && mx.machine.index[to] ? mx.machine.index[to].type : undefined;
+    let fromPortType = from && mx.machine.index[from] ? mx.machine.index[from].type : undefined;
   
 
   //Create new response item
