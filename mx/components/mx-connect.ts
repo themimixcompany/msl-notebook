@@ -141,7 +141,7 @@ export class mxConnect extends mxElement {
       return html`
 
       <div class="greyBk">
-      <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-plug" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
+      
       </div>
 
       <div class="greyBk elide">
@@ -183,12 +183,11 @@ export class mxConnect extends mxElement {
   
         return html`
         <div class="machine greyBk">
-        <mx-icon @click=${() => this.connectGroup(groupKey)} title=${groupTooltip} class="fas fa-plug" style="cursor:pointer;"></mx-icon>
         </div>
   
         <div class="machine greyBk elide">
-          <mx-icon @click=${() => this.connectGroup(groupKey)} title=${groupTooltip} class=${groupIcon} style="cursor:pointer;"></mx-icon>
-          <a title="Connect to the ${groupKey} group.">
+          <mx-icon title=${groupTooltip} class=${groupIcon}></mx-icon>
+          <a @click=${() => this.connectGroup(groupKey)} title="Connect to the ${groupKey} group.">
           <span>${groupKey}</span></a>
         </div>
 
@@ -365,7 +364,6 @@ export class mxConnect extends mxElement {
 
     let machineListHeader = html`
     <div class="whiteHeaderText darkGreyBk">
-     <mx-icon title="Machines are shown in the order defined." class="fas fa-list-ul"></mx-icon>
     </div>
 
     <div class="whiteHeaderText darkGreyBk">
@@ -395,7 +393,7 @@ export class mxConnect extends mxElement {
 
     let groupListHeader = html`
     <div class="whiteHeaderText darkGreyBk">
-     <mx-icon title="Groups are shown in the order defined." class="fas fa-list-ul"></mx-icon>
+  
     </div>
 
     <div class="whiteHeaderText darkGreyBk" style="grid-column: 2/span 4">
