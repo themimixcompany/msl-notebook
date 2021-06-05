@@ -5,12 +5,19 @@
         "type": "msl",
         "machines": ["local","engine"]
       },
+    "admin-relay": {
+        "name": "Relay group based on type",
+        "relay": true,
+        "type": "admin",
+        "machines": ["local","engine"]
+      },
     "port-relay": {
         "name": "Relay specific ports only",
         "relay": true,
         "machines": ["local","echo"],
         "ports": [
-          ["local-mx-admin","echo-wss-text"]
+          ["local-mx-admin","echo-wss-text"],
+          ["local-mx-msl","echo-wss-text"]
         ]
     },
     "no-relay": {

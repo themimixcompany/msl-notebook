@@ -157,6 +157,7 @@ export class mxConnect extends mxElement {
           <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to ${portKey} on ${machineKey}." class=${this.connections[`${machineKey}-${portKey}`] ? "active" : ""} >${portKey}</a>
         </div>
         `)}
+        
       </div>
 
       <div class="greyBk whiteHeaderText" style="text-align:right">
@@ -178,7 +179,7 @@ export class mxConnect extends mxElement {
         let groupIcon = mx.machine.groups[groupKey].ports ? "fas fa-project-diagram" : mx.machine.groups[groupKey].type ? "fas fa-network-wired" : "fas fa-object-ungroup"
   
         //Setup group tooltip
-        let groupTooltip = mx.machine.groups[groupKey].ports ? `Connect to the ${groupKey} group with the specific relay pairs defined there.` : mx.machine.groups[groupKey].type ? `Connect to the ${groupKey} group which defines relays between ${mx.machine.groups[groupKey].type} ports.` : `Connect to the ${groupKey} group which has no relays.`
+        let groupTooltip = mx.machine.groups[groupKey].ports ? `The ${groupKey} group defines specific relay ports.` : mx.machine.groups[groupKey].type ? `The ${groupKey} group relays messages between ${mx.machine.groups[groupKey].type} ports.` : `The ${groupKey} group opens the machines without any relays.`
   
         return html`
         <div class="machine greyBk">
@@ -187,21 +188,47 @@ export class mxConnect extends mxElement {
   
         <div class="machine greyBk elide">
           <mx-icon @click=${() => this.connectGroup(groupKey)} title=${groupTooltip} class=${groupIcon} style="cursor:pointer;"></mx-icon>
-          <a @click=${() => this.connectGroup(groupKey)} title=${groupTooltip}>
+          <a title="Connect to the ${groupKey} group.">
           <span>${groupKey}</span></a>
         </div>
-  
+
+        ${!mx.machine.groups[groupKey].ports ? html`
         <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); grid-auto-rows: 28pt;">
           ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
-          <div class="machine greyBk" style="font-weight:200">
-            <mx-icon title="Use the group link to connect to all ports on these machines." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : localAdminColor : ''}></mx-icon>
-            ${machineKey}
-          </div>
+            <div class="machine greyBk" style="font-weight:200">
+              <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-router" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey,"msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey,"admin") ?  mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
+              ${machineKey}
+            </div>
           `)}
         </div>
+        `: ""}
+
+        ${mx.machine.groups[groupKey].ports ? html`
+        <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].ports?.length},1fr); grid-auto-rows: 28pt;">
+
+            ${mx.machine.groups[groupKey].ports.map((portPair: string[]) => html`
+            <div style="display: grid; gap: 3px; grid-template-columns: repeat(2,1fr); grid-auto-rows: 28pt;">
+
+              ${portPair.map((socketKey) => html`
+                <div class="machine greyBk" style="font-weight:200">
+
+                    ${socketKey == portPair[1] ? html`
+                      <mx-icon title="${portPair[0]} relays to ${portPair[1]}" class="fas fa-arrow-alt-right"></mx-icon>
+                    ` : ""}
+
+                    <mx-icon color=${mx.machine.index[socketKey]["type"] == 'msl' ? mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.index[socketKey]["type"] == 'admin' ?  mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''} title=${`The ${groupKey} group will relay from ${portPair[0]} to ${portPair[1]}.`} class="fas fa-router"}>
+                    </mx-icon>
+
+                    ${socketKey}
+
+                </div>
+            </div>
+              `)}
+          `)}
+        </div>
+        `: ""}
   
         <div class="machine greyBk">
-         
         </div>
       `})}
       `
@@ -371,19 +398,11 @@ export class mxConnect extends mxElement {
      <mx-icon title="Groups are shown in the order defined." class="fas fa-list-ul"></mx-icon>
     </div>
 
-    <div class="whiteHeaderText darkGreyBk">
+    <div class="whiteHeaderText darkGreyBk" style="grid-column: 2/span 4">
         <div>
             <mx-icon title="Available groups." class="fas fa-network-wired"></mx-icon> groups
-        </div
-        <div>
-            
         </div>
     </div>
-
-    <div class="whiteHeaderText darkGreyBk" style="grid-column: 3/span 3">
-    <mx-icon title="Ports available on the machine." class="fas fa-router"></mx-icon> machines
-    </div>
-
 
     <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
 
@@ -391,7 +410,6 @@ export class mxConnect extends mxElement {
 
         <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden} style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} the group list."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
-        
     </div>
 
     `
