@@ -138,6 +138,8 @@ export class mxActions extends mxElement {
         //Setup Colors
         let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
         let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let actionWireColor = actionItem.toPortType == 'msl' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : actionItem.toPortType == 'admin' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''
+  
 
 
         //Build summary action line
@@ -161,6 +163,10 @@ export class mxActions extends mxElement {
             </div>
         
             <div class="whiteHeaderText veryDarkGreyBk elide">
+                ${!actionItem.response ? html`
+                <mx-icon color=${actionWireColor} title="Waiting on a response from ${actionNames[actionItem.type]}." class="fas fa-clock">
+                </mx-icon> <span style="font-weight: 200">waiting…</span>
+                ` : ""}
                 ${secondMessage ? html`
                 <mx-icon color=${fromWireColor} title="The message received from the ${actionNames[actionItem.type]}." class=${responseIcons[1]}>
                 </mx-icon>

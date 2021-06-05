@@ -97,6 +97,7 @@ templateInputBox() {
 
    
   return html`
+
     <div class="whiteHeaderText elide ${this.isHidden ? "navyBk" : "activeBk"}" style="padding-left:10px;font-weight:900;grid-row:1/span 2">
       <mx-icon class="fas fa-arrow-alt-right">
       </mx-icon>
@@ -109,12 +110,12 @@ templateInputBox() {
       send
     </div>
 
-    <div style="grid-column:3/span 4;padding-left:0px;padding-right:6px;">
-      <input ?disabled=${this.isDisabled} style="width:100%" @keydown=${this.mslBoxKeyDown} placeholder="${socket?.port.type}"></input>
+    <div style="grid-column:3/span 3;padding-left:0px;padding-right:8px;padding-bottom:4px;">
+      <input ?disabled=${this.isDisabled} style="width:100%;height:100%;padding-left:5px" @keydown=${this.mslBoxKeyDown} placeholder="${socket?.port.type}"></input>
     </div>
 
-  
-
+    <div class="activeBk">
+    </div>
 `
 }
 
@@ -139,7 +140,7 @@ templateInputBox() {
 
       //Create the icon and socketKey for each available connection
       connectionList = html`${connectionList}
-      <div class="activeBk whiteHeaderText">
+      <div class="activeBk whiteHeaderText elide">
         <mx-icon style="cursor:pointer;opacity:${opacity}" @click=${() => this.socketKey = socketKey} title=${this.socketKey ? `Direct your message to ${socketKey}` : ""} class="fas fa-router" color=${toWireColor}></mx-icon><a style="opacity:${opacity}" title=${`Direct your message to ${socketKey}`} @click=${() => this.socketKey = socketKey}>${socketKey}</a>
       </div>
       `
@@ -147,15 +148,16 @@ templateInputBox() {
 
     return html`
 
-          <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-auto-rows: 26pt; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
+          <div class="grid-fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
           ${connectionList}
           </div>
 
+          ${connectionList ? html`
           <div class="activeBk whiteHeaderText" style="padding-left:3px;text-align:right;">
-                <mx-icon class="fas fa-plus-square"></mx-icon>
-                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;margin-right:3px;" title="Close the connection to ${this.socketKey}." class="fas fa-minus-square">
-      </mx-icon>
+                <mx-icon @click=${() => this.closeSocket()} style="cursor:pointer;margin-right:3px;" title="Disconnect from ${this.socketKey}." class="far fa-plug">
+                </mx-icon>
           </div>
+          ` :""}
         `
   }
 
@@ -182,7 +184,8 @@ templateInputBox() {
 
     return html`
     <div class="grid-fixed-rows">
-      ${!this.isDisabled && this.connections[this.socketKey] ? this.templateInputBox() : ""}
+      ${!this.isDisabled && this.connections[this.socketKey] ? html`
+      ${this.templateInputBox()}` : ""}
       ${!this.isDisabled ? this.templateConnections() : ""}
     </div>
     <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this.connector}></mx-actions>

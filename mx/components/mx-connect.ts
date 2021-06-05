@@ -149,7 +149,7 @@ export class mxConnect extends mxElement {
         <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span>${machineKey}</span></a>
       </div>
 
-      <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.list[machineKey].ports.length},1fr); grid-auto-rows: 28pt;">
+      <div class="grid-fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.list[machineKey].ports.length},1fr);">
 
         ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
         <div class="greyBk">
@@ -192,7 +192,7 @@ export class mxConnect extends mxElement {
         </div>
 
         ${!mx.machine.groups[groupKey].ports ? html`
-        <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); grid-auto-rows: 28pt;">
+        <div class="grid-fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); ">
           ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
             <div class="machine greyBk" style="font-weight:200">
               <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-router" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey,"msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey,"admin") ?  mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
@@ -206,10 +206,10 @@ export class mxConnect extends mxElement {
         <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].ports?.length},1fr); grid-auto-rows: 28pt;">
 
             ${mx.machine.groups[groupKey].ports.map((portPair: string[]) => html`
-            <div style="display: grid; gap: 3px; grid-template-columns: repeat(2,1fr); grid-auto-rows: 28pt;">
+            <div class="grid-fixed-rows" style="grid-template-columns: repeat(2,1fr);">
 
               ${portPair.map((socketKey) => html`
-                <div class="machine greyBk" style="font-weight:200">
+                <div class="machine greyBk elide" style="font-weight:200">
 
                     ${socketKey == portPair[1] ? html`
                       <mx-icon title="${portPair[0]} relays to ${portPair[1]}" class="fas fa-arrow-alt-right"></mx-icon>
@@ -328,12 +328,18 @@ export class mxConnect extends mxElement {
   templateConnectURL() {
     return html`
     <div class="greyBk">
+    </div>
+
+    <div class="greyBk">
       <mx-icon title="Add a new machine." class="fas fa-arrow-alt-right"></mx-icon>
       <mx-icon title="Type a URL in the box and press Enter to connect to a machine that's not on thie list." class="fas fa-server"></mx-icon>
     </div>
 
-    <div class="greyBk"  style="grid-column: 2/ span 5;padding-left:0px;padding-top:0px;padding-right:6px;">
-    <input @keydown=${this.urlKeyDown} placeholder="echo.websocket.org" style="width:100%">
+    <div style="grid-column: 3/ span 3;padding-left:0px;padding-top:0px;padding-right:8px;padding-bottom: 4px">
+    <input @keydown=${this.urlKeyDown} placeholder="echo.websocket.org" style="width:100%;height:100%;padding-left:5px">
+    </div>
+
+    <div class="greyBk">
     </div>
 
     `;

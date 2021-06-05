@@ -5,7 +5,7 @@
         "ports" : ["mx-msl","mx-admin"]
       },
     "engine": {
-        "name": "DO Engine",
+        "name": "Hello World Engine",
         "ip": "engine.mcenter.io",
         "ports": ["mx-msl","mx-admin"]
     },

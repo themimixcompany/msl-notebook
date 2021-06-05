@@ -25,7 +25,7 @@ export class mxElement extends LitElement {
     .grid-fixed-rows {
       display: grid;
       grid-template-columns: 100px 175px 1fr 250px 250px 110px;
-      grid-auto-rows: 28pt;
+      grid-auto-rows: 30pt;
       gap: 3px;
     }
     .grid2 {
