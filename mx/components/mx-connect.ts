@@ -356,10 +356,12 @@ export class mxConnect extends mxElement {
 
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
+
+        <mx-icon title="Download the machine list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.machines,"machines")}></mx-icon>
         
             <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden} style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} the machine list."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
-            <mx-icon title="Download the machine list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.machines,"machines")}></mx-icon>
+      
         </div>
 
     `
@@ -384,9 +386,12 @@ export class mxConnect extends mxElement {
 
 
     <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
+
+    <mx-icon title="Download the group list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.groups,"groups")}></mx-icon>
+
         <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden} style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} the group list."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
-        <mx-icon title="Download the group list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.groups,"groups")}></mx-icon>
+        
     </div>
 
     `

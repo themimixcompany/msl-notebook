@@ -25,7 +25,6 @@ export class mxCommunicator extends mxElement {
       ];
     }
 
-
   //PRIVATE PROPERTIES //////////
 
   //Setup for Run Once

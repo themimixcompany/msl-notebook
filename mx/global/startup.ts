@@ -33,7 +33,7 @@
 
 // VERSION //////////
 const mslNotebook = {
-    version: "1.15.4"
+    version: "2.0.0"
 };
 
 
@@ -59,7 +59,7 @@ const remoteMslColor = "#00A1F1";
 const remoteAdminColor = "#7CBB00";
 
 // FILE DOWNLOADING //////////
-// Opens a browser file download dialog box for any content.
+// Opens a browser download dialog box for any content.
 
 //downloadFile
 //Download a file of arbitrary type
@@ -69,10 +69,11 @@ const downloadFile = (content, fileName, mimeType) => {
         "type": mimeType,
         "endings": "native"
     }
-    const file = new Blob([content],fileOptions);
+    const file = new Blob([content], fileOptions);
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();
+    URL.revokeObjectURL(a.href);
 }
 
 //downloadJSON
@@ -83,7 +84,7 @@ const downloadJSON = (content: {} | [], fileName:string = "jsonObject") => {
 
 //downloadText
 //Download a text file
-const downloadText = (content, fileName) => {
+const downloadText = (content:string, fileName) => {
     downloadFile(content, fileName, "text/plain")
 }
 

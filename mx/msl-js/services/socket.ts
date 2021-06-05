@@ -276,12 +276,12 @@ const msl = (actionList:{}[]) => {
         }
       }
 
-      //Add messages to MSL text
-      mslText = `${mslText ? mslText : ""}${mslMessage} => ${mslResponse} => ${adminResponse}`
-      
+       //Turn actionIndex into a number for math
+       let actionIndexNumber: number = parseInt(actionIndex);
+
+      //Add message to MSL text
+      mslText = `${mslText ? mslText + "\n" : ""}${mslMessage} => ${mslResponse} => ${adminResponse}`
     }
-    
-    
   }
 
   //Return final MSL text
