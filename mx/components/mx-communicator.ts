@@ -53,15 +53,30 @@ export class mxCommunicator extends mxElement {
 
   //Close Socket
   closeSocket() {
-    let socket = mx.socket.connections[this.socketKey]
+
+    //Get the socket this communicator is talking to.
+    const socket = mx.socket.connections[this.socketKey]
+
+    const thisSocketKey = this.socketKey;
+
+    //Make a copy of connections w/o this key to find a replacement socket to use.
+    const {[thisSocketKey]:matchingSocketKey, ...remainingSockets} = mx.socket.connections
+
+    //Remember the first socket in the remaining connections
+    const newSocketKey = Object.keys(remainingSockets)[0];
+
+    //Close the current socket.
     socket.mxClose(this, this.actionList);
+
+    //Change to the new, remaining socket.
+    this.socketKey = newSocketKey;
+
   }
 
   //Update results area when a message is received
   messageReceived(event: CustomEvent) {
     this.privateActionList = event.detail;
-    event.cancelBubble = true;
-      
+    event.cancelBubble = true;   
   }
 
 
