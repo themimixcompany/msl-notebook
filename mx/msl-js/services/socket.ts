@@ -45,9 +45,6 @@ let connections = {};
 //Used to handle the .onmessage that might come from a socket *before* any message is sent. It is an "empty" callback because the message parameter is empty, meaning no message was sent.
 const setupEmptyCallback = function (socket: WebSocket, messageNumber?, actionList?: {}[]) {
 
-  //Get actionIndex
-  let actionIndex = actionList.length - 1;
-
   //Remember us as original sender
   socket.sender = socket.key;
 
@@ -84,12 +81,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     let notifyElement = actionList[actionIndex]["notify"]
 
 
-    //Relay if relay is set, not looping back to original machine, and active in connections
-    // if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
-    //   sendSingleMessage(connections[socket.relayTo], receivedMessage, echo, socket.key)
-    // }
-
-
     //Record a regular or roundtrip message was received
     if (relay == socket.relayTo) {
       recordRoundtrip(actionList, actionIndex, socket.key, relay, message);
@@ -107,12 +98,6 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
       }
     }
 
-    // //For relay actions, include the original send
-    // if (actionList[actionIndex]["type"] == action.relay) {
-    //   messageActionList = [actionList[actionIndex - 1], actionList[actionIndex]];
-    // } else {
-    //   messageActionList = [actionList[actionIndex]];
-    // }
 
     //Notify the requested component of the received message.
     if (notifyElement) {
@@ -122,21 +107,25 @@ const setupMessageCallback = function (socket: WebSocket, message: string, echo:
     }
 
 
-    //Detect messages from opening
-    let isOpeningMessage = false;
+    //Detect message responses from connect action
+    let isConnectResponseMessage = false;
     if (actionIndex > 0) {
       if (actionList[actionIndex]["type"] == action.connect) {
-        isOpeningMessage = true;
+        isConnectResponseMessage = true;
       }
     }
 
-    //Perform relay if appropriate
-    if (socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo]) {
+    //Decide if this message should be relayed
+    //let isRelay:boolean = socket.relayTo && (relay != socket.relayTo) && connections[socket.relayTo];
+    let isRelay = (socket.relayTo && relay != socket.relayTo);
 
+    //Perform relay if appropriate
+    if (isRelay) {
+    
       //Get toSocket
       let toSocket = connections[socket.relayTo];
       //Sent outgoing relay message
-      if (!isOpeningMessage) {
+      if (!isConnectResponseMessage) {
         sendSingleMessage(toSocket, receivedMessage, echo, socket.key, notifyElement, actionList)
       }
     }

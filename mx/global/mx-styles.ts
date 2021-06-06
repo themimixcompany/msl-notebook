@@ -29,6 +29,8 @@ export class mxElement extends LitElement {
     .gridHeader {background-color:#bbb;}
     .greyBk {background-color:#ccc;}
     .activeBk {background-color:navy;}
+
+    img {color:currentColor}
   
     /* Grids */
     .grid {

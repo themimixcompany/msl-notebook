@@ -160,9 +160,9 @@ export class mxActions extends mxElement {
 
 
         //Setup Colors
-        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
-        let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
-        let actionWireColor = actionItem.toPortType == 'msl' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : actionItem.toPortType == 'admin' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'text' ? remoteTextColor : fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let toWireColor = toSocketKey && toSocketKey.port.type == "text" ? remoteTextColor : toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let actionWireColor = actionItem.toPortType == "text" ? remoteTextColor : actionItem.toPortType == 'msl' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : actionItem.toPortType == 'admin' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''
   
 
         //Build summary action line
@@ -241,7 +241,7 @@ export class mxActions extends mxElement {
         let toSocketKey = mx.socket.list[responseItem.to];
 
         //Setup Colors
-        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
+        let fromWireColor = fromSocketKey && fromSocketKey.port.type == 'text' ? remoteTextColor : fromSocketKey && fromSocketKey.port.type == 'msl' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : fromSocketKey && fromSocketKey.port.type == 'admin' ? fromSocketKey && fromSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
         let toWireColor = toSocketKey && toSocketKey.port.type == 'msl' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localMslColor : remoteMslColor : toSocketKey && toSocketKey.port.type == 'admin' ? toSocketKey && toSocketKey.machine.ip == 'localhost' ? localAdminColor : remoteAdminColor : ''
 
         //Build single response template

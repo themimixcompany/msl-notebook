@@ -33,7 +33,7 @@
 
 // VERSION //////////
 const mslNotebook = {
-    version: "2.0.4"
+    version: "2.0.5"
 };
 
 
@@ -57,6 +57,7 @@ const localMslColor = "#F65314";
 const localAdminColor = "#FFBB00";
 const remoteMslColor = "#00A1F1";
 const remoteAdminColor = "#7CBB00";
+const remoteTextColor = "#bf41f9";
 
 // FILE DOWNLOADING //////////
 // Opens a browser download dialog box for any content.

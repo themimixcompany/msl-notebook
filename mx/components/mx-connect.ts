@@ -85,6 +85,7 @@ export class mxConnect extends mxElement {
 
     //Display an empty communicator
     this.emptyCommunicator = this.templateSingleCommunicator(Object.keys(this.connections)[0], [])
+
   }
 
   //Show or hide actions
@@ -145,7 +146,7 @@ export class mxConnect extends mxElement {
       </div>
 
       <div class="greyBk elide">
-        <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : ''} style="cursor:pointer;"></mx-icon>
+        <mx-icon @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}." class="fas fa-server" color=${mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : remoteTextColor} style="cursor:pointer;"></mx-icon>
         <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span>${machineKey}</span></a>
       </div>
 
@@ -153,7 +154,12 @@ export class mxConnect extends mxElement {
 
         ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
         <div class="greyBk">
-          <mx-icon @click=${() => this.connectPort(machineKey, portKey)}  title="Connect to ${portKey} on ${machineKey}." class="fas fa-router" color=${mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? localAdminColor : remoteAdminColor : ''} style="cursor:pointer;"></mx-icon>
+          <mx-icon  @click=${() => this.connectPort(machineKey, portKey)}  
+                    title="Connect to ${portKey} on ${machineKey}." 
+                    class="fas fa-router" 
+                    color=${mx.machine.ports[portKey]["type"] == 'text' ? remoteTextColor : mx.machine.ports[portKey].type == 'msl' ? mx.machine.list[machineKey].ip == 'localhost' ? localMslColor : remoteMslColor : mx.machine.ports[portKey].type == 'admin' ? mx.machine.list[machineKey].ip == 'localhost' ? localAdminColor : remoteAdminColor : ''} 
+                    style="cursor:pointer;">
+                    </mx-icon>
           <a @click=${() => this.connectPort(machineKey, portKey)} title="Connect to ${portKey} on ${machineKey}." class=${this.connections[`${machineKey}-${portKey}`] ? "active" : ""} >${portKey}</a>
         </div>
         `)}
@@ -214,10 +220,10 @@ export class mxConnect extends mxElement {
                 <div class="greyBk elide" style="font-weight:200">
 
                     ${socketKey == portPair[1] ? html`
-                      <mx-icon title="${portPair[0]} relays to ${portPair[1]}" class="fas fa-arrow-alt-right"></mx-icon>
+                      <mx-icon color="white" title="${portPair[0]} relays to ${portPair[1]}" class="fas fa-arrow-alt-right"></mx-icon>
                     ` : ""}
 
-                    <mx-icon color=${mx.machine.index[socketKey]["type"] == 'msl' ? mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.index[socketKey]["type"] == 'admin' ?  mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''} title=${`The ${groupKey} group will relay from ${portPair[0]} to ${portPair[1]}.`} class="fas fa-router"}>
+                    <mx-icon color=${mx.machine.index[socketKey]["type"] == 'text' ? remoteTextColor : mx.machine.index[socketKey]["type"] == 'msl' ? mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.index[socketKey]["type"] == 'admin' ?  mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''} title=${`The ${groupKey} group will relay from ${portPair[0]} to ${portPair[1]}.`} class="fas fa-router"}>
                     </mx-icon>
 
                     ${socketKey}
@@ -292,8 +298,9 @@ export class mxConnect extends mxElement {
   //Template one communicator.
   templateSingleCommunicator(socketKey, privateActionList: {}[] = [], isDisabled = false, isHidden = false) {
     return html`
-      <div style="height:3px;">&nbsp;</div>
+      <div id=${privateActionList.length == 0 ? "communicatorInputBox" : ""} style="height:3px;">&nbsp;</div>
       <mx-communicator 
+      id=${privateActionList.length == 0 ? "communicatorInputBox" : ""}
         .isDisabled=${isDisabled} 
         .isHidden=${isHidden}
         .connections=${this.connections} 

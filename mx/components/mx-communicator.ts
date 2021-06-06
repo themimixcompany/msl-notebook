@@ -61,6 +61,7 @@ export class mxCommunicator extends mxElement {
   messageReceived(event: CustomEvent) {
     this.privateActionList = event.detail;
     event.cancelBubble = true;
+      
   }
 
 
@@ -93,7 +94,7 @@ templateInputBox() {
    let socket = mx.socket.list[this.socketKey];
 
     //Setup Colors
-     let toWireColor = socket.port.type == 'msl' ? socket.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : socket.port.type == 'admin' ? socket.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
+     let toWireColor = socket.port.type == "text" ? remoteTextColor : socket.port.type == 'msl' ? socket.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : socket.port.type == 'admin' ? socket.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
 
    
   return html`
@@ -129,7 +130,7 @@ templateInputBox() {
   
       //Setup Colors
       let toSocket = mx.socket.list[socketKey];
-      let toWireColor = toSocket.port.type == 'msl' ? toSocket.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : toSocket.port.type == 'admin' ? toSocket.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : ''
+      let toWireColor = toSocket.port.type == 'msl' ? toSocket.machine.ip == 'localhost' ? this.localMslColor : this.remoteMslColor : toSocket.port.type == 'admin' ? toSocket.machine.ip == 'localhost' ? this.localAdminColor : this.remoteAdminColor : remoteTextColor
 
       //Test if socket is currently selected
       let isSelectedSocket = socketKey == this.socketKey ? true : false;
@@ -173,7 +174,6 @@ templateInputBox() {
       //Add event listeners for events targeting this component
       this.addEventListener("message-received", this.messageReceived);
 
-
       //Remember we ran once
       this.hasRun = true;
 
@@ -186,6 +186,7 @@ templateInputBox() {
     <div class="grid fixed-rows">
       ${!this.isDisabled && this.connections[this.socketKey] ? html`
       ${this.templateInputBox()}` : ""}
+      ${this.scrollIntoView()}
       ${!this.isDisabled ? this.templateConnections() : ""}
     </div>
     <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this.connector}></mx-actions>
