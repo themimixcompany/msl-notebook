@@ -6,7 +6,7 @@
 //Lit Dependencies
 import { mxElement } from 'global/mx-styles';
 import { html, css, LitElement, HTMLTemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader'
@@ -15,6 +15,9 @@ import * as mx from 'msl-js/service-loader'
 //Displays history information collected from the socket service
 @customElement('mx-actions')
 export class mxActions extends mxElement {
+
+   
+
     //CSS PROPERTIES //////////
 
     //Use shared styles
@@ -23,20 +26,41 @@ export class mxActions extends mxElement {
           super.styles,
           css``
         ];
-      }
-
-    //PRIVATE PROPERTIES
+    }
 
 
+    //PRIVATE PROPERTIES //////////
 
-    //PRIVATE PROPERTIES
 
-    //PUBLIC PROPERTIES (databinding) //////////
+    //PUBLIC PROPERTIES //////////
+
     @property() actionList: {}[] = [];
     @property() fullActions: {}[];
     @property() connector: {};
     @property() name: string;
     @property() isHidden: boolean = false;
+
+    //PRIVATE FUNCTIONS //////////
+
+    //hasSendActions()
+    //Returns true if actionList has any send actions on it. (Prevents downloading empty MSL.)
+    hasSendActions() {
+    
+        //Look for any send action and return true if found.
+        for (let actionIndex in this.fullActions) {
+
+            //Remember actionItem for testing
+            let actionItem = this.fullActions[actionIndex];
+            
+            if (actionItem["type"] == 1) {
+                return true;
+            }
+        }
+
+        //None found.
+        return false;
+
+    }
 
     //Show or Hide Actions
     showOrHide() {
@@ -80,7 +104,7 @@ export class mxActions extends mxElement {
 
         //return all results   
         return html` 
-            <div class=${this.isHidden ? "grid-fixed-rows" : "grid2"}>
+            <div class=${this.isHidden ? "grid fixed-rows" : "grid"}>
             ${itemTemplates}
             </div>
             `
@@ -141,7 +165,6 @@ export class mxActions extends mxElement {
         let actionWireColor = actionItem.toPortType == 'msl' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : actionItem.toPortType == 'admin' ? mx.machine.machines[mx.machine.index[actionItem.to]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''
   
 
-
         //Build summary action line
         let actionItemLine = html`
             <div class="whiteHeaderText veryDarkGreyBk elide" style="padding-left:10px;font-weight:900">
@@ -181,7 +204,6 @@ export class mxActions extends mxElement {
     
             <div class="whiteHeaderText veryDarkGreyBk elide" style="text-align:right;">
             
-
                 ${!this.isHidden && (actionItem.type == 1 || actionItem.type == 2) && actionItem.toPortType == "msl" ? html`
                 <a title="Download this action as MSL text." @click=${() => this.downloadMSL([actionItem])}><img src="mx/svg/M Trademark White.svg" height="18"></a>
                  ` : ""}
@@ -241,9 +263,10 @@ export class mxActions extends mxElement {
         }
 
         let responseItemValues = html`
-            <div class="greyBk" style="padding-left:8px;">
+            <div class="greyBk" style="padding-left:12px;">
             ${actionItem.number}.${responseNumber}
             </div>
+
             <div class="greyBk">
             <mx-icon color=${fromWireColor} title=${responseIconTitle} class=${responseItem.from == actionItem.to ? responseIcons[responseItem.type] : "fas fa-comment-alt-plus"}></mx-icon> ${responseNames[responseItem.type]}
             </div>
@@ -311,7 +334,9 @@ export class mxActions extends mxElement {
     
             <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
 
+                ${this.hasSendActions() ? html`
                 <a title="Download all actions' MSL text." @click=${() => this.downloadMSL(this.fullActions)}><img src="mx/svg/M Trademark White.svg" height="18"></a>
+                `:""}
                 
                 <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadActionList(this.fullActions)}></mx-icon>
 
@@ -324,7 +349,7 @@ export class mxActions extends mxElement {
         return html`
         
             ${this.actionList[0] && this.actionList[0]["number"] == 1 ? html`
-            <div class="grid-fixed-rows" style="margin-bottom:3px">
+            <div class="grid fixed-rows" style="margin-bottom:3px">
                 ${actionListHeader}
             </div>
             ` : ""}

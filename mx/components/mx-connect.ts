@@ -149,7 +149,7 @@ export class mxConnect extends mxElement {
         <a @click=${() => this.connectMachine(machineKey)} title="Connect to all ports on ${machineKey}."><span>${machineKey}</span></a>
       </div>
 
-      <div class="grid-fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.list[machineKey].ports.length},1fr);">
+      <div class="grid fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.list[machineKey].ports.length},1fr);">
 
         ${mx.machine.list[machineKey].ports.map((portKey: string) => html`
         <div class="greyBk">
@@ -161,8 +161,10 @@ export class mxConnect extends mxElement {
       </div>
 
       <div class="greyBk whiteHeaderText" style="text-align:right">
-      ${machineKey == Object.keys(machine.list)[0] ? html`
-      <mx-icon title="Download the port list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.ports,"ports")}></mx-icon>
+      
+        ${machineKey == Object.keys(machine.list)[0] ? html`
+        <mx-icon title="Download the port list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.ports,"ports")}></mx-icon>
+
       </div>
       ` : ""}
     `})}
@@ -192,10 +194,10 @@ export class mxConnect extends mxElement {
         </div>
 
         ${!mx.machine.groups[groupKey].ports ? html`
-        <div class="grid-fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); ">
+        <div class="grid fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); ">
           ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
             <div class="machine greyBk" style="font-weight:200">
-              <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-router" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey,"msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey,"admin") ?  mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
+              <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-server" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey,"msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey,"admin") ?  mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
               ${machineKey}
             </div>
           `)}
@@ -203,13 +205,13 @@ export class mxConnect extends mxElement {
         `: ""}
 
         ${mx.machine.groups[groupKey].ports ? html`
-        <div style="grid-column: 3/span 3; display: grid; gap: 3px; grid-template-columns: repeat(${mx.machine.groups[groupKey].ports?.length},1fr); grid-auto-rows: 28pt;">
+        <div class="grid fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.groups[groupKey].ports?.length},1fr);">
 
             ${mx.machine.groups[groupKey].ports.map((portPair: string[]) => html`
-            <div class="grid-fixed-rows" style="grid-template-columns: repeat(2,1fr);">
+            <div class="greyBk grid fixed-rows" style="grid-template-columns: repeat(2,1fr);">
 
               ${portPair.map((socketKey) => html`
-                <div class="machine greyBk elide" style="font-weight:200">
+                <div class="greyBk elide" style="font-weight:200">
 
                     ${socketKey == portPair[1] ? html`
                       <mx-icon title="${portPair[0]} relays to ${portPair[1]}" class="fas fa-arrow-alt-right"></mx-icon>
@@ -368,21 +370,16 @@ export class mxConnect extends mxElement {
 
     }
 
-    let machineListHeader = html`
+    let machineHeader = html`
     <div class="whiteHeaderText darkGreyBk">
     </div>
 
     <div class="whiteHeaderText darkGreyBk">
-        <div>
-            <mx-icon title="Available machines." class="fas fa-server"></mx-icon> machines
-        </div
-        <div>
-            
-        </div>
+      <mx-icon title="Available machines." class="fas fa-server"></mx-icon> machines
     </div>
 
     <div class="whiteHeaderText darkGreyBk" style="grid-column: 3/span 3">
-    <mx-icon title="Machines which are part of the group." class="fas fa-router"></mx-icon> ports
+      <mx-icon title="Machines which are part of the group." class="fas fa-router"></mx-icon> ports
     </div>
 
 
@@ -397,15 +394,13 @@ export class mxConnect extends mxElement {
 
     `
 
-    let groupListHeader = html`
+    let groupHeader = html`
     <div class="whiteHeaderText darkGreyBk">
   
     </div>
 
     <div class="whiteHeaderText darkGreyBk" style="grid-column: 2/span 4">
-        <div>
             <mx-icon title="Available groups." class="fas fa-network-wired"></mx-icon> groups
-        </div>
     </div>
 
     <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
@@ -420,13 +415,13 @@ export class mxConnect extends mxElement {
 
     return html`
 
-    <div class="grid-fixed-rows">
-      ${groupListHeader}
+    <div class="grid fixed-rows">
+      ${groupHeader}
       ${!this.isGroupsHidden ? this.templateGroups() : ""}
     </div>
 
-    <div class="grid-fixed-rows" style="margin-top:3px;">
-      ${machineListHeader}
+    <div class="grid fixed-rows" style="margin-top:3px;">
+      ${machineHeader}
       ${!this.isMachinesHidden ? this.templateMachines() : ""}
       ${this.templateConnectURL()}
     </div>

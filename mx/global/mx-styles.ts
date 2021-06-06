@@ -10,30 +10,43 @@ import {customElement} from 'lit/decorators.js';
 export class mxElement extends LitElement {
   static styles = css`
 
+    /* Elements */
+
+    /* Text */
     ol, ul, input, div { font-family: Inter; font-size: 18pt }
+
+    /* Links */
     a {text-decoration: none; cursor: pointer;}
     a:hover {text-decoration: underline}
 
-    .elide {text-overflow: ellipsis; overflow: hidden; white-space: nowrap}
-    .greyBk {background-color:#ccc; padding:5px;}
-    .darkGreyBk {background-color:#aaa; padding:5px;}
-    .veryDarkGreyBk {background-color:#606060; padding:5px;}
-    .activeBk {background-color:navy; padding:5px;}
-    .gridHeader {background-color:#bbb; font-family: Inter; font-size: 20pt }
+    /* Text Classes */
+    .elide {text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
     .whiteHeaderText {color:white;font-weight:500;}
 
-    .grid-fixed-rows {
+    /* Background Colors */
+    .veryDarkGreyBk {background-color:#606060;}
+    .darkGreyBk {background-color:#aaa;}
+    .gridHeader {background-color:#bbb;}
+    .greyBk {background-color:#ccc;}
+    .activeBk {background-color:navy;}
+  
+    /* Grids */
+    .grid {
       display: grid;
       grid-template-columns: 100px 175px 1fr 250px 250px 110px;
-      grid-auto-rows: 30pt;
       gap: 3px;
     }
-    .grid2 {
-        display: grid;
-        grid-template-columns: 100px 175px 1fr 250px 250px 110px;
-        gap: 3px;
-      }
+    .fixed-rows {
+      grid-auto-rows: 30pt;
+    
+    }
+
+    /* Grid-Classed Elements */
+    .grid div {padding:5px;}
+    .grid div.grid {padding:0px;}
     `;
+
+   
 
   protected render() {
     return html`

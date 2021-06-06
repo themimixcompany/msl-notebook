@@ -148,7 +148,7 @@ templateInputBox() {
 
     return html`
 
-          <div class="grid-fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
+          <div class="grid fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${Object.keys(this.connections).length},1fr)">
           ${connectionList}
           </div>
 
@@ -183,7 +183,7 @@ templateInputBox() {
     //RENDER TEMPLATE
 
     return html`
-    <div class="grid-fixed-rows">
+    <div class="grid fixed-rows">
       ${!this.isDisabled && this.connections[this.socketKey] ? html`
       ${this.templateInputBox()}` : ""}
       ${!this.isDisabled ? this.templateConnections() : ""}
