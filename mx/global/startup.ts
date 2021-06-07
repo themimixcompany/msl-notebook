@@ -33,7 +33,7 @@
 
 // VERSION //////////
 const mslNotebook = {
-    version: "2.0.7"
+    version: "2.0.8"
 };
 
 
@@ -86,9 +86,8 @@ const downloadJSON = (content: {} | [], fileName:string = "jsonObject") => {
 //downloadText
 //Download a text file
 const downloadText = (content:string, fileName) => {
-    downloadFile(content, fileName, "text/plain")
+    downloadFile(content, fileName, "text/msl")
 }
-
 
 //downloadActionList
 //Download the action list w/o the notify component

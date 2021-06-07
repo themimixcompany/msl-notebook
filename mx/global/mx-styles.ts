@@ -22,13 +22,17 @@ export class mxElement extends LitElement {
     /* Text Classes */
     .elide {text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
     .whiteHeaderText {color:white;font-weight:500;}
+    .light {font-weight:200;}
+    .right {text-align:right;}
+    .small {font-size:12pt;}
+    .bottom {vertical-align:bottom;}
 
     /* Background Colors */
     .veryDarkGreyBk {background-color:#606060;}
     .darkGreyBk {background-color:#aaa;}
     .gridHeader {background-color:#bbb;}
     .greyBk {background-color:#ccc;}
-    .activeBk {background-color:navy;}
+    .activeBk {background-color:#aaa;}
 
     img {color:currentColor}
   
@@ -47,8 +51,6 @@ export class mxElement extends LitElement {
     .grid div {padding:5px;}
     .grid div.grid {padding:0px;}
     `;
-
-   
 
   protected render() {
     return html`

@@ -6,7 +6,7 @@
 //Lit Dependencies
 import { mxElement } from 'global/mx-styles';
 import { html, css, LitElement, CSSResult, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 //MSL.js Services
 import * as mx from 'msl-js/service-loader';
@@ -36,6 +36,9 @@ export class mxCommunicator extends mxElement {
    remoteMslColor = "#00A1F1";
    remoteAdminColor = "#7CBB00";
 
+  //PRIVATE PROPERTIES
+  @state() privateActionList: {}[] = [];
+
   // PUBLIC PROPERTIES //////////
 
   //Define public properties (databinding)
@@ -43,9 +46,10 @@ export class mxCommunicator extends mxElement {
   @property() message: string = "";
   @property() isHidden: boolean = false;
   @property() isDisabled: boolean = false;
+  @property() isMSLText: boolean = false;
   @property() actionList: {}[] = [];
   @property() connections: {} = {};
-  @property() privateActionList: {}[] = [];
+  
   @property() connector
 
 
@@ -198,13 +202,21 @@ templateInputBox() {
     //RENDER TEMPLATE
 
     return html`
+    ${!this.isDisabled && this.connections[this.socketKey] ? html`
     <div class="grid fixed-rows">
-      ${!this.isDisabled && this.connections[this.socketKey] ? html`
-      ${this.templateInputBox()}` : ""}
+      ${this.templateInputBox()}
       ${this.scrollIntoView()}
-      ${!this.isDisabled ? this.templateConnections() : ""}
+      ${this.templateConnections()}
     </div>
-    <mx-actions .isHidden=${this.isHidden} .actionList=${this.privateActionList} .fullActions=${this.actionList} .name=${this.socketKey} .connector=${this.connector}></mx-actions>
+    `:""}
+    <mx-actions .isHidden=${this.isHidden}
+                .isDisabled=${this.isDisabled} 
+                .actionList=${this.privateActionList} 
+                .fullActions=${this.actionList}
+                .isMSLText=${this.isMSLText}
+                .name=${this.socketKey} 
+                .connector=${this.connector}>
+                </mx-actions>
     `
   }
 }

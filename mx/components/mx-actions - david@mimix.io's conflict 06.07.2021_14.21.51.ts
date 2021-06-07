@@ -332,39 +332,15 @@ export class mxActions extends mxElement {
                 <mx-icon title="Actions you take will appear here after you connect." class="fas fa-cogs"></mx-icon> actions
         </div>
 
-        ${this.fullActions.length == 0 ? html`
         <div class="whiteHeaderText darkGreyBk light" style="grid-column:3/span 2">
         Click a <mx-icon class="fas fa-network-wired"></mx-icon> group, <mx-icon class="fas fa-server"></mx-icon> machine, or <mx-icon class="fas fa-router"></mx-icon> port name to connect.
         </div>
-        `:""}
-        
-        ${this.fullActions.length > 0 ? html`
-        <div class="whiteHeaderText darkGreyBk">
-            <mx-icon title="Messages in this action." class="fas fa-envelope"></mx-icon> messages
-        </div>
 
-        <div class="whiteHeaderText darkGreyBk">
-            <mx-icon title="The socket a response came from." class="fas fa-router">
-            </mx-icon>
-            from
-        </div>
-        `:""}
-
-        <div class="grid fixed-rows darkGreyBk" style="grid-template-columns: repeat(2,1fr);">
-            <div class="whiteHeaderText darkGreyBk">
-                ${this.fullActions.length > 0 ? html`
-                <mx-icon title="The socket an action was sent to." class="fas fa-router">
-                </mx-icon>
-                to
-                `:""}
-            </div>
-            
-            <div class="whiteHeaderText darkGreyBk right">
+        <div class="whiteHeaderText darkGreyBk right">
                 ${this.hasSendActions() ? html`
                 <img @click=${() => this.setFiletypeMSL(true)} style="cursor:pointer;" title="Use MSL for action uploads and downloads." src="mx/svg/M Trademark ${this.isMSLText ? "White" : "Grey"}.svg" height="18">
                 `:""}
                 <mx-icon @click=${() => this.setFiletypeMSL(false)} style="cursor:pointer;" color=${!this.isMSLText ? "currentColor" : "lightGrey"} title="Use JSON for action uploads and downloads." class="fab fa-js"></mx-icon>
-            </div>
         </div>
 
     
@@ -411,11 +387,18 @@ export class mxActions extends mxElement {
         `
 
         return html`
-        ${this.fullActions.length == 0 || (this.actionList[0] && this.actionList[0]["number"] == 1) ? html`
-                <div class="grid fixed-rows" style="margin-bottom:3px;margin-top:15px;">
+
+        ${this.fullActions.length == 0 || this.actionList["number"] == 1 ? html`
+                <div class="grid fixed-rows" style="margin-bottom:3px;">
                     ${actionHeaderOnly}
                 </div>
                 `:""}
+
+        ${this.actionList[0] && this.actionList[0]["number"] == 1 ? html`
+                <div class="grid fixed-rows" style="margin-bottom:3px">
+                    ${actionListHeader}
+                </div>
+                ` : ""}
 
         ${this.actionList[0] ? this.templateList() : ""}
         `}

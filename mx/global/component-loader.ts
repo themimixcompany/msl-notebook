@@ -12,7 +12,7 @@ export * from "components/mx-actions";
 export * from "components/mx-debug";
 export * from "components/mx-greeting";
 export * from "components/mx-icon";
-export * from "components/mx-logo";
+export * from "components/mx-header";
 export * from "components/mx-footer";
 
 //Export Views

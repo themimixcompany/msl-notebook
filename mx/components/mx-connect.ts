@@ -32,11 +32,12 @@ export class mxConnect extends mxElement {
   // PRIVATE PROPERTIES //////////
 
   @state() isActionsHidden: boolean = true;
-  @state() emptyCommunicator;
+  @state() emptyCommunicator: TemplateResult;
   @state() url: string = "";
-  @state() communicators;
-  @state() isGroupsHidden = false;
-  @state() isMachinesHidden = false;
+  @state() communicators: {};
+  @state() isGroupsHidden: boolean = false;
+  @state() isMachinesHidden: boolean = false;
+  @state() isMSLText: boolean = false;
 
   // PUBLIC PROPERTIES /////////
 
@@ -97,6 +98,14 @@ export class mxConnect extends mxElement {
     this.communicators = this.templateCommunicators();
 
   }
+
+  //Switch MSL to JSON or back
+  filetypeChanged(receivedEvent: CustomEvent) {
+    this.isMSLText = receivedEvent.detail;
+    //Update communicators
+    this.communicators = this.templateCommunicators();
+
+  } 
 
 
   //PORT connect link clicked
@@ -185,7 +194,7 @@ export class mxConnect extends mxElement {
         ${!mx.machine.groups[groupKey].ports ? html`
         <div class="grid fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); ">
           ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
-            <div class="machine greyBk" style="font-weight:200">
+            <div class="machine greyBk light">
               <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-server" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey, "admin") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
               ${machineKey}
             </div>
@@ -236,12 +245,6 @@ export class mxConnect extends mxElement {
       //Get the action item itself.
       let actionItem = this.actionList[actionIndex];
 
-      //Hide type 0 connect communicators by default.
-      let isHidden = this.isActionsHidden;
-      if (actionItem["type"] == 0) {
-        isHidden = true;
-      }
-
       //Decide if communicator is hidden. Unhide last item by default.
       let isCommunicatorHidden = this.isActionsHidden
 
@@ -283,9 +286,10 @@ export class mxConnect extends mxElement {
     return html`
       <div id=${privateActionList.length == 0 ? "communicatorInputBox" : ""} style="height:3px;">&nbsp;</div>
       <mx-communicator 
-      id=${privateActionList.length == 0 ? "communicatorInputBox" : ""}
+        id=${privateActionList.length == 0 ? "communicatorInputBox" : ""}
         .isDisabled=${isDisabled} 
         .isHidden=${isHidden}
+        .isMSLText=${this.isMSLText}
         .connections=${this.connections} 
         .socketKey=${socketKey} 
         .actionList=${this.actionList} 
@@ -295,26 +299,6 @@ export class mxConnect extends mxElement {
   `
   }
 
-
-  //Visual key template. Explains icons and colors.
-  templateVisualKey() {
-    return html`
-    <div class="machine greyBk threeRows">
-      <mx-icon class="fas fa-key"></mx-icon><span style="font-weight:600">key</span>
-      <p><mx-icon class="fas fa-server" color="#ec2028"></mx-icon>local msl engine</p>
-      <p><mx-icon class="fas fa-router" color="#ec2028"></mx-icon>local msl port</p>
-      <p><mx-icon class="fas fa-router" color="orange"></mx-icon>local admin port</p>
-      <p><mx-icon class="fas fa-server" color="navy"></mx-icon>remote msl engine</p>
-      <p><mx-icon class="fas fa-router" color="navy"></mx-icon>remote msl port</p>
-      <p><mx-icon class="fas fa-router" color="purple"></mx-icon>remote admin port</p>
-      <p><mx-icon class="fas fa-server"></mx-icon>websocket server</p>
-      <p><mx-icon class="fas fa-router"></mx-icon>websocket text port</p>
-      <p><mx-icon class="fas fa-network-wired" color="navy"></mx-icon>type relay group</p>
-      <p><mx-icon class="fas fa-project-diagram" color="navy"></mx-icon>port relay group</p>
-      <p><mx-icon class="fas fa-object-ungroup" color="navy"></mx-icon>non-relay group</p>
-    </div>
-    `
-  }
 
   //Connect to URL template. Creates a connection from URL typed in the box.
   templateConnectURL() {
@@ -352,7 +336,10 @@ export class mxConnect extends mxElement {
       this.addEventListener("status-changed", this.statusChanged);
       this.addEventListener("actions-changed", this.actionsChanged);
       this.addEventListener("actions-hidden", this.actionsHiddenChanged)
+      this.addEventListener("filetype-changed", this.filetypeChanged)
 
+       //Display an empty communicator (action header only)
+      this.emptyCommunicator = this.templateSingleCommunicator(undefined, this.actionList)
 
       //Remember we ran once
       this.hasRun = true;
@@ -415,13 +402,9 @@ export class mxConnect extends mxElement {
       ${this.templateConnectURL()}
     </div>
 
-    <br>
     ${this.communicators}
     ${this.emptyCommunicator}
-
     <br>
-   
-  
   `;
   }
 }
