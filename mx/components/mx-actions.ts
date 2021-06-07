@@ -332,13 +332,13 @@ export class mxActions extends mxElement {
                 <mx-icon title="Actions you take will appear here after you connect." class="fas fa-cogs"></mx-icon> actions
         </div>
 
-        ${this.fullActions.length == 0 ? html`
+        ${Object.keys(mx.socket.list).length == 0 ? html`
         <div class="whiteHeaderText darkGreyBk light" style="grid-column:3/span 2">
         Click a <mx-icon class="fas fa-network-wired"></mx-icon> group, <mx-icon class="fas fa-server"></mx-icon> machine, or <mx-icon class="fas fa-router"></mx-icon> port name to connect.
         </div>
         `:""}
         
-        ${this.fullActions.length > 0 ? html`
+        ${Object.keys(mx.socket.list).length > 0 ? html`
         <div class="whiteHeaderText darkGreyBk">
             <mx-icon title="Messages in this action." class="fas fa-envelope"></mx-icon> messages
         </div>
@@ -352,7 +352,7 @@ export class mxActions extends mxElement {
 
         <div class="grid fixed-rows darkGreyBk" style="grid-template-columns: repeat(2,1fr);">
             <div class="whiteHeaderText darkGreyBk">
-                ${this.fullActions.length > 0 ? html`
+                ${Object.keys(mx.socket.list).length > 0 ? html`
                 <mx-icon title="The socket an action was sent to." class="fas fa-router">
                 </mx-icon>
                 to
