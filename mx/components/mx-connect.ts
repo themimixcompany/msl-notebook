@@ -15,16 +15,16 @@ import { machine } from 'msl-js/service-loader';
 //<mx-connect>
 @customElement('mx-connect')
 export class mxConnect extends mxElement {
-  
+
   //CSS PROPERTIES //////////
 
-    //Use shared styles
-    static get styles() {
-      return [
-        super.styles,
-        css``
-      ];
-    }
+  //Use shared styles
+  static get styles() {
+    return [
+      super.styles,
+      css``
+    ];
+  }
 
   //Setup for Run Once
   hasRun = false;
@@ -57,6 +57,8 @@ export class mxConnect extends mxElement {
       mx.socket.connect(this.url, this, this.actionList);
     }
   }
+
+  
 
   //Machines changed
   machinesChanged(receivedEvent: CustomEvent) {
@@ -96,25 +98,6 @@ export class mxConnect extends mxElement {
 
   }
 
-  //Setup last (empty, current) communicator with values
-  communicatorChanged(event: CustomEvent) {
-
-    console.log("communicator changed")
-
-    let { socketKey, message } = event.detail;
-    let payload = {
-      "socketKey": socketKey,
-      "message": message
-    }
-
-    //If the requested socket is live...
-    if (this.connections[socketKey]) {
-
-      //Retemplate it with new values
-      this.emptyCommunicator = this.templateSingleCommunicator(socketKey);
-    }
-
-  }
 
   //PORT connect link clicked
   connectPort(machineKey: string, portKey: string) {
@@ -169,7 +152,7 @@ export class mxConnect extends mxElement {
       <div class="greyBk whiteHeaderText" style="text-align:right">
       
         ${machineKey == Object.keys(machine.list)[0] ? html`
-        <mx-icon title="Download the port list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.ports,"ports")}></mx-icon>
+        <mx-icon title="Download the port list as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.ports, "ports")}></mx-icon>
 
       </div>
       ` : ""}
@@ -177,19 +160,19 @@ export class mxConnect extends mxElement {
     `
   }
 
-    //Groups template. Draws one panel for each group.
-    templateGroups() {
+  //Groups template. Draws one panel for each group.
+  templateGroups() {
+
+    return html`
+      ${mx.machine.groupKeys.map(groupKey => {
+
+      //Setup group icon
+      let groupIcon = mx.machine.groups[groupKey].ports ? "fas fa-project-diagram" : mx.machine.groups[groupKey].type ? "fas fa-network-wired" : "fas fa-object-ungroup"
+
+      //Setup group tooltip
+      let groupTooltip = mx.machine.groups[groupKey].ports ? `The ${groupKey} group defines specific relay ports.` : mx.machine.groups[groupKey].type ? `The ${groupKey} group relays messages between ${mx.machine.groups[groupKey].type} ports.` : `The ${groupKey} group opens the machines without any relays.`
 
       return html`
-      ${mx.machine.groupKeys.map(groupKey => {
-  
-        //Setup group icon
-        let groupIcon = mx.machine.groups[groupKey].ports ? "fas fa-project-diagram" : mx.machine.groups[groupKey].type ? "fas fa-network-wired" : "fas fa-object-ungroup"
-  
-        //Setup group tooltip
-        let groupTooltip = mx.machine.groups[groupKey].ports ? `The ${groupKey} group defines specific relay ports.` : mx.machine.groups[groupKey].type ? `The ${groupKey} group relays messages between ${mx.machine.groups[groupKey].type} ports.` : `The ${groupKey} group opens the machines without any relays.`
-  
-        return html`
         <div class="machine greyBk">
         </div>
   
@@ -203,7 +186,7 @@ export class mxConnect extends mxElement {
         <div class="grid fixed-rows" style="grid-column: 3/span 3; grid-template-columns: repeat(${mx.machine.groups[groupKey].machines.length},1fr); ">
           ${mx.machine.groups[groupKey].machines.map((machineKey: string) => html`
             <div class="machine greyBk" style="font-weight:200">
-              <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-server" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey,"msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey,"admin") ?  mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
+              <mx-icon title="${!mx.machine.groups[groupKey].relay ? `The ${groupKey} group will open all ports on ${machineKey} without any relays.` : `The ${groupKey} group will open all ports on ${mx.machine.machines[machineKey].ip == "localhost" ? "local" : "remote"} machine ${machineKey} and relay ${mx.machine.groups[groupKey].type} messages to other machines in the group.`}" class="fas fa-server" color=${mx.machine.groups[groupKey].type == 'msl' || mx.machine.hasType(machineKey, "msl") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.groups[groupKey].type == 'admin' || mx.machine.hasType(machineKey, "admin") ? mx.machine.list[machineKey]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''}></mx-icon>
               ${machineKey}
             </div>
           `)}
@@ -223,7 +206,7 @@ export class mxConnect extends mxElement {
                       <mx-icon color="white" title="${portPair[0]} relays to ${portPair[1]}" class="fas fa-arrow-alt-right"></mx-icon>
                     ` : ""}
 
-                    <mx-icon color=${mx.machine.index[socketKey]["type"] == 'text' ? remoteTextColor : mx.machine.index[socketKey]["type"] == 'msl' ? mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.index[socketKey]["type"] == 'admin' ?  mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''} title=${`The ${groupKey} group will relay from ${portPair[0]} to ${portPair[1]}.`} class="fas fa-router"}>
+                    <mx-icon color=${mx.machine.index[socketKey]["type"] == 'text' ? remoteTextColor : mx.machine.index[socketKey]["type"] == 'msl' ? mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localMslColor : remoteMslColor : mx.machine.index[socketKey]["type"] == 'admin' ? mx.machine.list[mx.machine.index[socketKey]["machineKey"]]["ip"] == 'localhost' ? localAdminColor : remoteAdminColor : ''} title=${`The ${groupKey} group will relay from ${portPair[0]} to ${portPair[1]}.`} class="fas fa-router"}>
                     </mx-icon>
 
                     ${socketKey}
@@ -239,7 +222,7 @@ export class mxConnect extends mxElement {
         </div>
       `})}
       `
-    }
+  }
 
   //Template all communicators. Draws one communicator for each action item.
   templateCommunicators() {
@@ -368,7 +351,6 @@ export class mxConnect extends mxElement {
       this.addEventListener("machines-changed", this.machinesChanged);
       this.addEventListener("status-changed", this.statusChanged);
       this.addEventListener("actions-changed", this.actionsChanged);
-      this.addEventListener("communicator-changed", this.communicatorChanged);
       this.addEventListener("actions-hidden", this.actionsHiddenChanged)
 
 
@@ -392,7 +374,7 @@ export class mxConnect extends mxElement {
 
         <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
 
-        <mx-icon title="Download the machine list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.machines,"machines")}></mx-icon>
+        <mx-icon title="Download the machine list as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.machines, "machines")}></mx-icon>
         
             <mx-icon @click=${() => this.isMachinesHidden = !this.isMachinesHidden} style="cursor:pointer;" color=${this.isMachinesHidden ? "currentColor" : "lightGrey"} title="${this.isMachinesHidden ? "Show" : "Hide"} the machine list."  class=${this.isMachinesHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
@@ -412,7 +394,7 @@ export class mxConnect extends mxElement {
 
     <div class="whiteHeaderText darkGreyBk elide" style="text-align:right;">
 
-    <mx-icon title="Download the group list as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.groups,"groups")}></mx-icon>
+    <mx-icon title="Download the group list as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${() => downloadJSON(mx.machine.groups, "groups")}></mx-icon>
 
         <mx-icon @click=${() => this.isGroupsHidden = !this.isGroupsHidden} style="cursor:pointer;" color=${this.isGroupsHidden ? "currentColor" : "lightGrey"} title="${this.isGroupsHidden ? "Show" : "Hide"} the group list."  class=${this.isGroupsHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
@@ -436,6 +418,7 @@ export class mxConnect extends mxElement {
     <br>
     ${this.communicators}
     ${this.emptyCommunicator}
+
     <br>
    
   

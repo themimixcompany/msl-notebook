@@ -85,6 +85,14 @@ export class mxActions extends mxElement {
         downloadText(mx.socket.msl(actionList), fileName)
     }
 
+    //Action upload
+    uploadActionList = async (event: Event) => {
+    await uploadJSON(event).then(value => {
+      mx.socket.notify(this.connector,"actions-changed",value);
+    }
+    );
+  }
+
     //Close socket
     closeSocket(socketKey) {
         mx.socket.list[socketKey].mxClose(this, this.fullActions);
@@ -208,7 +216,7 @@ export class mxActions extends mxElement {
                 <a title="Download this action as MSL text." @click=${() => this.downloadMSL([actionItem])}><img src="mx/svg/M Trademark White.svg" height="18"></a>
                  ` : ""}
 
-                ${!this.isHidden ? html`<mx-icon title="Download this action and its responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadActionItem(actionItem)}></mx-icon>` : ""}
+                ${!this.isHidden ? html`<mx-icon title="Download this action and its responses as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${() => downloadActionItem(actionItem)}></mx-icon>` : ""}
 
                 <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} action ${actionItem.number}: ${actionNames[actionItem.type]}, and its responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
@@ -338,7 +346,7 @@ export class mxActions extends mxElement {
                 <a title="Download all actions' MSL text." @click=${() => this.downloadMSL(this.fullActions)}><img src="mx/svg/M Trademark White.svg" height="18"></a>
                 `:""}
                 
-                <mx-icon title="Download all actions and responses as JSON." class="fas fa-file-export" style="cursor:pointer" @click=${() => downloadActionList(this.fullActions)}></mx-icon>
+                <mx-icon @mouseover=${(e) => {e.shiftKey ? (e.target.class = "fas fa-file-upload") && (e.target.title = "Upload a new action list.") : ""}} @mouseout=${(e) => {(e.target.class = "fas fa-file-download") && (e.target.title="Download all actions and responses as JSON.")}} title="Download all actions and responses as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${(e) => !e.shiftKey ? downloadActionList(this.fullActions) : fileChooser(this.uploadActionList)}></mx-icon>
 
                 <mx-icon @click=${() => this.showOrHide()} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} all actions and responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
                 
@@ -346,8 +354,7 @@ export class mxActions extends mxElement {
 
         `
 
-        return html`
-        
+        return html`        
             ${this.actionList[0] && this.actionList[0]["number"] == 1 ? html`
             <div class="grid fixed-rows" style="margin-bottom:3px">
                 ${actionListHeader}

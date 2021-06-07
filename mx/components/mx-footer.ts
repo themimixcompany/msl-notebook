@@ -20,6 +20,7 @@ export class mxFooter extends LitElement {
   //Show this component on screen
   render() {
     return html`
+    <br>
     <a href="https://mimix.io" title="MSL Notebook is a product of The Mimix Company. Enjoy!"><img src="${logo}" style="height:30px;margin-bottom:20px;margin-top:10px;"></a> 
     `;
   }

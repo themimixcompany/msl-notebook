@@ -33,7 +33,7 @@
 
 // VERSION //////////
 const mslNotebook = {
-    version: "2.0.6"
+    version: "2.0.7"
 };
 
 
@@ -112,6 +112,39 @@ const downloadActionItem = (actionItem: {}, name ?: string) => {
     downloadJSON(actionItemCopy, `${name ? name : `${actionNames[actionItem["type"]]}-${actionItem["to"]}`}.json`);
 }
 
+// FILE UPLOADING
+
+//    <input @change=${this.uploadActionList} type="file" id="file" name="file">
+const fileChooser = (uploadFunction) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = uploadFunction;
+    input.click();
+}
+
+const uploadFile = (event: Event): File => {
+    const uploadedFile: File = event.target["files"][0];
+    return uploadedFile;
+}
+
+const uploadText = async (event: Event): Promise<string> => {
+    const uploadedFile: File = uploadFile(event);
+    const uploadedFileText = await uploadedFile.text(); 
+    return uploadedFileText;
+}
+
+const uploadJSON = async (event: Event): Promise<{}> => {
+    const uploadedText = await uploadText(event);
+    let uploadedJSON = {};
+
+    try {
+        uploadedJSON = JSON.parse(uploadedText);
+        return uploadedJSON;
+    } catch (error) {
+        return false;
+    }
+
+}
 
 
 // START APPLICATION //////////

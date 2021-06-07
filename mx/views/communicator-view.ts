@@ -33,6 +33,7 @@ export class communicatorView extends LitElement {
     </ol>
 
     <mx-connect></mx-connect>
+   
     <!-- <mx-debug></mx-debug> -->
     `
   }
