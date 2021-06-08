@@ -308,11 +308,11 @@ export class mxConnect extends mxElement {
 
     <div class="greyBk">
       <mx-icon title="Add a new machine." class="fas fa-arrow-alt-right"></mx-icon>
-      <mx-icon title="Type a URL in the box and press Enter to connect to a machine that's not on thie list." class="fas fa-server"></mx-icon>
+      <mx-icon title="Type a websocket address in the box and press Enter to connect to a new machine." class="fas fa-server"></mx-icon>
     </div>
 
-    <div style="grid-column: 3/ span 3;padding-left:0px;padding-top:0px;padding-right:8px;padding-bottom: 4px">
-    <input @keydown=${this.urlKeyDown} placeholder="echo.websocket.org" style="width:100%;height:100%;padding-left:5px">
+    <div style="grid-column: 3/ span 3;padding-left:0px;padding-top:0px;padding-right:8px;padding-bottom: 6px">
+      <input @keydown=${this.urlKeyDown} placeholder="echo.websocket.org" style="width:100%;height:100%;padding-left:5px">
     </div>
 
     <div class="greyBk">
@@ -355,7 +355,7 @@ export class mxConnect extends mxElement {
     </div>
 
     <div class="whiteHeaderText darkGreyBk" style="grid-column: 3/span 3">
-      <mx-icon title="Machines which are part of the group." class="fas fa-router"></mx-icon> ports
+      <mx-icon title="Available ports on the machine." class="fas fa-router"></mx-icon> ports
     </div>
 
 

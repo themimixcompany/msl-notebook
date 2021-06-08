@@ -130,7 +130,7 @@ templateInputBox() {
       send
     </div>
 
-    <div style="grid-column:3/span 3;padding-left:0px;padding-right:8px;padding-bottom:4px;">
+    <div style="grid-column:3/span 3;padding-left:0px;padding-right:8px;padding-bottom:6px;padding-top:0px;">
       <input ?disabled=${this.isDisabled} style="width:100%;height:100%;padding-left:5px" @keydown=${this.mslBoxKeyDown} placeholder="${socket?.port.type}"></input>
     </div>
 
@@ -161,7 +161,7 @@ templateInputBox() {
       //Create the icon and socketKey for each available connection
       connectionList = html`${connectionList}
       <div class="activeBk whiteHeaderText elide">
-        <mx-icon style="cursor:pointer;opacity:${opacity}" @click=${() => this.socketKey = socketKey} title=${this.socketKey ? `Direct your message to ${socketKey}` : ""} class="fas fa-router" color=${toWireColor}></mx-icon><a style="opacity:${opacity}" title=${`Direct your message to ${socketKey}`} @click=${() => this.socketKey = socketKey}>${socketKey}</a>
+        <mx-icon style="cursor:pointer;opacity:${opacity}" @click=${() => this.socketKey = socketKey} title=${this.socketKey ? `Direct your message to ${socketKey}` : ""} class="fas fa-router" color=${toWireColor}></mx-icon><a style="opacity:${opacity}" title=${`Direct your message to ${socketKey}.`} @click=${() => this.socketKey = socketKey}>${socketKey}</a>
       </div>
       `
     }

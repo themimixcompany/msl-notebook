@@ -214,7 +214,7 @@ export class mxActions extends mxElement {
             </div>
      
             <div class="whiteHeaderText veryDarkGreyBk elide">
-                <mx-icon color=${toWireColor} title="The socket the action was sent to." class="fas fa-router">
+                <mx-icon color=${toWireColor} title="The socket the ${actionNames[actionItem.type]} was sent to." class="fas fa-router">
                 </mx-icon>
                 ${actionItem.to}
             </div>
@@ -222,15 +222,15 @@ export class mxActions extends mxElement {
             <div class="whiteHeaderText veryDarkGreyBk elide" style="text-align:right;">
 
                 ${!this.isHidden && this.isMSLText && (actionItem.type == 1 || actionItem.type == 2) && actionItem.toPortType == "msl" ? html`
-                <img title="This action can be downloaded as MSL." src="mx/svg/M Trademark White.svg" height="18">
-                <mx-icon title="Download this action as MSL text." class="fas fa-file-download" style="cursor:pointer" @click=${() => this.downloadMSL([actionItem])}></mx-icon>
+                <img title="This ${actionNames[actionItem.type]} can be downloaded as MSL." src="mx/svg/M Trademark White.svg" height="18">
+                <mx-icon title="Download this ${actionNames[actionItem.type]} as MSL." class="fas fa-file-download" style="cursor:pointer" @click=${() => this.downloadMSL([actionItem])}></mx-icon>
                  ` : ""}
 
                 ${!this.isHidden && (!this.isMSLText || (actionItem.type != 1 && actionItem.type != 2)) ? html`
-                <mx-icon title="This action can be downloaded as JSON." class="fab fa-js"></mx-icon>
-                <mx-icon title="Download this action and its responses as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${() => downloadActionItem(actionItem)}></mx-icon>` : ""}
+                <mx-icon title="This ${actionNames[actionItem.type]} can be downloaded as JSON." class="fab fa-js"></mx-icon>
+                <mx-icon title="Download this ${actionNames[actionItem.type]} and its responses as JSON." class="fas fa-file-download" style="cursor:pointer" @click=${() => downloadActionItem(actionItem)}></mx-icon>` : ""}
 
-                <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} action ${actionItem.number}: ${actionNames[actionItem.type]}, and its responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
+                <mx-icon @click=${() => this.isHidden = !this.isHidden} style="cursor:pointer;" color=${this.isHidden ? "currentColor" : "lightGrey"} title="${this.isHidden ? "Show" : "Hide"} this ${actionNames[actionItem.type]} and its responses."  class=${this.isHidden ? "fas fa-eye" : "fas fa-eye-slash"}></mx-icon>
 
             </div>
  
@@ -304,7 +304,7 @@ export class mxActions extends mxElement {
             </div>
 
             <div class="greyBk">
-            ${responseItem.to ? html`<mx-icon class="fas fa-router" color=${toWireColor}></mx-icon>` : ""}
+            ${responseItem.to ? html`<mx-icon title="The message is in response to one you originally sent from ${responseItem.to}." class="fas fa-router" color=${toWireColor}></mx-icon>` : ""}
             ${responseItem.to}
             </div>
            
@@ -329,7 +329,7 @@ export class mxActions extends mxElement {
         </div>
 
         <div class="whiteHeaderText darkGreyBk">
-                <mx-icon title="Actions you take will appear here after you connect." class="fas fa-cogs"></mx-icon> actions
+                <mx-icon title=${this.actionList.length == 0 ? "Actions you take will appear here after you connect." : "Actions you took."} class="fas fa-cogs"></mx-icon> actions
         </div>
 
         ${Object.keys(mx.socket.list).length == 0 ? html`
@@ -340,7 +340,7 @@ export class mxActions extends mxElement {
         
         ${Object.keys(mx.socket.list).length > 0 ? html`
         <div class="whiteHeaderText darkGreyBk">
-            <mx-icon title="Messages in this action." class="fas fa-envelope"></mx-icon> messages
+            <mx-icon title="Messages in the action." class="fas fa-envelope"></mx-icon> messages
         </div>
 
         <div class="whiteHeaderText darkGreyBk">
