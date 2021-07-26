@@ -5,6 +5,10 @@ MSL Notebook is a TypeScript application built with web components based on Lit.
 1. A webserver that can transpile TS. I recommend [Vite](https://vitejs.dev/).
 2. An MSL engine to test MSL expressions. 
 
+# Run Instructions
+1. Download the entire repository to any directory.
+2. Switch to that directory and run `npx vite` or your chosen webserver against **index.html**. MSL Notebook is an SPA.
+
 # Dev Requirements
 See [full instructions](https://nebula.mimix.io/en/msl-notebook/program-flow).
 
